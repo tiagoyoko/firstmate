@@ -79,6 +79,7 @@ case "${1:-}" in
           -t) skip_next=1; continue ;;
           -l) continue ;;
           Enter|C-m) continue ;;
+          ". '"*"'") [ -r "${a:3:${#a}-4}" ] && a=$(cat "${a:3:${#a}-4}"); printf '%s\n' "$a" >> "$FM_FAKE_LAUNCH_LOG" ;;
           *) printf '%s\n' "$a" >> "$FM_FAKE_LAUNCH_LOG" ;;
         esac
       done
