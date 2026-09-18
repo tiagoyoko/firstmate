@@ -284,8 +284,9 @@
 #     __GEMINISETTINGS__ firstmate-owned per-task gemini settings file (busy-state hooks)
 #     __ROVOBIN__   resolved, rovo-verified executable for a rovo launch
 #     __AGYBIN__    resolved, agy-verified executable for an agy launch
-# The finished launch command is written owner-only to /tmp/fm-<task-id>/launch.sh
-# and the pane is typed only a line that sources it, because a pane shell still
+# The finished launch command is written owner-only to a file unique to that
+# launch, /tmp/fm-<task-id>/launch.XXXXXX, and the pane is typed only a line
+# that sources it, because a pane shell still
 # drawing its prompt truncates a typed line at MAX_CANON (1024 bytes on macOS);
 # every line typed into the pane shell is refused above 512 bytes.
 # Verified per-harness turn-end hooks are installed automatically where enabled; some live outside the worktree.
@@ -4510,21 +4511,22 @@ if [ "$LAUNCH_ENV_ENABLED" = 1 ]; then
   LAUNCH="$LAUNCH_ENV_PREFIX /bin/sh -c $(shell_quote "$LAUNCH")"
 fi
 # A full launch command routinely exceeds the typed-line limit above, so write
-# it to a private file in the task's temp root and type only a line that
+# it to a private file unique to this launch in the task's temp root, so a
+# concurrent same-id launch from another home can never replace it before the
+# pane shell reads it, and type only a line that
 # sources it. Sourcing runs it in the pane shell exactly as typing would: the
 # same expansions and env handling, and the harness is still a direct child of
 # the pane shell. Teardown removes the file with the rest of the temp root.
-LAUNCH_FILE="$TASK_TMP/launch.sh"
 if [ -L "$TASK_TMP" ] || [ ! -d "$TASK_TMP" ] || [ ! -O "$TASK_TMP" ]; then
   echo "error: task temp root $TASK_TMP is not a directory owned by this user; refusing to write the launch command there" >&2
   exit 1
 fi
-LAUNCH_FILE_TMP=$(mktemp "$TASK_TMP/.launch.XXXXXX") || {
+LAUNCH_FILE=$(mktemp "$TASK_TMP/launch.XXXXXX") || {
   echo "error: could not create the launch command file in $TASK_TMP" >&2
   exit 1
 }
-if ! printf '%s\n' "$LAUNCH" >"$LAUNCH_FILE_TMP" || ! mv -f "$LAUNCH_FILE_TMP" "$LAUNCH_FILE"; then
-  rm -f "$LAUNCH_FILE_TMP"
+if ! printf '%s\n' "$LAUNCH" >"$LAUNCH_FILE"; then
+  rm -f "$LAUNCH_FILE"
   echo "error: could not write the launch command to $LAUNCH_FILE" >&2
   exit 1
 fi
