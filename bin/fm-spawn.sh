@@ -4519,7 +4519,10 @@ if [ -L "$TASK_TMP" ] || [ ! -d "$TASK_TMP" ] || [ ! -O "$TASK_TMP" ]; then
   echo "error: task temp root $TASK_TMP is not a directory owned by this user; refusing to write the launch command there" >&2
   exit 1
 fi
-LAUNCH_FILE_TMP=$(mktemp "$TASK_TMP/.launch.XXXXXX")
+LAUNCH_FILE_TMP=$(mktemp "$TASK_TMP/.launch.XXXXXX") || {
+  echo "error: could not create the launch command file in $TASK_TMP" >&2
+  exit 1
+}
 if ! printf '%s\n' "$LAUNCH" >"$LAUNCH_FILE_TMP" || ! mv -f "$LAUNCH_FILE_TMP" "$LAUNCH_FILE"; then
   rm -f "$LAUNCH_FILE_TMP"
   echo "error: could not write the launch command to $LAUNCH_FILE" >&2
