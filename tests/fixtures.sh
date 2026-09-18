@@ -94,7 +94,10 @@ fm_test_fake_gh_axi() {
 # fm_test_fake_tmux_spawn <fakebin>
 # Spawn-world tmux: pane_current_path from FM_FAKE_PANE_PATH, session named
 # firstmate, window ops succeed, send-keys succeed. When FM_FAKE_LAUNCH_LOG is
-# set, each send-keys -l payload is appended one per line. Optional
+# set, each send-keys -l payload is appended one per line, with a typed
+# `. '<file>'` launch line logged as that file's contents. When
+# FM_FAKE_TYPED_LOG is set, every typed text payload (literal or submitted, not
+# a bare Enter key) is appended raw, one per line. Optional
 # FM_FAKE_DUPLICATE_WINDOW is printed from list-windows.
 #
 # The pane path defaults to empty when FM_FAKE_PANE_PATH is unset. Window
@@ -118,10 +121,17 @@ case "${1:-}" in
     ;;
   has-session|new-session|new-window|kill-window|set-window-option) exit 0 ;;
   send-keys)
+    if [ -n "${FM_FAKE_TYPED_LOG:-}" ]; then
+      typed=("${@:2}")
+      [ "${typed[0]:-}" != -t ] || typed=("${typed[@]:2}")
+      [ "${typed[0]:-}" != -l ] || typed=("${typed[@]:1}")
+      [ "${typed[0]:-}" = Enter ] || printf '%s\n' "${typed[0]:-}" >> "$FM_FAKE_TYPED_LOG"
+    fi
     if [ -n "${FM_FAKE_LAUNCH_LOG:-}" ]; then
       prev=
       for a in "$@"; do
         if [ "$prev" = "-l" ]; then
+          case "$a" in ". '"*"'") [ -r "${a:3:${#a}-4}" ] && a=$(cat "${a:3:${#a}-4}") ;; esac
           printf '%s\n' "$a" >> "$FM_FAKE_LAUNCH_LOG"
         fi
         prev=$a

@@ -1070,6 +1070,73 @@ SH
   done
 }
 
+# A pane shell still drawing its prompt reads typed input through the
+# terminal's canonical line discipline, which drops everything past MAX_CANON
+# (1024 bytes on macOS). A realistic long launch - a maximum-length task id,
+# deep paths, and the allowlisted env boundary - must still reach the pane as
+# short typed lines, and running exactly those lines must start the harness
+# with the same arguments and environment as the full inline command.
+test_launch_typed_lines_stay_under_canonical_limit() {
+  local id rec out status typed_log line bytes recbin pane_shell typed_script inline_script
+  local via_typed via_inline encoded mode script
+  id=launch-line-regression-$(printf 'x%.0s' $(seq 1 41))
+  [ "${#id}" -eq 64 ] || fail "fixture id must be the 64-byte maximum, got ${#id}"
+  rec=$(make_spawn_case "launch-line-$(printf 'd%.0s' $(seq 1 150))" claude "$id")
+  read_case_record "$rec"
+  printf 'FM_TEST_ALLOWED\n' > "$HOME_DIR/config/launch-env-allowlist"
+  typed_log="$CASE_DIR/typed.log"
+  : > "$typed_log"
+  out=$(FM_FAKE_TYPED_LOG="$typed_log" \
+    run_ship_spawn "$HOME_DIR" "$WT_DIR" "$FAKEBIN_DIR" "$LAUNCH_LOG" "$id" "$PROJ_DIR")
+  status=$?
+  expect_code 0 "$status" "long-launch spawn should succeed: $out"
+  [ -s "$typed_log" ] || fail "the spawn typed nothing into the pane"
+  while IFS= read -r line; do
+    bytes=$(printf '%s' "$line" | LC_ALL=C wc -c | tr -d ' ')
+    [ "$bytes" -le 512 ] || fail "a ${bytes}-byte line was typed into the pane shell: ${line:0:120}..."
+  done < "$typed_log"
+  [ "$(LC_ALL=C wc -c < "$LAUNCH_LOG" | tr -d ' ')" -gt 1024 ] \
+    || fail "fixture launch must exceed MAX_CANON for this regression to mean anything"
+
+  recbin="$CASE_DIR/recbin"
+  mkdir -p "$recbin"
+  cat > "$recbin/claude" <<SH
+#!/bin/sh
+{ printf 'arg:%s\n' "\$@"; env | LC_ALL=C sort | grep -v '^_=\|^SHLVL=\|^OLDPWD='; } > "\$(cat '$CASE_DIR/rec.target')"
+SH
+  chmod +x "$recbin/claude"
+  # The pane-side script is every typed line except worktree navigation, in
+  # order; the inline reference types the full launch command itself.
+  typed_script=$(grep -v '^treehouse get$' "$typed_log")
+  inline_script=$(grep -v '^treehouse get$' "$typed_log" | sed '$d')$'\n'$(cat "$LAUNCH_LOG")
+  encoded=$("$ROOT/bin/fm-operational-input.sh" encode launch-brief < "$HOME_DIR/data/$id/launch-brief.md")
+  for pane_shell in /bin/sh /bin/bash /bin/zsh; do
+    [ -x "$pane_shell" ] || continue
+    for mode in typed inline; do
+      if [ "$mode" = typed ]; then script=$typed_script; else script=$inline_script; fi
+      # The env boundary drops unlisted names, so the recorder learns where to
+      # write from a file rather than from its environment.
+      printf '%s\n' "$CASE_DIR/rec.$mode" > "$CASE_DIR/rec.target"
+      (cd "$WT_DIR" && env -i HOME="$HOME_DIR/user-home" PATH="$recbin:$PATH" TERM=xterm \
+        FM_TEST_ALLOWED=kept FM_TEST_DROPPED=leaked \
+        "$pane_shell" -c "$script") || fail "$mode launch failed in $pane_shell"
+    done
+    via_typed=$(cat "$CASE_DIR/rec.typed")
+    via_inline=$(cat "$CASE_DIR/rec.inline")
+    [ "$via_typed" = "$via_inline" ] \
+      || fail "$pane_shell: typed launch diverged from the inline command"$'\n'"$(diff <(printf '%s\n' "$via_inline") <(printf '%s\n' "$via_typed"))"
+    assert_contains "$via_typed" "arg:--dangerously-skip-permissions" "$pane_shell: harness flags lost"
+    assert_contains "$via_typed" "arg:$encoded" "$pane_shell: encoded launch brief lost"
+    assert_contains "$via_typed" "FM_TEST_ALLOWED=kept" "$pane_shell: allowlisted env lost"
+    assert_contains "$via_typed" "FM_TASK_ID=$id" "$pane_shell: task id export lost"
+    assert_contains "$via_typed" "GOTMPDIR=/tmp/fm-$id/gotmp" "$pane_shell: GOTMPDIR export lost"
+    assert_not_contains "$via_typed" "FM_TEST_DROPPED" "$pane_shell: env -i boundary leaked an unlisted variable"
+    rm -f "$CASE_DIR/rec.typed" "$CASE_DIR/rec.inline"
+  done
+  rm -rf "/tmp/fm-$id"
+  pass "a long launch reaches the pane as short typed lines that start the harness exactly as the inline command"
+}
+
 test_launch_environment_invalid_config_refuses() {
   local rec id bad out status
   id=env-invalid
@@ -1238,6 +1305,7 @@ SH
 }
 
 test_launch_environment_allowlist
+test_launch_typed_lines_stay_under_canonical_limit
 test_launch_environment_invalid_config_refuses
 test_launch_environment_inaccessible_config_refuses
 test_launch_environment_inherited_by_secondmate

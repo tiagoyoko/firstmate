@@ -100,6 +100,7 @@ case "${1:-}" in
       if [ "$prev" = -l ]; then literal=$arg; break; fi
       prev=$arg
     done
+    case "$literal" in ". '"*"'") [ -r "${literal:3:${#literal}-4}" ] && literal=$(cat "${literal:3:${#literal}-4}") ;; esac
     if [ -n "$literal" ]; then
       case "$literal" in
         *' --auto')

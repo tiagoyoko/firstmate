@@ -284,6 +284,10 @@
 #     __GEMINISETTINGS__ firstmate-owned per-task gemini settings file (busy-state hooks)
 #     __ROVOBIN__   resolved, rovo-verified executable for a rovo launch
 #     __AGYBIN__    resolved, agy-verified executable for an agy launch
+# The finished launch command is written owner-only to /tmp/fm-<task-id>/launch.sh
+# and the pane is typed only a line that sources it, because a pane shell still
+# drawing its prompt truncates a typed line at MAX_CANON (1024 bytes on macOS);
+# every line typed into the pane shell is refused above 512 bytes.
 # Verified per-harness turn-end hooks are installed automatically where enabled; some live outside the worktree.
 # Kimi uses one surgically installed Firstmate region in $HOME/.kimi-code/config.toml,
 # a firstmate-owned global hook and registry, and a gitignored per-task pointer.
@@ -3230,7 +3234,20 @@ fi
 # WT_TARGET to $T for them (and for any future backend) - the shared treehouse-get +
 # worktree-detection steps below must never reference an unbound WT_TARGET under set -u.
 : "${WT_TARGET:=$T}"
+# Every line typed into the pane shell must stay well under the terminal's
+# canonical-mode line limit: a shell that is still drawing its prompt reads
+# typed input through the kernel line discipline, which silently drops
+# everything past MAX_CANON (1024 bytes on macOS), leaving a truncated command
+# at a continuation prompt. Refuse rather than type a line that could be cut.
+SPAWN_TYPED_LINE_MAX=512
+spawn_typed_line_fits() { # <text>
+  local LC_ALL=C
+  [ "${#1}" -le "$SPAWN_TYPED_LINE_MAX" ] && return 0
+  echo "error: refusing to type a ${#1}-byte line into $W; the pane shell could truncate it (limit $SPAWN_TYPED_LINE_MAX bytes)" >&2
+  return 1
+}
 spawn_send_text_line() { # <target> <text>
+  spawn_typed_line_fits "$2" || return 1
   case "$BACKEND" in
   tmux) fm_backend_tmux_send_text_line "$1" "$2" ;;
   herdr) fm_backend_herdr_send_text_line "$1" "$2" ;;
@@ -3248,6 +3265,7 @@ spawn_current_path() { # <target>
   esac
 }
 spawn_send_literal() { # <target> <text>
+  spawn_typed_line_fits "$2" || return 1
   case "$BACKEND" in
   tmux) fm_backend_tmux_send_literal "$1" "$2" ;;
   herdr) fm_backend_herdr_send_literal "$1" "$2" ;;
@@ -4491,8 +4509,24 @@ if [ "$LAUNCH_ENV_ENABLED" = 1 ]; then
   fi
   LAUNCH="$LAUNCH_ENV_PREFIX /bin/sh -c $(shell_quote "$LAUNCH")"
 fi
+# A full launch command routinely exceeds the typed-line limit above, so write
+# it to a private file in the task's temp root and type only a line that
+# sources it. Sourcing runs it in the pane shell exactly as typing would: the
+# same expansions and env handling, and the harness is still a direct child of
+# the pane shell. Teardown removes the file with the rest of the temp root.
+LAUNCH_FILE="$TASK_TMP/launch.sh"
+if [ -L "$TASK_TMP" ] || [ ! -d "$TASK_TMP" ] || [ ! -O "$TASK_TMP" ]; then
+  echo "error: task temp root $TASK_TMP is not a directory owned by this user; refusing to write the launch command there" >&2
+  exit 1
+fi
+LAUNCH_FILE_TMP=$(mktemp "$TASK_TMP/.launch.XXXXXX")
+if ! printf '%s\n' "$LAUNCH" >"$LAUNCH_FILE_TMP" || ! mv -f "$LAUNCH_FILE_TMP" "$LAUNCH_FILE"; then
+  rm -f "$LAUNCH_FILE_TMP"
+  echo "error: could not write the launch command to $LAUNCH_FILE" >&2
+  exit 1
+fi
 sleep 0.3
-spawn_send_literal "$T" "$LAUNCH"
+spawn_send_literal "$T" ". $(shell_quote "$LAUNCH_FILE")"
 sleep 0.3
 if [ "${HERDR_PROJECTED:-0}" -eq 1 ]; then
   HERDR_PROJECTION_ABORT_CLEANUP=0
