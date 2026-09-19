@@ -62,6 +62,7 @@ case "${1:-}" in
     done
     payload=${1:-}
     if [ "$literal" = 1 ]; then
+      case "$payload" in ". '"*"'") [ -r "${payload:3:${#payload}-4}" ] && payload=$(cat "${payload:3:${#payload}-4}") ;; esac
       printf '%s\n' "$payload" >> "$D/literal"
       case "$payload" in
         /exit|/quit)

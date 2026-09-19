@@ -69,7 +69,9 @@ case "${1:-}" in
       esac
     done
     payload=${1:-}
+    printf '%s\n' "$payload" >> "$D/typed"
     if [ "$literal" = 1 ]; then
+      case "$payload" in ". '"*"'") [ -r "${payload:3:${#payload}-4}" ] && payload=$(cat "${payload:3:${#payload}-4}") ;; esac
       printf '%s\n' "$payload" >> "$D/literal"
       case "$payload" in
         /exit|/quit)
@@ -137,6 +139,7 @@ new_case() {
   mkdir -p "$dir/home/state" "$dir/home/data" "$dir/fake"
   : > "$dir/fake/literal"
   : > "$dir/fake/keys"
+  : > "$dir/fake/typed"
   printf 'claude' > "$dir/fake/command"
   printf 'claude' > "$dir/fake/becomes"
   printf '%s\n' "fm-$id" > "$dir/fake/windows"
@@ -303,6 +306,32 @@ fi
 exec "$real" "\$@"
 SH
   chmod +x "$dir/fakebin/tasks-axi"
+}
+
+# A relaunch types its launch into a pane shell that may still be drawing its
+# prompt, where the canonical line discipline drops everything past MAX_CANON
+# (1024 bytes on macOS). With a maximum-length id, deep paths, and the env
+# boundary on, every typed line must stay short while the full command still
+# reaches the pane.
+test_relaunch_types_only_short_lines_for_a_long_launch() {
+  local dir id out rc line bytes
+  id=relaunch-line-regression-$(printf 'x%.0s' $(seq 1 39))
+  [ "${#id}" -eq 64 ] || fail "fixture id must be the 64-byte maximum, got ${#id}"
+  dir=$(new_case "long-$(printf 'd%.0s' $(seq 1 150))" "$id")
+  add_ship_task "$dir" "$id" claude
+  mkdir -p "$dir/home/config"
+  printf 'FM_TEST_ALLOWED\n' > "$dir/home/config/launch-env-allowlist"
+  out=$(run_control "$dir" "$id" relaunch --note "long launch"); rc=$?
+  expect_code 0 "$rc" "a long-launch relaunch should succeed"$'\n'"$out"
+  while IFS= read -r line; do
+    bytes=$(printf '%s' "$line" | LC_ALL=C wc -c | tr -d ' ')
+    [ "$bytes" -le 512 ] || fail "relaunch typed a ${bytes}-byte line into the pane shell: ${line:0:120}..."
+  done < "$dir/fake/typed"
+  grep -q '^/usr/bin/env -i .*FM_TEST_ALLOWED.*encode launch-brief' "$dir/fake/literal" \
+    || fail "the sourced relaunch command should carry the env boundary and the brief"
+  [ "$(grep 'encode launch-brief' "$dir/fake/literal" | LC_ALL=C wc -c | tr -d ' ')" -gt 1024 ] \
+    || fail "fixture relaunch command must exceed MAX_CANON for this regression to mean anything"
+  pass "fm-control relaunch: a long launch reaches the pane as short typed lines"
 }
 
 # --- 1. same-harness relaunch -----------------------------------------------
@@ -1682,6 +1711,7 @@ test_relaunch_moves_a_drifted_item_back_in_flight() {
 }
 
 test_same_harness_relaunch_keeps_identity_and_reuses_the_endpoint
+test_relaunch_types_only_short_lines_for_a_long_launch
 test_relaunch_refuses_before_exit_when_the_composer_holds_pending_text
 test_relaunch_refuses_before_exit_when_the_composer_state_is_unproven
 test_relaunch_from_linked_home_preserves_recorded_worktree

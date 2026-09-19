@@ -528,7 +528,7 @@ test_spawn_preserves_orca_metadata_when_pathless_worktree_cleanup_fails() {
 }
 
 test_spawn_writes_orca_metadata_and_launches_harness() {
-  local proj wt data state config id out log
+  local proj wt data state config id out log launch_file
   id="orcaspawnz1"
   proj="$TMP_ROOT/spawn-project"
   wt="$TMP_ROOT/spawn-wt"
@@ -560,8 +560,11 @@ test_spawn_writes_orca_metadata_and_launches_harness() {
     "spawn should reuse the implicit terminal returned by Orca worktree creation"
   assert_contains "$(cat "$log")" $'orca\x1f''terminal'$'\x1f''send'$'\x1f''--terminal'$'\x1f''term-spawn'$'\x1f''--text'$'\x1f''export GOTMPDIR=/tmp/fm-orcaspawnz1/gotmp'$'\x1f''--enter'$'\x1f''--json' \
     "spawn did not export GOTMPDIR through the Orca terminal"
-  assert_contains "$(cat "$log")" "CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION=false CLAUDE_CODE_SEND_FEEDBACK=0 claude --dangerously-skip-permissions --settings '{\"feedbackDrafts\":\"off\",\"attribution\":{\"commit\":\"\",\"pr\":\"\",\"sessionUrl\":false}}'" \
-    "spawn did not send the selected harness launch command through Orca"
+  launch_file=$(tr '\037' '\n' < "$log" | sed -n "s|^\. '\(/tmp/fm-$id/launch\.[^/']*\)'\$|\1|p")
+  [ "$(printf '%s\n' "$launch_file" | grep -c .)" -eq 1 ] \
+    || fail "spawn did not send exactly one short sourced launch line through Orca: $launch_file"
+  assert_contains "$(cat "$launch_file")" "CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION=false CLAUDE_CODE_SEND_FEEDBACK=0 claude --dangerously-skip-permissions --settings '{\"feedbackDrafts\":\"off\",\"attribution\":{\"commit\":\"\",\"pr\":\"\",\"sessionUrl\":false}}'" \
+    "spawn did not write the selected harness launch command for Orca"
   rm -rf "/tmp/fm-$id"
   pass "fm-spawn.sh --backend orca: reuses implicit terminal, records metadata, launches harness"
 }
