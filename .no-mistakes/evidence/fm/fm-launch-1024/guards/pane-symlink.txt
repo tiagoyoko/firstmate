@@ -1,0 +1,50 @@
+treehouse get
+symlink$ treehouse get
+symlink$ export GOTMPDIR=/tmp/fm-guard-symlink-ssssssssssssssssssssssssssssssssssssssssssssssssss/gotmp
+symlink$ export FM_TASK_ID=guard-symlink-ssssssssssssssssssssssssssssssssssssssssssssssssss
+symlink$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

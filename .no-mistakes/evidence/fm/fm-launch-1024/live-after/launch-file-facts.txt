@@ -1,0 +1,8 @@
+task id bytes: 64
+worktree: /private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-live-launch.Drl75f/case/wt-dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+--- typed launch line (what tmux send-keys -l actually carried) ---
+-rw-------@ 1 tiagoyoko  wheel  2407 Sep 19 10:49 /tmp/fm-live-launch-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/launch.9BJlfU
+--- launch file byte size (the command that had to reach the shell) ---
+    2407 /tmp/fm-live-launch-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/launch.9BJlfU
+--- launch file mode ---
+600 /tmp/fm-live-launch-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/launch.9BJlfU

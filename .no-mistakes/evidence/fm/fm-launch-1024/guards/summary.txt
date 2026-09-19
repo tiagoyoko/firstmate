@@ -1,0 +1,14 @@
+=== case symlink ===
+error: task temp root /tmp/fm-guard-symlink-ssssssssssssssssssssssssssssssssssssssssssssssssss is not a directory owned by this user; refusing to write the launch command there
+SPAWN_EXIT=1
+worker harness: never started
+decoy/temp root contents after the refusal:
+  gotmp
+
+=== case readonly ===
+error: could not create the launch command file in /tmp/fm-guard-readonly-rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+SPAWN_EXIT=1
+worker harness: never started
+decoy/temp root contents after the refusal:
+  gotmp
+

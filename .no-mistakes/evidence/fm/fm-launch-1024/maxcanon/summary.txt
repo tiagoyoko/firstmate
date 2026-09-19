@@ -1,0 +1,10 @@
+host MAX_CANON: 1024 bytes
+pane shell:     bash running PROMPT_COMMAND='sleep 4' before every prompt
+
+measure: typed a 1501-byte line; the terminal accepted 1023 payload bytes
+
+inline:  the real 2406-byte launch command typed whole
+         harness: never started
+
+sourced: a 81-byte line sourcing that same command
+         harness: argc:6

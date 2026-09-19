@@ -1,0 +1,5 @@
+warning: /private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-guards.OS9dkG/symlink/home/data/guard-symlink-ssssssssssssssssssssssssssssssssssssssssssssssssss/launch-brief.md records no delivery contract line (scaffolded before ship briefs recorded one); launching on the explicit --mode no-mistakes - confirm its definition of done matches
+/private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-guards.OS9dkG/symlink/bin/timeout: line 3: exec: 1: not found
+/private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-guards.OS9dkG/symlink/bin/timeout: line 3: exec: 1: not found
+error: task temp root /tmp/fm-guard-symlink-ssssssssssssssssssssssssssssssssssssssssssssssssss is not a directory owned by this user; refusing to write the launch command there
+SPAWN_EXIT=1

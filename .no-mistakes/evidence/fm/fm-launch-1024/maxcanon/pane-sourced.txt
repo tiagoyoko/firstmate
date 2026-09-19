@@ -1,0 +1,50 @@
+export PATH='/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-canon.xViGVH/bin':$PATH
+. '/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-canon.xViGVH/launch.file'
+live$ export PATH='/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-canon.xViGVH/bin':$PATH
+live$ . '/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-canon.xViGVH/launch.file'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

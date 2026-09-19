@@ -1,0 +1,9 @@
+shared task temp root: /tmp/fm-two-homes-yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
+
+--- launch files written there (one per launch, owner-only) ---
+-rw-------@ 1 tiagoyoko  wheel  1188 Sep 19 10:39 /tmp/fm-two-homes-yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy/launch.43ujp2
+-rw-------@ 1 tiagoyoko  wheel  1188 Sep 19 10:39 /tmp/fm-two-homes-yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy/launch.aTL2aS
+
+--- which brief each worker's harness actually received ---
+home A worker -> INTENT-BELONGS-TO-HOME-A 
+home B worker -> INTENT-BELONGS-TO-HOME-B 

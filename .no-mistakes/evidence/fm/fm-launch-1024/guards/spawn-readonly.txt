@@ -1,0 +1,6 @@
+warning: /private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-guards.OS9dkG/readonly/home/data/guard-readonly-rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr/launch-brief.md records no delivery contract line (scaffolded before ship briefs recorded one); launching on the explicit --mode no-mistakes - confirm its definition of done matches
+/private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-guards.OS9dkG/readonly/bin/timeout: line 3: exec: 1: not found
+/private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-guards.OS9dkG/readonly/bin/timeout: line 3: exec: 1: not found
+mktemp: mkstemp failed on /tmp/fm-guard-readonly-rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr/launch.fdeEU7: Permission denied
+error: could not create the launch command file in /tmp/fm-guard-readonly-rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+SPAWN_EXIT=1

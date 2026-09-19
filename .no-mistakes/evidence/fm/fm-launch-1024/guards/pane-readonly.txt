@@ -1,0 +1,50 @@
+treehouse get
+readonly$ treehouse get
+readonly$ export GOTMPDIR=/tmp/fm-guard-readonly-rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr/gotmp
+readonly$ export FM_TASK_ID=guard-readonly-rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+readonly$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

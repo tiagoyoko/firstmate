@@ -1,0 +1,5 @@
+warning: /private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-two-homes.1WE2cv/A/home/data/two-homes-yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy/launch-brief.md records no delivery contract line (scaffolded before ship briefs recorded one); launching on the explicit --mode no-mistakes - confirm its definition of done matches
+/private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-two-homes.1WE2cv/A/bin/timeout: line 3: exec: 1: not found
+/private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-two-homes.1WE2cv/A/bin/timeout: line 3: exec: 1: not found
+spawned two-homes-yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy harness=claude kind=ship mode=no-mistakes yolo=off window=homeA:fm-two-homes-yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy worktree=/private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-two-homes.1WE2cv/A/worker-wt
+SPAWN_EXIT=0
