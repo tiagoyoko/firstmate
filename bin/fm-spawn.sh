@@ -285,10 +285,10 @@
 #     __ROVOBIN__   resolved, rovo-verified executable for a rovo launch
 #     __AGYBIN__    resolved, agy-verified executable for an agy launch
 # The finished launch command is written owner-only to a file unique to that
-# launch, /tmp/fm-<task-id>/launch.XXXXXX, and the pane is typed only a line
-# that sources it, because a pane shell still
-# drawing its prompt truncates a typed line at MAX_CANON (1024 bytes on macOS);
-# every line typed into the pane shell is refused above 512 bytes.
+# launch, /tmp/fm-<task-id>/launch.XXXXXX, and the pane is typed only a line that
+# sources it, because a pane shell still drawing its prompt truncates a typed
+# line at MAX_CANON (1024 bytes on macOS); every line typed into the pane shell
+# is refused above 512 bytes.
 # Verified per-harness turn-end hooks are installed automatically where enabled; some live outside the worktree.
 # Kimi uses one surgically installed Firstmate region in $HOME/.kimi-code/config.toml,
 # a firstmate-owned global hook and registry, and a gitignored per-task pointer.
@@ -4513,10 +4513,10 @@ fi
 # A full launch command routinely exceeds the typed-line limit above, so write
 # it to a private file unique to this launch in the task's temp root, so a
 # concurrent same-id launch from another home can never replace it before the
-# pane shell reads it, and type only a line that
-# sources it. Sourcing runs it in the pane shell exactly as typing would: the
-# same expansions and env handling, and the harness is still a direct child of
-# the pane shell. Teardown removes the file with the rest of the temp root.
+# pane shell reads it, and type only a line that sources it. Sourcing runs it in
+# the pane shell exactly as typing would: the same expansions and env handling,
+# and the harness is still a direct child of the pane shell. Teardown removes
+# the file with the rest of the temp root.
 if [ -L "$TASK_TMP" ] || [ ! -d "$TASK_TMP" ] || [ ! -O "$TASK_TMP" ]; then
   echo "error: task temp root $TASK_TMP is not a directory owned by this user; refusing to write the launch command there" >&2
   exit 1
