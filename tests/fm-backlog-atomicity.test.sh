@@ -1934,7 +1934,7 @@ test_orca_cleanup_recovery_never_transitions_the_backlog() {
   id=atomic-orca-cleanup-recovery-b8
   case_dir=$(make_home orca-cleanup-recovery)
   add_item "$case_dir" "$id"
-  write_task_meta "$case_dir" "$id" ship local-only "cleanup_recovery=orca"
+  write_task_meta "$case_dir" "$id" reviewer no-mistakes "cleanup_recovery=orca"
   meta="$(home_of "$case_dir")/state/$id.meta"
 
   out=$(run_bootstrap "$case_dir")
@@ -1947,7 +1947,7 @@ test_orca_cleanup_recovery_never_transitions_the_backlog() {
   [ "$(row_state "$case_dir" "$id")" = queued ] \
     || fail "cleanup recovery teardown completed work that never launched"
   assert_absent "$meta" "cleanup recovery teardown retained its task record"
-  pass "Orca cleanup recovery is excluded from backlog lifecycle transitions"
+  pass "Orca reviewer cleanup recovery skips delivery and backlog gates"
 }
 
 test_recovery_marks_an_owned_record_in_flight() {

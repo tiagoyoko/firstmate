@@ -3386,7 +3386,9 @@ if [ "$KIND" = secondmate ] && [ "$FORCE" = "--force" ]; then
   cleanup_firstmate_home_children "$HOME_PATH" || exit $?
 fi
 
-if { [ "$KIND" = scout ] || [ "$KIND" = reviewer ]; } && [ "$FORCE" != "--force" ]; then
+if { [ "$KIND" = scout ] || [ "$KIND" = reviewer ]; } \
+  && [ "$FORCE" != "--force" ] \
+  && [ "$CLEANUP_RECOVERY" != orca ]; then
   REPORT="$DATA/$ID/report.md"
   if [ ! -f "$REPORT" ]; then
     echo "REFUSED: $KIND task $ID has no report at $REPORT." >&2

@@ -410,11 +410,11 @@ test_direct_pr_and_scout_refresh_before_launch() {
 }
 
 test_final_reviewer_records_the_refreshed_head() {
-  local rec id out status current recorded
+  local rec id out status current recorded wiring
   id='pool-final-reviewer-head-r1'
   rec=$(make_case final-reviewer-head "$id")
   read_case_record "$rec"
-  out=$(run_spawn "$id" --final-reviewer)
+  out=$(run_spawn "$id" --final-reviewer --harness claude)
   status=$?
   expect_code 0 "$status" "final reviewer should launch from the refreshed pooled worktree"$'\n'"$out"
   current=$(git -C "$POOL_DIR" rev-parse HEAD)
@@ -424,7 +424,67 @@ test_final_reviewer_records_the_refreshed_head() {
     || fail "final reviewer metadata recorded '$recorded' instead of refreshed HEAD '$current'"
   [ "$recorded" = "$(git -C "$POOL_DIR" rev-parse origin/main)" ] \
     || fail "final reviewer recorded a snapshot before the pooled worktree refresh"
-  pass "final reviewers record the exact refreshed HEAD they receive"
+  wiring="$POOL_DIR/.claude/settings.local.json"
+  [ -f "$wiring" ] || fail "final reviewer did not create new harness wiring"
+  if git -C "$POOL_DIR" ls-files --error-unmatch -- '.claude/settings.local.json' >/dev/null 2>&1; then
+    fail "final reviewer added its new harness wiring to the reviewed commit"
+  fi
+  pass "final reviewers record the exact refreshed HEAD and allow new untracked harness wiring"
+}
+
+test_final_reviewer_refuses_harness_wiring_collisions() {
+  local spec harness rel rec id out status exclude target before publisher n=0
+  for spec in \
+    'claude:.claude/settings.local.json' \
+    'opencode:.opencode/plugins/fm-busy-state.js' \
+    'grok:.fm-grok-turnend' \
+    'kimi:.fm-kimi-turnend'; do
+    harness=${spec%%:*}
+    rel=${spec#*:}
+    n=$((n + 1))
+    id="pool-reviewer-collision-$harness-r$n"
+    rec=$(make_case "reviewer-collision-$harness" "$id")
+    read_case_record "$rec"
+    [ "$harness" != kimi ] || fm_fake_exit0 "$FAKEBIN_DIR" kimi
+    target="$POOL_DIR/$rel"
+    mkdir -p "$(dirname "$target")"
+    printf 'project-owned-%s\n' "$harness" > "$target"
+    before=$(cat "$target")
+    exclude=$(git -C "$POOL_DIR" rev-parse --git-path info/exclude)
+    printf '%s\n' "$rel" >> "$exclude"
+    out=$(run_spawn "$id" --final-reviewer --harness "$harness")
+    status=$?
+    [ "$status" -ne 0 ] || fail "$harness reviewer overwrote an existing wiring path"
+    assert_contains "$out" "required wiring path '$rel' already exists" \
+      "$harness reviewer refusal did not identify the existing wiring collision"
+    [ "$(cat "$target")" = "$before" ] \
+      || fail "$harness reviewer changed the colliding project file before refusing"
+    assert_absent "$HOME_DIR/state/$id.meta" \
+      "$harness reviewer published metadata after a wiring collision"
+  done
+
+  id='pool-reviewer-tracked-collision-r5'
+  rec=$(make_case reviewer-tracked-collision "$id")
+  read_case_record "$rec"
+  rel='.claude/settings.local.json'
+  publisher="$CASE_DIR/publisher"
+  target="$publisher/$rel"
+  mkdir -p "$(dirname "$target")"
+  printf '%s\n' 'tracked-project-setting' > "$target"
+  git -C "$publisher" add -f "$rel"
+  git -C "$publisher" -c user.name='Firstmate Tests' -c user.email='tests@example.invalid' \
+    commit -qm 'add project-owned Claude settings'
+  git -C "$publisher" push --quiet origin "$DEFAULT_BRANCH"
+  out=$(run_spawn "$id" --final-reviewer --harness claude)
+  status=$?
+  [ "$status" -ne 0 ] || fail "claude reviewer overwrote a tracked wiring path"
+  assert_contains "$out" "required wiring path '$rel' is tracked" \
+    "claude reviewer refusal did not identify the tracked wiring collision"
+  [ "$(cat "$POOL_DIR/$rel")" = 'tracked-project-setting' ] \
+    || fail "claude reviewer changed the tracked project file before refusing"
+  assert_absent "$HOME_DIR/state/$id.meta" \
+    "claude reviewer published metadata after a tracked wiring collision"
+  pass "final reviewers refuse existing or tracked worktree wiring collisions before launch"
 }
 
 test_dirty_pool_refuses_without_discarding_work() {
@@ -768,6 +828,7 @@ test_stale_pool_base_refreshes_before_branching
 test_non_main_default_branch_refreshes_before_branching
 test_direct_pr_and_scout_refresh_before_launch
 test_final_reviewer_records_the_refreshed_head
+test_final_reviewer_refuses_harness_wiring_collisions
 test_dirty_pool_refuses_without_discarding_work
 test_unresolved_remote_default_refuses_pool
 test_unreachable_origin_refuses_stale_pool_base

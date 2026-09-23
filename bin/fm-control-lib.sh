@@ -101,8 +101,8 @@ fm_control_harness_family() {  # <recorded-harness>
   esac
 }
 
-# Which task kinds an adapter is verified to run. muse, gemini, rovo, and agy
-# are crewmate/scout adapters only: none has a primary supervision protocol,
+# Which task kinds an adapter is verified to run. muse, gemini, and agy are
+# crewmate/scout adapters only: none has a primary supervision protocol,
 # and bin/fm-spawn.sh refuses a --secondmate launch on any of them. The control
 # plane asks this BEFORE it stops anything, so an incompatible relaunch target is
 # refused while the current agent is still running rather than after it has
@@ -111,7 +111,8 @@ fm_control_harness_supports_kind() {  # <harness> <kind>
   local harness=${1-} kind=${2-}
   fm_control_harness_supported "$harness" || return 1
   case "$harness" in
-    muse|gemini|rovo|agy) [ "$kind" != secondmate ] || return 1 ;;
+    muse|gemini|agy) [ "$kind" != secondmate ] || return 1 ;;
+    rovo) [ "$kind" != secondmate ] && [ "$kind" != reviewer ] || return 1 ;;
   esac
   return 0
 }

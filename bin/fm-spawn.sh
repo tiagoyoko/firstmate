@@ -1998,6 +1998,10 @@ if [ "$KIND" = secondmate ] && [ "$HARNESS" = rovo ]; then
   echo "error: rovo is a verified crewmate/scout adapter only and cannot run a secondmate; it has no primary supervision protocol. Select a harness verified for secondmates." >&2
   exit 1
 fi
+if [ "$KIND" = reviewer ] && [ "$(fm_control_harness_family "$HARNESS" 2>/dev/null || true)" = rovo ]; then
+  echo "error: rovo cannot run final reviewer $ID because it cannot load the required reasoning-critique skill outside the reviewed worktree. Select another verified harness for this reviewer." >&2
+  exit 1
+fi
 
 case "$HARNESS" in
 pi | pi-signed)
@@ -2322,12 +2326,6 @@ case "$LAUNCH" in
     echo "error: refusing Kimi spawn because backend '$BACKEND' has no verified viewport-bounded capture; Kimi 2.0.0 gates a fresh worktree on a trust dialog that can only be answered and confirmed cleared from a scrollback-free read of the live pane" >&2
     exit 1
   }
-  if [ "$KIND" != secondmate ]; then
-    "$FM_ROOT/bin/fm-kimi-turnend-hook.sh" install || {
-      echo "error: refusing Kimi spawn because the global turn-end hook could not be installed safely" >&2
-      exit 1
-    }
-  fi
   ;;
 esac
 
@@ -3743,6 +3741,58 @@ if [ "$KIND" = reviewer ]; then
   }
   [ "$CURRENT_REVIEW_HEAD" = "$REVIEW_HEAD" ] || {
     echo "error: reviewer $ID's HEAD $CURRENT_REVIEW_HEAD does not match recorded initial review HEAD $REVIEW_HEAD; refusing to relaunch" >&2
+    exit 1
+  }
+fi
+reviewer_wiring_collision_check() {
+  local target_family prior_family paths prior_paths path prior_path rel tracked prior_owns
+  [ "$KIND" = reviewer ] || return 0
+  target_family=$(fm_control_harness_family "$HARNESS" 2>/dev/null || true)
+  [ -n "$target_family" ] || return 0
+  paths=$(fm_control_harness_wiring_paths "$target_family" "$WT" "$STATE" "$ID") || return 1
+  prior_family=
+  prior_paths=
+  if [ "$RELAUNCH" -eq 1 ]; then
+    prior_family=$(fm_control_harness_family "$RELAUNCH_PRIOR_HARNESS" 2>/dev/null || true)
+    if [ -n "$prior_family" ]; then
+      prior_paths=$(fm_control_harness_wiring_paths "$prior_family" "$WT" "$STATE" "$ID") || return 1
+    fi
+  fi
+  while IFS= read -r path; do
+    [ -n "$path" ] || continue
+    case "$path" in
+      "$WT"/*) rel=${path#"$WT"/} ;;
+      *) continue ;;
+    esac
+    tracked=$(git -C "$WT" ls-files -- "$rel") || {
+      echo "error: reviewer $ID cannot inspect harness wiring path '$rel' in the reviewed worktree" >&2
+      return 1
+    }
+    if [ -n "$tracked" ]; then
+      echo "error: reviewer $ID cannot use harness '$HARNESS' because its required wiring path '$rel' is tracked by the reviewed worktree. Remove or relocate that project file, or choose a reviewer harness that does not write there." >&2
+      return 1
+    fi
+    if [ -e "$path" ] || [ -L "$path" ]; then
+      prior_owns=0
+      while IFS= read -r prior_path; do
+        [ "$prior_path" != "$path" ] || prior_owns=1
+      done <<EOF
+$prior_paths
+EOF
+      if [ "$prior_owns" != 1 ]; then
+        echo "error: reviewer $ID cannot use harness '$HARNESS' because its required wiring path '$rel' already exists in the reviewed worktree. Remove or relocate that file, or choose a reviewer harness that does not write there." >&2
+        return 1
+      fi
+    fi
+  done <<EOF
+$paths
+EOF
+}
+reviewer_wiring_collision_check || exit 1
+if [ "$KIND" != secondmate ] \
+  && [ "$(fm_control_harness_family "$HARNESS" 2>/dev/null || true)" = kimi ]; then
+  "$FM_ROOT/bin/fm-kimi-turnend-hook.sh" install || {
+    echo "error: refusing Kimi spawn because the global turn-end hook could not be installed safely" >&2
     exit 1
   }
 fi
