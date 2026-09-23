@@ -871,6 +871,22 @@ EOF
     "final-reviewer teardown removed task metadata after a snapshot mismatch"
   git -C "$case_dir/wt" reset --hard "$review_head" >/dev/null
 
+  mkdir -p "$case_dir/wt/.claude"
+  printf '%s\n' '.claude/settings.local.json' \
+    >> "$(git -C "$case_dir/wt" rev-parse --git-path info/exclude)"
+  printf '%s\n' '{"hooks":{}}' > "$case_dir/wt/.claude/settings.local.json"
+  printf '%s\n' 'reviewer note' > "$case_dir/wt/.claude/reviewer-note"
+  set +e
+  out=$(run_teardown "$case_dir" 2>&1)
+  rc=$?
+  set -e
+  [ "$rc" -ne 0 ] || fail "final-reviewer teardown with an extra Claude file should refuse"
+  assert_contains "$out" "worktree $case_dir/wt has uncommitted changes" \
+    "final-reviewer teardown hid an extra file behind the Claude wiring directory"
+  assert_present "$case_dir/state/task-x1.meta" \
+    "final-reviewer teardown removed task metadata for an extra Claude file"
+  rm -rf "$case_dir/wt/.claude"
+
   printf '%s\n' 'reviewer changed the reviewed copy' > "$case_dir/wt/reviewer-edit.txt"
   set +e
   out=$(run_teardown "$case_dir" 2>&1)
