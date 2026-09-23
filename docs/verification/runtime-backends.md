@@ -2038,7 +2038,7 @@ bun /Users/<user>/.bun/bin/omp
 
 The portable regression accepts only that second operand when its basename is exactly `omp`; a directory component or later argument named `omp` remains unrelated.
 omp publishes no harness marker: `PI_CODING_AGENT` is absent from the binary, and the default profile sets neither `PI_CODING_AGENT_DIR` nor `OMP_PROFILE` in the process environment.
-`FM_OMP_HARNESS=omp` is Firstmate's own launch marker and wins over an inherited `CLAUDECODE` only under a real omp ancestor; `tests/fm-omp-harness.test.sh` pins both directions with real processes.
+`FM_OMP_HARNESS=omp` is Firstmate's own launch marker and wins over an inherited `CLAUDECODE` only under a real omp ancestor; `tests/fm-omp-harness.test.sh` pins the precedence and leakage directions with bounded process-table fixtures, while `tests/fm-tmux-agent-liveness.test.sh` drives the Bun identity through a real tmux process.
 
 ### Composer
 
