@@ -1,0 +1,3 @@
+A: action=capitão, iniciar validação no-mistakes; done=NO
+B: action=aguardar validação e CI verde; done=NO
+C: action=reportar conclusão ao Firstmate; done=https://github.com/example/repo/pull/42

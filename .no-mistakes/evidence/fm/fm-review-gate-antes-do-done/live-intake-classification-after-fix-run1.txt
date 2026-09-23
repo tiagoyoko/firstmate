@@ -1,0 +1,5 @@
+A: mode=no-mistakes; reason=código-fonte, captain
+B: mode=no-mistakes; reason=documentação-operacional
+C: mode=direct-PR; reason=anotação-interna
+D: mode=no-mistakes; reason=configuração-operacional
+E: mode=local-only; reason=projeto-sem-remoto

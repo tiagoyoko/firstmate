@@ -1,0 +1,5 @@
+A: mode=direct-pr; reason=código, captain
+B: mode=direct-pr; reason=manual-cliente
+C: mode=local-only; reason=anotação-interna
+D: mode=no-mistakes-prod-only; reason=configuração-operacional
+E: mode=local-only; reason=código-local

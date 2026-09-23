@@ -1,0 +1,8 @@
+A: mode=no-mistakes; reason=capitão, código-fonte
+B: mode=no-mistakes; reason=treinamento operacional
+C: mode=direct-PR; reason=anotação interna
+D: mode=direct-PR; reason=planejamento interno
+E: mode=direct-PR; reason=evidência interna
+F: mode=no-mistakes; reason=configuração operacional
+G: mode=no-mistakes; reason=escopo misto operacional
+H: mode=local-only; reason=projeto sem remoto

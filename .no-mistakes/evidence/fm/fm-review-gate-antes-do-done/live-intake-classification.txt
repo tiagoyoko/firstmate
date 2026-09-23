@@ -1,0 +1,5 @@
+A: mode=no-mistakes-prod-only; reason=código executável.
+B: mode=no-mistakes-prod-only; reason=material entregue ao cliente.
+C: mode=direct-PR; reason=anotação interna da frota.
+D: mode=no-mistakes-prod-only; reason=configuração com efeito operacional.
+E: mode=local-only; reason=entrega restrita ao ambiente local.

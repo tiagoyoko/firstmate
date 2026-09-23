@@ -1,0 +1,3 @@
+A: next=capitão, iniciar /no-mistakes; done_allowed=NO
+B: next=capitão, continuar validação; done_allowed=NO
+C: status=done: PR https://github.com/example/repo/pull/42 checks green
