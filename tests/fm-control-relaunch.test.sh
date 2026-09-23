@@ -622,6 +622,20 @@ test_reviewer_relaunch_requires_and_records_progress() {
     "a dirty reviewer relaunch created a transaction before refusing"
   rm "$dir/wt/reviewer-edit.txt"
 
+  printf '%s\n' 'reviewer committed a changed object' > "$dir/wt/reviewer-commit.txt"
+  git -C "$dir/wt" add reviewer-commit.txt
+  git -C "$dir/wt" -c user.name='Firstmate Tests' -c user.email='tests@example.invalid' \
+    commit -qm 'reviewer changed object'
+  out=$(run_control "$dir" rl45 relaunch --note "continue the independent evidence review"); rc=$?
+  expect_code 1 "$rc" "a reviewer HEAD outside the default line should refuse relaunch"
+  assert_contains "$out" "is not contained in default branch" \
+    "reviewer relaunch accepted a committed change to the reviewed copy"
+  [ "$(cat "$dir/fake/command")" = claude ] \
+    || fail "a reviewer commit refusal must leave the original agent running"
+  assert_absent "$dir/home/state/rl45.control-relaunch" \
+    "a reviewer commit created a relaunch transaction before refusal"
+  git -C "$dir/wt" reset --hard main >/dev/null
+
   out=$(run_control "$dir" rl45 relaunch --note "continue the independent evidence review"); rc=$?
   expect_code 0 "$rc" "a reviewer relaunch with progress should succeed"$'\n'"$out"
   [ "$(meta_field "$dir" rl45 kind)" = reviewer ] \

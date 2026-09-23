@@ -830,6 +830,32 @@ EOF
 
   printf '%s\n' "done: revisão final Aprovado report=$case_dir/data/task-x1/report.md" \
     >> "$case_dir/state/task-x1.status"
+  printf '%s\n' "working: revisão final reaberta" >> "$case_dir/state/task-x1.status"
+  set +e
+  out=$(run_teardown "$case_dir" 2>&1)
+  rc=$?
+  set -e
+  [ "$rc" -ne 0 ] || fail "final-reviewer teardown with a reopened review should refuse"
+  assert_contains "$out" "status does not match report verdict 'Aprovado'" \
+    "final-reviewer teardown ignored a later event that reopened the review"
+  assert_present "$case_dir/state/task-x1.meta" \
+    "final-reviewer teardown removed task metadata after the review reopened"
+
+  printf '%s\n' "done: revisão final Aprovado report=$case_dir/data/task-x1/report.md" \
+    >> "$case_dir/state/task-x1.status"
+  printf '%s\n' "failed: evidência final invalidada" >> "$case_dir/state/task-x1.status"
+  set +e
+  out=$(run_teardown "$case_dir" 2>&1)
+  rc=$?
+  set -e
+  [ "$rc" -ne 0 ] || fail "final-reviewer teardown after a terminal failure should refuse"
+  assert_contains "$out" "status does not match report verdict 'Aprovado'" \
+    "final-reviewer teardown ignored a later terminal failure"
+  assert_present "$case_dir/state/task-x1.meta" \
+    "final-reviewer teardown removed task metadata after a terminal failure"
+
+  printf '%s\n' "done: revisão final Aprovado report=$case_dir/data/task-x1/report.md" \
+    >> "$case_dir/state/task-x1.status"
   printf '%s\n' 'reviewer changed the reviewed copy' > "$case_dir/wt/reviewer-edit.txt"
   set +e
   out=$(run_teardown "$case_dir" 2>&1)

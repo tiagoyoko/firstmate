@@ -1600,7 +1600,7 @@ validate_final_review_report() {  # <report>
   latest_status_line=
   if [ -f "$status_file" ]; then
     latest_status_line=$(LC_ALL=C awk '
-      index($0, "done: revisão final ") == 1 { latest = $0 }
+      $0 !~ /^[[:space:]]*$/ { latest = $0 }
       END { if (latest != "") print latest }
     ' "$status_file") || return 1
   fi
