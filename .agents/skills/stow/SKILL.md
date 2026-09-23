@@ -180,7 +180,7 @@ Approved project-level destinations are not produced by stow: they ship normally
   Because this destination is local and untracked, it is also the JIT home for private conditional knowledge that no committed surface may hold.
 - An already-existing user-owned local on-demand note with an established trigger, after confirming it is untracked, private, and able to hold the quoted entry.
   The pass may add the entry to that existing owner but never creates a new note, skill, or trigger for this purpose.
-- A project's existing committed `AGENTS.md`, for project-intrinsic knowledge useful to nearly every session of that project, through a normal crewmate ship task using `bin/fm-ensure-agents-md.sh` and the project's registered delivery mode.
+- A project's existing committed `AGENTS.md`, for project-intrinsic knowledge useful to nearly every session of that project, through a normal crewmate ship task using `bin/fm-ensure-agents-md.sh` and the task delivery mode selected under `AGENTS.md` section 7.
 - A project-level skill in the project's own repository, for situation-conditional knowledge within one project, through the same ship-task path.
 
 Forbidden destinations: any firstmate-repo-tracked skill per the hard rule; firstmate's own `AGENTS.md`, which is always-loaded for every fleet session; `docs/` alone, which is never agent-loaded on demand, though a skill body may point into docs for depth; and any committed surface for private content.
@@ -201,7 +201,7 @@ A local skill exists only in this home, so offloading an entry out of `data/capt
    Before creating the destination or writing any private content, resolve the exclude file with `git -C "$home_root" rev-parse --git-path info/exclude`, append the destination directory path to it, and verify the future `SKILL.md` path is ignored with `git -C "$home_root" check-ignore`.
    Only after that verification succeeds, create the destination and write the `SKILL.md` with its precise description trigger, then confirm the skill appears in a fresh session's skill index.
    If any migration step fails, remove the destination content and the exclude rule written by this attempt, leaving neither partial private content nor a partial rule behind.
-   An approved project destination ships as a normal task through that project's registered delivery mode.
+   An approved project destination ships as a normal task through the delivery mode selected under `AGENTS.md` section 7.
    The migration's source of truth is the entry as quoted in the proposal.
 4. Remove only once live.
    The memory entry leaves its always-injected file only after the destination is live: the local skill exists with its verified line in the active home's resolved repository-local exclude file, or the project change has landed.
