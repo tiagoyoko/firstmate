@@ -129,15 +129,23 @@ test_detection_anchored_name_and_marker_precedence() {
 # only the script path names the harness (verified, omp 18.2.6 on macOS:
 # comm=bun, args="bun /Users/<user>/.bun/bin/omp").
 test_detection_bun_installed_script() {
-  local real decoy out
+  local real decoy nested option out
   real=$(ancestry_fakebin "$TMP_ROOT/bun-omp" bun 'bun /Users/u/.bun/bin/omp --cwd /x')
   decoy=$(ancestry_fakebin "$TMP_ROOT/bun-ompd" bun 'bun /Users/u/.bun/bin/ompd --cwd /x')
+  nested=$(ancestry_fakebin "$TMP_ROOT/bun-nested-omp" bun 'bun /workspace/omp/build.ts')
+  option=$(ancestry_fakebin "$TMP_ROOT/bun-option-omp" bun 'bun /workspace/build.ts --output /tmp/omp')
   out=$(PATH="$real:$PATH" env -u CLAUDECODE -u FM_OMP_HARNESS -u PI_CODING_AGENT \
     -u CURSOR_AGENT -u CURSOR_INVOKED_AS "$HARNESS" ancestry)
   [ "$out" = "args omp" ] || fail "a bun-installed omp script must identify as omp, got '$out'"
   out=$(PATH="$decoy:$PATH" env -u CLAUDECODE -u FM_OMP_HARNESS -u PI_CODING_AGENT \
     -u CURSOR_AGENT -u CURSOR_INVOKED_AS "$HARNESS" ancestry)
   [ -z "$out" ] || fail "a bun script named ompd merely contains omp and must not identify, got '$out'"
+  out=$(PATH="$nested:$PATH" env -u CLAUDECODE -u FM_OMP_HARNESS -u PI_CODING_AGENT \
+    -u CURSOR_AGENT -u CURSOR_INVOKED_AS "$HARNESS" ancestry)
+  [ -z "$out" ] || fail "an omp directory component must not identify an unrelated bun script, got '$out'"
+  out=$(PATH="$option:$PATH" env -u CLAUDECODE -u FM_OMP_HARNESS -u PI_CODING_AGENT \
+    -u CURSOR_AGENT -u CURSOR_INVOKED_AS "$HARNESS" ancestry)
+  [ -z "$out" ] || fail "a later bun argument named omp must not identify an unrelated script, got '$out'"
   # The same evidence is what lets FM_OMP_HARNESS outrank an inherited CLAUDECODE.
   out=$(PATH="$real:$PATH" env -u PI_CODING_AGENT -u CURSOR_AGENT -u CURSOR_INVOKED_AS \
     CLAUDECODE=1 FM_OMP_HARNESS=omp "$HARNESS")
@@ -165,6 +173,10 @@ test_lock_identity_and_liveness_classification() {
     || fail "a bun script named ompd merely contains omp and must not identify"
   ! fm_harness_process_matches bun 'bun /Users/u/src/build.ts' \
     || fail "an ordinary bun command must not identify as a harness"
+  ! fm_harness_process_matches bun 'bun /workspace/omp/build.ts' \
+    || fail "an omp directory component must not identify an unrelated bun script"
+  ! fm_harness_process_matches bun 'bun /workspace/build.ts --output /tmp/omp' \
+    || fail "a later bun argument named omp must not identify an unrelated script"
   # shellcheck source=bin/fm-backend.sh
   . "$ROOT/bin/fm-backend.sh"
   fm_backend_source tmux || fail "fm_backend_source tmux failed"
@@ -176,6 +188,10 @@ test_lock_identity_and_liveness_classification() {
     || fail "liveness must classify a bun-installed omp worker as an agent"
   [ "$(fm_agent_process_classify bun bun 'bun /Users/u/src/build.ts')" != agent ] \
     || fail "liveness must not classify an ordinary bun command as an agent"
+  [ "$(fm_agent_process_classify bun bun 'bun /workspace/omp/build.ts')" != agent ] \
+    || fail "liveness must not classify an omp directory component as an agent"
+  [ "$(fm_agent_process_classify bun bun 'bun /workspace/build.ts --output /tmp/omp')" != agent ] \
+    || fail "liveness must not classify a later omp argument as an agent"
   pass "session lock and tmux liveness: omp is anchored, decoys stay out"
 }
 

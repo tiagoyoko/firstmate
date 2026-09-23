@@ -62,8 +62,8 @@ FM_ROOT="${FM_ROOT_OVERRIDE:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 FM_HOME="${FM_HOME:-${FM_ROOT_OVERRIDE:-$FM_ROOT}}"
 CONFIG="${FM_CONFIG_OVERRIDE:-$FM_HOME/config}"
 
-# shellcheck source=bin/fm-cursor-lib.sh
-. "$SCRIPT_DIR/fm-cursor-lib.sh"
+# shellcheck source=bin/fm-session-lock-lib.sh
+. "$SCRIPT_DIR/fm-session-lock-lib.sh"
 # shellcheck source=bin/fm-gemini-lib.sh
 . "$SCRIPT_DIR/fm-gemini-lib.sh"
 
@@ -155,25 +155,11 @@ ancestry_names_omp() {
     comm=$(ps -o comm= -p "$pid" 2>/dev/null) || return 1
     [ "$(basename -- "$comm")" = omp ] && return 0
     case "$(basename -- "$comm")" in
-      bun*) args_name_omp "$(ps -o args= -p "$pid" 2>/dev/null)" && return 0 ;;
+      bun) fm_bun_args_are_omp "$(ps -o args= -p "$pid" 2>/dev/null)" && return 0 ;;
     esac
     pid=$(ps -o ppid= -p "$pid" 2>/dev/null | tr -d ' ')
     [ -n "$pid" ] && [ "$pid" -gt 1 ] || return 1
   done
-  return 1
-}
-
-# True when command line $1 hands an interpreter a script path whose last
-# component is exactly `omp`. This exists because omp installed with
-# `bun install -g @oh-my-pi/pi-coding-agent` is a `#!/usr/bin/env bun` script,
-# not the compiled single binary, so its live process name is bun and only the
-# script path names the harness (verified, omp 18.2.6, macOS: comm=bun,
-# args="bun /Users/<user>/.bun/bin/omp"). Anchored on the path separator so an
-# unrelated bun command carrying the fragment elsewhere cannot claim omp.
-args_name_omp() {  # <args>
-  case " $1 " in
-    *"/omp "*) return 0 ;;
-  esac
   return 1
 }
 
@@ -263,11 +249,11 @@ harness_process_verdict() {  # <pid>
         *grok*) echo "args grok"; return ;;
         *" pi "*|*/pi) echo "args pi"; return ;;
       esac ;;
-    bun*)
+    bun)
       # bun is kept apart from the node*|python* arm deliberately: the only
       # harness that ships as a bun script is omp, and reusing that arm's loose
       # *claude* glob would let omp's own claude-bridge subtree rename it.
-      args_name_omp "$(ps -o args= -p "$pid" 2>/dev/null)" && { echo "args omp"; return; }
+      fm_bun_args_are_omp "$(ps -o args= -p "$pid" 2>/dev/null)" && { echo "args omp"; return; }
       ;;
   esac
 }

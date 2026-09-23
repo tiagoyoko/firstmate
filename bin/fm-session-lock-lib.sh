@@ -57,12 +57,23 @@ fm_harness_path_name() {  # <path>
 #      argv[0] in `ps -o comm=`, while procps on Linux reports the kernel exec
 #      name and ignores argv[0] entirely, so a version-named Claude Code binary
 #      is identified by its install path on macOS and by argv[0] on Linux.
-#   3. a bare interpreter (node, python, bun) running a harness script path.
+#   3. a bare interpreter (node, python) running a harness script path, or Bun
+#      whose script operand has the exact basename `omp`.
 #   4. Cursor's own structural identity, owned by bin/fm-cursor-lib.sh.
 FM_HARNESS_IS_CLAUDE=0
-fm_harness_process_matches() {  # <comm> <args>
-  local comm=$1 args=$2 base argv0 name token
+
+fm_bun_args_are_omp() {  # <args>
+  local args=$1
   local -a tokens=()
+  read -r -a tokens <<EOF
+$args
+EOF
+  [ "${#tokens[@]}" -ge 2 ] || return 1
+  [ "$(basename -- "${tokens[1]}")" = omp ]
+}
+
+fm_harness_process_matches() {  # <comm> <args>
+  local comm=$1 args=$2 base argv0 name
   FM_HARNESS_IS_CLAUDE=0
   base=$(basename -- "$comm")
   if printf '%s' "$base" | grep -qE "$FM_HARNESS_RE"; then
@@ -74,30 +85,23 @@ fm_harness_process_matches() {  # <comm> <args>
     case "$name" in claude) FM_HARNESS_IS_CLAUDE=1 ;; esac
     return 0
   fi
-  # Bare interpreter: the harness name is in the script path it was handed, not
-  # in comm. bun belongs here because omp installed with
+  # Bun belongs here because omp installed with
   # `bun install -g @oh-my-pi/pi-coding-agent` is a `#!/usr/bin/env bun` script
   # rather than the compiled single binary, so the process reports comm=bun with
   # args "bun ~/.bun/bin/omp" (verified, omp 18.2.6, macOS). Without this arm a
   # bun-installed omp primary can never find itself in its own ancestry, so
   # every one of its sessions refuses the fleet lock and runs read-only.
+  if [ "$base" = bun ] && fm_bun_args_are_omp "$args"; then
+    return 0
+  fi
+  # Bare interpreter: the harness name is in the script path it was handed, not
+  # in comm.
   case "$comm" in
-    *node*|*python*|*bun*)
+    *node*|*python*)
       if printf '%s' "$args" | grep -qE "$FM_HARNESS_RE"; then
         case "$args" in *claude*) FM_HARNESS_IS_CLAUDE=1 ;; esac
         return 0
       fi
-      # FM_HARNESS_RE anchors omp, pi, and pi-signed, so those three can never
-      # match inside a command line however the interpreter was invoked. Test
-      # each argument as a path instead, under the same whole-component rule
-      # fm_harness_path_name applies to comm and argv[0] above.
-      read -r -a tokens <<<"$args"
-      for token in "${tokens[@]}"; do
-        if name=$(fm_harness_path_name "$token"); then
-          case "$name" in claude) FM_HARNESS_IS_CLAUDE=1 ;; esac
-          return 0
-        fi
-      done
       ;;
   esac
   # Cursor: its own owner decides, from Cursor's name or versioned install tree
