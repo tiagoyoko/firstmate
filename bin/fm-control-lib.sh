@@ -102,7 +102,7 @@ fm_control_harness_family() {  # <recorded-harness>
 }
 
 # Which task kinds an adapter is verified to run. muse, gemini, and agy are
-# crewmate/scout adapters only: none has a primary supervision protocol,
+# worktree-worker adapters only: none has a primary supervision protocol,
 # and bin/fm-spawn.sh refuses a --secondmate launch on any of them. The control
 # plane asks this BEFORE it stops anything, so an incompatible relaunch target is
 # refused while the current agent is still running rather than after it has

@@ -44,7 +44,7 @@ Launching a supported harness inside it for your primary session instantiates yo
 - **One liaison** - you talk only to the first mate; it dispatches, supervises, escalates only real decisions, and reports plain outcomes.
 - **A visible crew** - every crewmate works in its own tmux window, Herdr tab, or experimental zellij tab, cmux workspace, or Orca terminal you can watch or type into; the first mate reconciles.
 - **Disposable worktrees** - each task runs in a clean [treehouse](https://github.com/kunchenguid/treehouse) git worktree, or an Orca-managed worktree when `backend=orca`, so parallel work on one repo never collides.
-- **Two task shapes** - ship tasks deliver authorized changes; scout tasks leave standalone investigation reports when the intake contract warrants separate research.
+- **Three task roles** - ship tasks deliver authorized changes, scout tasks leave standalone investigation reports, and dedicated final reviewers independently critique completed deliveries without changing them.
 - **Explicit task delivery** - each ship task resolves to `no-mistakes`, `direct-PR`, or `local-only` under the [delivery classification contract](AGENTS.md#intake-and-authority), with an optional `+yolo` merge-autonomy flag.
 - **Optional secondmates** - opt in to persistent second mates that run from isolated firstmate homes with their own `FM_HOME`, state, projects, and session lock, either locally or as a whole home on an SSH-reachable host, with guarded updates and recovery that never turns an unavailable remote route into a local replacement.
 - **Event-driven, zero-token supervision** - a bash watcher sleeps on the fleet and wakes the first mate only when something needs you; verified primary harnesses also get a turn-end backstop that blocks or follows up on a blind stop when work is under way and supervision is not live.
@@ -165,16 +165,17 @@ Setup guides for tmux (the default) and every other supported backend (herdr, ze
   treehouse worktree, Orca worktree, or isolated secondmate home
      │
      ├─ ship: project mode ► PR/local merge ► teardown
+     ├─ scout: report at data/<id>/report.md ► decision inventory ► relay findings ► teardown
      │
-     └─ scout: report at data/<id>/report.md ► decision inventory ► relay findings ► teardown
+     └─ final reviewer: read-only reasoning critique ► verdict report ► teardown
 ```
 
 You chat with the first mate.
-It routes each request to a crewmate in its own session endpoint and git worktree, supervises the fleet with a zero-token event-driven watcher, and brings you finished PRs, approved local merges, or investigation reports.
+It routes each request to a crewmate in its own session endpoint and git worktree, supervises the fleet with a zero-token event-driven watcher, and brings you finished PRs, approved local merges, or investigation reports with an independent final-review verdict.
 Optional secondmates extend this to persistent local or whole-home remote second mates, dispatch profiles let you steer which harness handles which task, and opt-in Relay lets the same fleet answer public mentions.
 `codex-app` is not a runtime backend yet; [docs/codex-app-backend.md](docs/codex-app-backend.md) owns the Codex App boundary.
 
-Full architecture - the supervision engine, worktree isolation, secondmates, dispatch profiles, project modes, optional Relay, fleet sync, and self-update - is in [docs/architecture.md](docs/architecture.md).
+Full architecture - the supervision engine, worktree isolation, dedicated final review, secondmates, dispatch profiles, project modes, optional Relay, fleet sync, and self-update - is in [docs/architecture.md](docs/architecture.md).
 
 ## Built-in skills
 

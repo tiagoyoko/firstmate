@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# fm-dispatch-resolve.sh - resolve one concrete crewmate or scout dispatch
+# fm-dispatch-resolve.sh - resolve one concrete worktree-worker dispatch
 # profile from a task brief with typesafe.ai's System One model (Jev), opt-in.
 #
 # Usage:

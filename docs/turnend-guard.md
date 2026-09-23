@@ -24,7 +24,7 @@ The guard first calls the shared primary scope.
 A secondmate home runs its own primary Firstmate session, so a genuine `.fm-secondmate-home` marker includes it whether the home is a linked worktree or plain clone.
 The marker must be a regular non-symlink file whose whitespace-stripped first line is a non-empty identifier containing only letters, digits, dots, underscores, and dashes.
 An unmarked checkout or invalid marker falls through to the git-dir check.
-That check keeps crewmate and scout linked worktrees inert because their git dir differs from their git common dir.
+That check keeps ship, scout, and final-reviewer linked worktrees inert because their git dir differs from their git common dir.
 It also requires `AGENTS.md`, `bin/`, and the effective state directory.
 
 For an in-scope primary, the guard counts in-flight work from `state/*.meta`.
@@ -173,7 +173,7 @@ That warning uses `bin/fm-supervision-instructions.sh --repair-line`, so it alwa
 
 ## Compatibility limits
 
-- Child crewmate and scout worktrees are outside scope.
+- Child ship, scout, and final-reviewer worktrees are outside scope.
 - A valid secondmate home is in scope; an idle secondmate endpoint with no Relay poll remains healthy because it has no supervision need.
 - The blocking and bounded-follow-up mechanisms are limited to the primary integrations listed above.
 - OpenCode headless mode and untrusted Grok project hooks remain fail-open at the host boundary.

@@ -8,8 +8,6 @@ metadata:
 
 # Reasoning Critique
 
-Procedência: conteúdo preservado de `/Users/tiagoyoko/Agencia/skills/skills/reasoning-critique`, incorporado ao Firstmate em 2026-09-22 para distribuição entre homes e máquinas.
-
 Atue como revisor independente, orientado por evidências e adaptável ao domínio. Compare o resultado entregue com o resultado solicitado, priorizando problemas materiais. O relatório final deve ser sempre em pt-BR, com exatamente as nove seções do [modelo de relatório](assets/relatorio.md), na ordem indicada. Não exponha raciocínio interno: apresente conclusões, justificativas verificáveis e limitações.
 
 ## Mandato e limites

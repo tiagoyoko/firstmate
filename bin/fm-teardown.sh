@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Tear down a finished task: return the treehouse worktree, release the Orca
 # worktree, or retire a secondmate home; kill the recorded runtime endpoint,
-# clear volatile state, and transition this home's backlog item for ship and
-# scout tasks before reporting success (a secondmate teardown transitions none,
+# clear volatile state, and transition this home's backlog item for ship, scout,
+# and final-reviewer tasks before reporting success (a secondmate teardown transitions none,
 # since secondmates are not backlog items), then refresh/prune the project's
 # clone for PR-based ship tasks.
 # An endpoint whose close could not do its job REFUSES before any record naming
@@ -69,10 +69,13 @@
 # local-only projects additionally accept work merged into the local default
 # branch (firstmate performs that merge after configured approval) as a fallback
 # for the common case where there is no remote at all.
-# Scout tasks (kind=scout in meta) carve out of that check: their worktree is
-# declared scratch and the report at data/<task-id>/report.md is the work
-# product. Teardown proceeds only once the report exists and the shared
+# Scout and final-reviewer tasks carve out of that landed-work check because
+# their worktrees are scratch and the report at data/<task-id>/report.md is the
+# work product. A scout proceeds only once the report exists and the shared
 # unresolved-decision completion gate verifies its captain-held inventory.
+# A final reviewer additionally requires the canonical nine report sections,
+# a valid report verdict matching the latest unsuperseded terminal review event,
+# a clean worktree, and a current HEAD equal to its recorded initial review HEAD.
 # Before destructive cleanup, teardown validates task check artifacts as
 # ordinary single-link files on the state device. It refuses and preserves
 # task state when that proof fails; otherwise it removes the task's check,

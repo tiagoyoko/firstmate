@@ -3,7 +3,7 @@
 # secondmate in its isolated firstmate home.
 # Usage: fm-spawn.sh <task-id> <project-dir> --mode <no-mistakes|direct-PR|local-only> --yolo <on|off> [--harness <name>|harness|launch-command] [--model <name>] [--effort <level>] [--backend <name>]
 #        fm-spawn.sh <task-id> <project-dir> --scout [--harness <name>|harness|launch-command] [--model <name>] [--effort <level>] [--backend <name>]
-#        fm-spawn.sh <task-id> <project-dir> --final-reviewer [--harness <name>|harness|launch-command] [--model <name>] [--effort <level>] [--backend <name>]
+#        fm-spawn.sh <task-id> <project-dir> --final-reviewer [--harness <name>|harness] [--model <name>] [--effort <level>] [--backend <name>]
 #        fm-spawn.sh <task-id> [<firstmate-home>] [--harness <name>|harness|launch-command] [--model <name>] [--effort <level>] [--backend <name>] --secondmate
 #   --mode and --yolo are this task's delivery contract, REQUIRED for every ship
 #   spawn and refused on --scout, --final-reviewer, and --secondmate spawns.
@@ -143,7 +143,8 @@
 #   /updatefirstmate, restart). A bare adapter name (claude|codex|opencode|pi|pi-signed|grok|kimi|cursor|gemini|muse|rovo|omp|agy)
 #   overrides it for this spawn (either kind). A non-flag string containing
 #   whitespace is treated as a RAW launch command - the escape hatch for verifying
-#   new adapters. For pi and pi-signed, fm-spawn resolves the selected executable
+#   new adapters, except that final reviewers require a named verified harness family.
+#   For pi and pi-signed, fm-spawn resolves the selected executable
 #   name from PATH once, probes that concrete path with --help, and launches the
 #   same path. It adds --tui-mode regular only when that help advertises the flag;
 #   a failed or inconclusive probe omits it so older Pi versions remain launchable.
@@ -188,6 +189,12 @@
 #   task's meta; both deliver a report from a scratch worktree. --secondmate
 #   records kind=secondmate and launches in a provisioned firstmate home; the
 #   default is kind=ship.
+#   A fresh final reviewer records review_head= only after the clean worktree is
+#   refreshed to its launch base, and every relaunch must preserve that exact
+#   commit. Before harness wiring is written, reviewer spawn refuses a required
+#   worktree path that is tracked, already exists without belonging to the prior
+#   incarnation, has a symlink/gitlink/non-directory ancestor, or resolves outside
+#   the reviewed worktree; a new untracked wiring path remains allowed.
 #   Before a secondmate launch, the home is fast-forwarded to the primary's
 #   default-branch commit when safe: directly for a local home, or through the
 #   configured host for a remote home. Skipped syncs warn and launch unchanged.
@@ -311,14 +318,16 @@
 # plus a gitignored .fm-grok-turnend worktree pointer and a state token.
 # muse installs no hook at all - its plugin engine is off in the default build - so
 # it writes state/<id>.muse-session to bind the pane to muse's own session event
-# log; muse, gemini, and agy are crewmate/scout only and are refused for --secondmate.
+# log; muse, gemini, and agy are worktree-worker only and are refused for --secondmate.
 # rovo installs no hook either - its eventHooks fire at tool granularity only,
 # never turn-end - so it carries no busy-source wiring at all and no turn-end
 # hook. A positional brief is dead-on-arrival (rovo loads, never works, and drops
 # to an idle shell), so rovo launches BARE and receives an absolute brief pointer
 # only after a TUI readiness gate, then a delivery-confirmation gate - the same
 # launch-then-send shape as kimi. Its busy state is a screen-scrape fallback like
-# grok. rovo is crewmate/scout only and is refused for --secondmate, like muse.
+# grok. rovo is ship/scout only: it is refused for --secondmate because it lacks
+# a primary protocol and for --final-reviewer because it cannot load the required
+# skill outside the reviewed worktree.
 # agy installs no hook either - it exposes no hook surface at all - so it
 # carries no busy-source wiring and no turn-end hook. Its brief rides the launch
 # command, but a fresh worktree would park it on a folder-trust dialog, so the
@@ -326,7 +335,7 @@
 # bin/fm-agy-trust.sh (the claude shape, but non-fatal) and then waits for a
 # busy turn - answering the dialog first if it renders anyway - before
 # reporting success (the rovo/kimi launch-then-confirm shape). Its busy state
-# is a screen-scrape fallback like grok and rovo, and it is crewmate/scout only.
+# is a screen-scrape fallback like grok and rovo, and it is worktree-worker only.
 # cursor installs no per-task hook either: it writes state/<id>.cursor-session to
 # bind the pane to cursor's own conversation transcript (projects root, the exact
 # workspace path cursor records in .workspace-trusted, and the conversations that
@@ -1726,7 +1735,7 @@ launch_template() {
     printf '%s' '__MODELFLAG____EFFORTFLAG__"$(__OPINPUT__ encode launch-brief < __BRIEF__)"'
     ;;
   # --disable hooks (equivalent to -c features.hooks=false) turns codex's whole
-  # lifecycle-hook layer off for CREWMATE and SCOUT launches only.
+  # lifecycle-hook layer off for ship, scout, and final-reviewer launches only.
   # Without it a crewmate launch parks forever on codex's hook-trust modal
   # ("N hooks are new or changed"), whose selection sits on "Review hooks" -
   # neither trusting nor declining. Firstmate's key plane carries Enter, Escape
@@ -1813,7 +1822,7 @@ launch_template() {
   # crewmate needs; it is the targeted equivalent of claude's
   # --dangerously-skip-permissions. grok's turn-end signal does NOT ride the
   # launch command - it is a Stop-event hook installed below (global hook +
-  # per-task pointer), so the template is identical for ship/scout/secondmate.
+  # per-task pointer), so the template is identical for ship/scout/final-reviewer/secondmate.
   grok) printf '%s' 'grok --always-approve __MODELFLAG____EFFORTFLAG__"$(__OPINPUT__ encode launch-brief < __BRIEF__)"' ;;
   # Cursor Agent CLI. --trust suppresses the workspace-trust prompt, which
   # --yolo does NOT cover and which would otherwise block every spawn, since
@@ -1973,7 +1982,7 @@ case "$ARG3" in
   ;;
 esac
 
-# muse, gemini, and agy are verified as CREWMATE/SCOUT adapters only. A secondmate is
+# muse, gemini, and agy support worktree-worker roles only. A secondmate is
 # a firstmate instance, so it needs a primary supervision protocol.
 # gemini has none: docs/supervision-protocols/ carries no gemini wake protocol
 # and this task verified only crewmate-side launch, busy state, interrupt, and
@@ -2682,7 +2691,7 @@ BRIEF_DIR_REAL=$(cd "$(dirname "$BRIEF")" && pwd -P)
 BRIEF_REAL="$BRIEF_DIR_REAL/$(basename "$BRIEF")"
 
 # PROJ_ABS can still carry a symlinked path component (e.g. macOS's /tmp ->
-# /private/tmp) when it came from the ship/scout branch's logical `pwd` above.
+# /private/tmp) when it came from the worktree-worker branch's logical `pwd` above.
 # Every backend's own current-path read (tmux's pane_current_path, herdr's
 # foreground_cwd, zellij/cmux's active pwd probe against the live shell) can
 # report the OS-level, physically-resolved cwd, so comparing it against a
@@ -3040,8 +3049,8 @@ else
   herdr)
     # fm_backend_herdr_workspace_label resolves the target workspace from
     # FM_HOME. For every KIND except secondmate, this process's own FM_HOME is
-    # already the right home (the primary spawning its own crewmate/scout, or
-    # a secondmate spawning ITS OWN crewmate/scout from its own process's
+    # already the right home (the primary spawning its own worktree worker, or
+    # a secondmate spawning ITS OWN worktree worker from its own process's
     # FM_HOME - the latter needs no glue at all). A --secondmate spawn is the
     # one case that does: it is the PRIMARY's own fm-spawn.sh process
     # launching a DIFFERENT home (PROJ_ABS, already validated above as the
@@ -3050,7 +3059,7 @@ else
     # after each prefixed simple-command call) so the secondmate's tab lands
     # in the secondmate's own workspace, not the primary's "firstmate" one.
     #
-    # Placement, separately from labeling: a crewmate/scout belongs in the
+    # Placement, separately from labeling: a worktree worker belongs in the
     # EXACT herdr workspace this launching process is itself running in, which
     # only its own herdr pane identity can name (a same-labeled sibling
     # workspace must never be adopted). A --secondmate launch is the exception -
@@ -3899,7 +3908,7 @@ fi
 # preselects the safe answer, so a failed registration is not fatal here: the
 # post-launch gate (agy_wait_for_working) answers the dialog itself and, on a
 # path that was not pre-registered, refuses to count a busy turn as ready until
-# it has done so. agy is crewmate/scout only (refused above for secondmate), so
+# it has done so. agy is worktree-worker only (refused above for secondmate), so
 # only the worktree shape applies.
 AGY_TRUST_PREREGISTERED=0
 case "$HARNESS" in
@@ -4646,7 +4655,7 @@ spawn_record_traceparent() {
 # the env is set when the agent starts; the brief sleep lets the export land.
 spawn_send_text_line "$T" "export GOTMPDIR=$TASK_TMP/gotmp"
 # Mark the pane as a task worker so bin/fm-test-run.sh can refuse to run the
-# suite in the repository's primary checkout. Ship and scout workers are the
+# suite in the repository's primary checkout. Worktree workers are the
 # ones assigned an isolated worktree; a secondmate runs its own home instead.
 # The id reached a validated bare-slug charset above, so it carries no shell
 # syntax of its own.
@@ -4654,7 +4663,7 @@ if [ "$KIND" = ship ] || [ "$KIND" = scout ] || [ "$KIND" = reviewer ]; then
   spawn_send_text_line "$T" "export FM_TASK_ID=$ID"
 fi
 # Send through the exact channel that already ships GOTMPDIR, so every backend
-# and harness - ship, scout, and secondmate - gets it before launch. Skipped
+# and harness - ship, scout, final reviewer, and secondmate - gets it before launch. Skipped
 # entirely when trace context is off.
 if [ -n "$SPAWN_TRACEPARENT" ]; then
   if spawn_send_text_line "$T" "export TRACEPARENT=$SPAWN_TRACEPARENT"; then
