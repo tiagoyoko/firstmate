@@ -409,6 +409,24 @@ test_direct_pr_and_scout_refresh_before_launch() {
   pass "direct-PR ships and scouts both refresh stale pooled worktrees before launch"
 }
 
+test_final_reviewer_records_the_refreshed_head() {
+  local rec id out status current recorded
+  id='pool-final-reviewer-head-r1'
+  rec=$(make_case final-reviewer-head "$id")
+  read_case_record "$rec"
+  out=$(run_spawn "$id" --final-reviewer)
+  status=$?
+  expect_code 0 "$status" "final reviewer should launch from the refreshed pooled worktree"$'\n'"$out"
+  current=$(git -C "$POOL_DIR" rev-parse HEAD)
+  recorded=$(awk -F= '$1 == "review_head" { value = substr($0, index($0, "=") + 1) } END { print value }' \
+    "$HOME_DIR/state/$id.meta")
+  [ "$recorded" = "$current" ] \
+    || fail "final reviewer metadata recorded '$recorded' instead of refreshed HEAD '$current'"
+  [ "$recorded" = "$(git -C "$POOL_DIR" rev-parse origin/main)" ] \
+    || fail "final reviewer recorded a snapshot before the pooled worktree refresh"
+  pass "final reviewers record the exact refreshed HEAD they receive"
+}
+
 test_dirty_pool_refuses_without_discarding_work() {
   local rec id out status before
   id='pool-dirty-refusal-r4'
@@ -749,6 +767,7 @@ test_linked_spawning_home_rejects_primary_before_refresh
 test_stale_pool_base_refreshes_before_branching
 test_non_main_default_branch_refreshes_before_branching
 test_direct_pr_and_scout_refresh_before_launch
+test_final_reviewer_records_the_refreshed_head
 test_dirty_pool_refuses_without_discarding_work
 test_unresolved_remote_default_refuses_pool
 test_unreachable_origin_refuses_stale_pool_base

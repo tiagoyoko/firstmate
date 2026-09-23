@@ -705,21 +705,8 @@ resolve_relaunch_profile() {
 # CHECKPOINT_LINES with the journal lines describing what it proved, and
 # refuses outright when any of it cannot be established.
 CHECKPOINT_LINES=()
-reviewer_default_ref() {
-  local ref candidate
-  ref=$(git -C "$WT" symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null || true)
-  for candidate in "$ref" origin/main origin/master main master; do
-    [ -n "$candidate" ] || continue
-    if git -C "$WT" rev-parse --verify --quiet "$candidate^{commit}" >/dev/null 2>&1; then
-      printf '%s\n' "$candidate"
-      return 0
-    fi
-  done
-  return 1
-}
-
 safe_checkpoint() {
-  local wt_real wt_top wt_top_real head head_ref head_ref_status status_output dirty reviewer_ref children marker child_meta
+  local wt_real wt_top wt_top_real head head_ref head_ref_status status_output dirty review_head children marker child_meta
   CHECKPOINT_LINES=()
   [ -n "$WT" ] || die "task $ID has no recorded worktree; refusing to relaunch without a recorded local copy to preserve"
   [ -d "$WT" ] || die "task $ID's recorded worktree $WT is missing; refusing to relaunch and lose track of its work"
@@ -754,10 +741,11 @@ safe_checkpoint() {
     die "reviewer $ID's worktree $WT has uncommitted changes; refusing to relaunch before stopping the agent"
   fi
   if [ "$KIND" = reviewer ]; then
-    reviewer_ref=$(reviewer_default_ref) \
-      || die "reviewer $ID's worktree $WT has no resolvable default branch; refusing to relaunch before stopping the agent"
-    git -C "$WT" merge-base --is-ancestor "$head" "$reviewer_ref" 2>/dev/null \
-      || die "reviewer $ID's HEAD $head is not contained in default branch $reviewer_ref; refusing to relaunch before stopping the agent"
+    review_head=$(fm_meta_get "$META" review_head)
+    [ -n "$review_head" ] \
+      || die "reviewer $ID has no recorded initial review HEAD; refusing to relaunch before stopping the agent"
+    [ "$head" = "$review_head" ] \
+      || die "reviewer $ID's HEAD $head does not match recorded initial review HEAD $review_head; refusing to relaunch before stopping the agent"
   fi
   CHECKPOINT_LINES+=("worktree_head=$head" "worktree_dirty=$dirty")
   if [ "$KIND" = secondmate ]; then
@@ -786,6 +774,23 @@ safe_checkpoint() {
     done
     CHECKPOINT_LINES+=("children=$children")
   fi
+}
+
+reopen_completed_review() {
+  local status_file latest_status
+  [ "$KIND" = reviewer ] || return 0
+  status_file="$STATE/$ID.status"
+  [ -f "$status_file" ] || return 0
+  latest_status=$(LC_ALL=C awk '
+    $0 !~ /^[[:space:]]*$/ { latest = $0 }
+    END { if (latest != "") print latest }
+  ' "$status_file") || die "could not inspect reviewer $ID's status before relaunch"
+  case "$latest_status" in
+    'done: revisão final '*)
+      printf '%s\n' 'working: revisão final reaberta por relaunch' >> "$status_file" \
+        || die "could not reopen reviewer $ID's completed status before relaunch"
+      ;;
+  esac
 }
 
 # record_note: put the required progress note somewhere durable, and - for a
@@ -862,6 +867,7 @@ do_relaunch() {
   journal_write stopping "${CHECKPOINT_LINES[@]}" "$note_line"
   exit_result=$(do_exit)
   journal_write exited "${CHECKPOINT_LINES[@]}" "$note_line" "exit_result=$exit_result"
+  reopen_completed_review
 
   # The launch owner (fm-spawn --relaunch) clears the previous incarnation's
   # per-task harness wiring before arming the new one, so nothing to do here.

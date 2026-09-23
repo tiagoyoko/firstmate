@@ -1570,7 +1570,7 @@ review_report_empty_section() {  # <report>
 }
 
 validate_final_review_report() {  # <report>
-  local report=$1 template expected_headings actual_headings empty_section verdict status_file status_line latest_status_line
+  local report=$1 template expected_headings actual_headings empty_section verdict status_file status_line latest_status_line review_head current_head
   template="$FM_ROOT/.agents/skills/reasoning-critique/assets/relatorio.md"
   [ -f "$template" ] && [ ! -L "$template" ] && [ -r "$template" ] || {
     echo "REFUSED: cannot read the canonical reasoning-critique report template at $template." >&2
@@ -1593,6 +1593,19 @@ validate_final_review_report() {  # <report>
   fi
   if ! verdict=$(review_report_verdict "$report" "$template"); then
     echo "REFUSED: reviewer task $ID report has no valid reasoning-critique verdict." >&2
+    return 1
+  fi
+  review_head=$(meta_value "$META" review_head)
+  if [ -z "$review_head" ]; then
+    echo "REFUSED: reviewer task $ID has no recorded initial review HEAD." >&2
+    return 1
+  fi
+  if ! current_head=$(git -C "$WT" rev-parse --verify 'HEAD^{commit}' 2>/dev/null); then
+    echo "REFUSED: reviewer task $ID current HEAD cannot be resolved." >&2
+    return 1
+  fi
+  if [ "$current_head" != "$review_head" ]; then
+    echo "REFUSED: reviewer task $ID current HEAD $current_head does not match recorded initial review HEAD $review_head." >&2
     return 1
   fi
   status_file="$STATE/$ID.status"

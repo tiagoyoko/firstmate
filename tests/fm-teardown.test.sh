@@ -705,9 +705,12 @@ test_local_only_fork_remote_allows() {
 }
 
 test_final_reviewer_requires_and_preserves_its_report() {
-  local case_dir out rc
+  local case_dir out rc review_head
   case_dir=$(make_case reviewer-report)
   write_meta "$case_dir" no-mistakes reviewer
+  wt_commit "$case_dir" "reviewed snapshot"
+  review_head=$(git -C "$case_dir/wt" rev-parse HEAD)
+  printf 'review_head=%s\n' "$review_head" >> "$case_dir/state/task-x1.meta"
 
   set +e
   out=$(run_teardown "$case_dir" 2>&1)
@@ -856,6 +859,18 @@ EOF
 
   printf '%s\n' "done: revisão final Aprovado report=$case_dir/data/task-x1/report.md" \
     >> "$case_dir/state/task-x1.status"
+  git -C "$case_dir/wt" reset --hard HEAD~1 >/dev/null
+  set +e
+  out=$(run_teardown "$case_dir" 2>&1)
+  rc=$?
+  set -e
+  [ "$rc" -ne 0 ] || fail "final-reviewer teardown on an older clean snapshot should refuse"
+  assert_contains "$out" "does not match recorded initial review HEAD $review_head" \
+    "final-reviewer teardown accepted a clean HEAD different from its initial snapshot"
+  assert_present "$case_dir/state/task-x1.meta" \
+    "final-reviewer teardown removed task metadata after a snapshot mismatch"
+  git -C "$case_dir/wt" reset --hard "$review_head" >/dev/null
+
   printf '%s\n' 'reviewer changed the reviewed copy' > "$case_dir/wt/reviewer-edit.txt"
   set +e
   out=$(run_teardown "$case_dir" 2>&1)

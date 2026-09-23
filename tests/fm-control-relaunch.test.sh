@@ -79,6 +79,10 @@ case "${1:-}" in
           [ -z "${FM_FAKE_EXIT_TRANSPORT_FAIL_AFTER_STOP:-}" ] || exit 1
           ;;
         *'encode launch-brief'*)
+          if [ -n "${FM_FAKE_STATUS_AT_LAUNCH:-}" ]; then
+            awk '$0 !~ /^[[:space:]]*$/ { latest = $0 } END { if (latest != "") print latest }' \
+              "$FM_FAKE_STATUS_FILE" > "$FM_FAKE_STATUS_AT_LAUNCH"
+          fi
           cat "$D/becomes" > "$D/command"
           [ -z "${FM_FAKE_LAUNCH_TRANSPORT_FAIL_AFTER_START:-}" ] || exit 1
           ;;
@@ -196,6 +200,8 @@ run_control() {  # <case-dir> <args...>
     FM_FAKE_TRACE_RELEASE="${FM_FAKE_TRACE_RELEASE:-}" \
     FM_FAKE_META_WRITER_READY="${FM_FAKE_META_WRITER_READY:-}" \
     FM_FAKE_TRACE_EXPORTED="${FM_FAKE_TRACE_EXPORTED:-}" \
+    FM_FAKE_STATUS_FILE="${FM_FAKE_STATUS_FILE:-}" \
+    FM_FAKE_STATUS_AT_LAUNCH="${FM_FAKE_STATUS_AT_LAUNCH:-}" \
     "$CONTROL" "$@" 2>&1
 }
 
@@ -598,11 +604,15 @@ test_relaunch_requires_a_note_for_a_ship_task() {
 }
 
 test_reviewer_relaunch_requires_and_records_progress() {
-  local dir out rc brief
+  local dir out rc brief review_head
   dir=$(new_case reviewer rl45)
   add_ship_task "$dir" rl45 claude
   sed 's/^kind=ship$/kind=reviewer/' "$dir/home/state/rl45.meta" > "$dir/home/state/rl45.meta.new"
   mv "$dir/home/state/rl45.meta.new" "$dir/home/state/rl45.meta"
+  git -C "$dir/wt" -c user.name='Firstmate Tests' -c user.email='tests@example.invalid' \
+    commit --allow-empty -qm 'reviewed snapshot'
+  review_head=$(git -C "$dir/wt" rev-parse HEAD)
+  printf 'review_head=%s\n' "$review_head" >> "$dir/home/state/rl45.meta"
 
   out=$(run_control "$dir" rl45 relaunch); rc=$?
   expect_code 1 "$rc" "a reviewer relaunch without a note should refuse"
@@ -622,21 +632,36 @@ test_reviewer_relaunch_requires_and_records_progress() {
     "a dirty reviewer relaunch created a transaction before refusing"
   rm "$dir/wt/reviewer-edit.txt"
 
+  git -C "$dir/wt" reset --hard HEAD~1 >/dev/null
+  out=$(run_control "$dir" rl45 relaunch --note "continue the independent evidence review"); rc=$?
+  expect_code 1 "$rc" "a reviewer reset behind its initial snapshot should refuse relaunch"
+  assert_contains "$out" "does not match recorded initial review HEAD $review_head" \
+    "reviewer relaunch accepted an older clean snapshot"
+  [ "$(cat "$dir/fake/command")" = claude ] \
+    || fail "a reviewer snapshot mismatch must leave the original agent running"
+  assert_absent "$dir/home/state/rl45.control-relaunch" \
+    "a reviewer snapshot mismatch created a relaunch transaction before refusal"
+  git -C "$dir/wt" reset --hard "$review_head" >/dev/null
+
   printf '%s\n' 'reviewer committed a changed object' > "$dir/wt/reviewer-commit.txt"
   git -C "$dir/wt" add reviewer-commit.txt
   git -C "$dir/wt" -c user.name='Firstmate Tests' -c user.email='tests@example.invalid' \
     commit -qm 'reviewer changed object'
   out=$(run_control "$dir" rl45 relaunch --note "continue the independent evidence review"); rc=$?
-  expect_code 1 "$rc" "a reviewer HEAD outside the default line should refuse relaunch"
-  assert_contains "$out" "is not contained in default branch" \
+  expect_code 1 "$rc" "a reviewer HEAD beyond its initial snapshot should refuse relaunch"
+  assert_contains "$out" "does not match recorded initial review HEAD $review_head" \
     "reviewer relaunch accepted a committed change to the reviewed copy"
   [ "$(cat "$dir/fake/command")" = claude ] \
     || fail "a reviewer commit refusal must leave the original agent running"
   assert_absent "$dir/home/state/rl45.control-relaunch" \
     "a reviewer commit created a relaunch transaction before refusal"
-  git -C "$dir/wt" reset --hard main >/dev/null
+  git -C "$dir/wt" reset --hard "$review_head" >/dev/null
 
-  out=$(run_control "$dir" rl45 relaunch --note "continue the independent evidence review"); rc=$?
+  printf '%s\n' "done: revisão final Aprovado report=$dir/home/data/rl45/report.md" \
+    > "$dir/home/state/rl45.status"
+  out=$(FM_FAKE_STATUS_FILE="$dir/home/state/rl45.status" \
+    FM_FAKE_STATUS_AT_LAUNCH="$dir/status-at-launch" \
+    run_control "$dir" rl45 relaunch --note "continue the independent evidence review"); rc=$?
   expect_code 0 "$rc" "a reviewer relaunch with progress should succeed"$'\n'"$out"
   [ "$(meta_field "$dir" rl45 kind)" = reviewer ] \
     || fail "reviewer kind did not survive relaunch"
@@ -647,7 +672,14 @@ test_reviewer_relaunch_requires_and_records_progress() {
     "reviewer replacement instructions did not receive the progress note"
   assert_grep "continue the independent evidence review" "$dir/home/state/rl45.control-relaunch.note" \
     "reviewer relaunch did not preserve the durable progress note"
-  pass "fm-control relaunch: reviewers require progress and a clean reviewed copy"
+  [ "$(cat "$dir/status-at-launch")" = 'working: revisão final reaberta por relaunch' ] \
+    || fail "reviewer relaunch launched its replacement before superseding the prior done status"
+  [ "$(awk 'NF { latest = $0 } END { print latest }' "$dir/home/state/rl45.status")" = \
+      'working: revisão final reaberta por relaunch' ] \
+    || fail "reviewer relaunch left the prior done status authoritative"
+  [ "$(meta_field "$dir" rl45 review_head)" = "$review_head" ] \
+    || fail "reviewer relaunch changed its immutable initial review HEAD"
+  pass "fm-control relaunch: reviewers keep their snapshot identity and reopen completed status"
 }
 
 # --- 2. harness switch -------------------------------------------------------
