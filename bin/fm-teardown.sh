@@ -69,11 +69,10 @@
 # local-only projects additionally accept work merged into the local default
 # branch (firstmate performs that merge after configured approval) as a fallback
 # for the common case where there is no remote at all.
-# Report tasks (kind=scout or kind=reviewer in meta) carve out of that check:
-# their worktree is declared scratch and the report at
-# data/<task-id>/report.md is the work product. Teardown proceeds only once the
-# report exists and the shared unresolved-decision completion gate verifies its
-# captain-held inventory.
+# Scout tasks (kind=scout in meta) carve out of that check: their worktree is
+# declared scratch and the report at data/<task-id>/report.md is the work
+# product. Teardown proceeds only once the report exists and the shared
+# unresolved-decision completion gate verifies its captain-held inventory.
 # Before destructive cleanup, teardown validates task check artifacts as
 # ordinary single-link files on the state device. It refuses and preserves
 # task state when that proof fails; otherwise it removes the task's check,
@@ -1524,8 +1523,54 @@ review_report_verdict() {  # <report> <template>
   printf '%s\n' "$matched"
 }
 
+review_report_empty_section() {  # <report>
+  LC_ALL=C awk '
+    function finish_section() {
+      if (seen && !has_content && !reported) {
+        print section
+        reported = 1
+      }
+    }
+    {
+      scan = $0
+      spaces = 0
+      while (spaces < 3 && substr(scan, 1, 1) == " ") {
+        scan = substr(scan, 2)
+        spaces++
+      }
+      marker = substr(scan, 1, 1)
+      marker_len = 0
+      if (marker == "`" || marker == "~") {
+        while (substr(scan, marker_len + 1, 1) == marker) marker_len++
+      }
+      if (marker_len >= 3) {
+        if (!in_fence) {
+          in_fence = 1
+          fence_marker = marker
+          fence_len = marker_len
+        } else if (marker == fence_marker && marker_len >= fence_len) {
+          rest = substr(scan, marker_len + 1)
+          if (rest ~ /^[[:space:]]*$/) in_fence = 0
+        }
+        next
+      }
+      if (!in_fence && scan ~ /^##[[:space:]]/) {
+        finish_section()
+        if (reported) exit
+        sub(/[[:space:]]+#+[[:space:]]*$/, "", scan)
+        section = scan
+        seen = 1
+        has_content = 0
+        next
+      }
+      if (seen && scan !~ /^[[:space:]]*$/) has_content = 1
+    }
+    END { finish_section() }
+  ' "$1"
+}
+
 validate_final_review_report() {  # <report>
-  local report=$1 template expected_headings actual_headings verdict status_line
+  local report=$1 template expected_headings actual_headings empty_section verdict status_line
   template="$FM_ROOT/.agents/skills/reasoning-critique/assets/relatorio.md"
   [ -f "$template" ] && [ ! -L "$template" ] && [ -r "$template" ] || {
     echo "REFUSED: cannot read the canonical reasoning-critique report template at $template." >&2
@@ -1539,6 +1584,11 @@ validate_final_review_report() {  # <report>
   actual_headings=$(review_report_headings "$report") || return 1
   if [ "$actual_headings" != "$expected_headings" ]; then
     echo "REFUSED: reviewer task $ID report does not match the canonical reasoning-critique section contract." >&2
+    return 1
+  fi
+  empty_section=$(review_report_empty_section "$report") || return 1
+  if [ -n "$empty_section" ]; then
+    echo "REFUSED: reviewer task $ID report section '$empty_section' has no content." >&2
     return 1
   fi
   if ! verdict=$(review_report_verdict "$report" "$template"); then
@@ -1820,7 +1870,7 @@ validate_worktree_teardown_safety() {
   [ -d "$WT" ] || return 0
   [ "$FORCE" != "--force" ] || return 0
   case "$KIND" in
-    secondmate|scout|reviewer) return 0 ;;
+    secondmate|scout) return 0 ;;
   esac
 
   if ! dirty_raw=$(git -C "$WT" status --porcelain 2>/dev/null); then
@@ -3371,7 +3421,7 @@ if [ -n "$X_REQUEST" ]; then
   echo "warning: task $ID still carries an unreconciled Relay request link ($X_REQUEST) on its task record." >&2
 fi
 
-if [ "$BACKEND" = orca ] && [ "$KIND" != scout ] && [ "$KIND" != reviewer ] && [ "$KIND" != secondmate ] && [ "$FORCE" != "--force" ]; then
+if [ "$BACKEND" = orca ] && [ "$KIND" != scout ] && [ "$KIND" != secondmate ] && [ "$FORCE" != "--force" ]; then
   if ! inspectable_git_worktree "$WT"; then
     echo "REFUSED: Orca ship task $ID has no inspectable git worktree at ${WT:-<missing>}." >&2
     echo "Cannot verify dirty or unlanded work; restore the worktree path or get explicit OK to discard, then --force." >&2
@@ -3546,7 +3596,7 @@ elif [ -d "$WT" ] && [ "$KIND" != secondmate ]; then
   # the project. teardown_treehouse_return tolerates transient and stale git locks
   # left by a killed crew process; see the script header for retry and stale-lock proof.
   post_lock_cleanup_check=
-  if [ "$FORCE" != "--force" ] && [ "$KIND" != scout ] && [ "$KIND" != reviewer ] && [ "$KIND" != secondmate ]; then
+  if [ "$FORCE" != "--force" ] && [ "$KIND" != scout ] && [ "$KIND" != secondmate ]; then
     post_lock_cleanup_check=validate_worktree_teardown_safety
   fi
   teardown_treehouse_return "$WT" "$PROJ" "worktree" "$post_lock_cleanup_check" || {

@@ -741,6 +741,37 @@ Aprovado
 
 ## Resultado Esperado
 
+## O Que Foi Entregue
+
+## Apontamentos
+
+## Cobertura de Requisitos
+
+## Riscos
+
+## Validação
+
+## Avaliação Final
+
+## Prevenção
+EOF
+  set +e
+  out=$(run_teardown "$case_dir" 2>&1)
+  rc=$?
+  set -e
+  [ "$rc" -ne 0 ] || fail "final-reviewer teardown with empty report sections should refuse"
+  assert_contains "$out" "report section '## Resultado Esperado' has no content" \
+    "final-reviewer teardown did not reject empty serialized report sections"
+  assert_present "$case_dir/state/task-x1.meta" \
+    "final-reviewer teardown removed task metadata after an empty report section"
+
+  cat > "$case_dir/data/task-x1/report.md" <<'EOF'
+## Veredito
+
+Aprovado
+
+## Resultado Esperado
+
 Resultado esperado.
 
 ## O Que Foi Entregue
@@ -785,6 +816,17 @@ EOF
 
   printf '%s\n' "done: revisão final Aprovado report=$case_dir/data/task-x1/report.md" \
     > "$case_dir/state/task-x1.status"
+  printf '%s\n' 'reviewer changed the reviewed copy' > "$case_dir/wt/reviewer-edit.txt"
+  set +e
+  out=$(run_teardown "$case_dir" 2>&1)
+  rc=$?
+  set -e
+  [ "$rc" -ne 0 ] || fail "final-reviewer teardown with a dirty reviewed worktree should refuse"
+  assert_contains "$out" "worktree $case_dir/wt has uncommitted changes" \
+    "final-reviewer teardown did not apply worktree cleanliness checks"
+  assert_present "$case_dir/state/task-x1.meta" \
+    "final-reviewer teardown removed task metadata for a dirty reviewed worktree"
+  rm "$case_dir/wt/reviewer-edit.txt"
   run_teardown "$case_dir" >/dev/null \
     || fail "final-reviewer teardown with a completed report should succeed"
   assert_absent "$case_dir/state/task-x1.meta" \
