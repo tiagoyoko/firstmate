@@ -1,0 +1,26 @@
+spawned live-reviewer-reopen harness=omp kind=reviewer window=firstmate:fm-live-reviewer-reopen worktree=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M362YDJJDBANWQV3EPF3TMAY/.nm-live-reviewer/repo/.treehouse/repo-7b4365/1/repo
+relaunched live-reviewer-reopen harness=omp from=omp model=default effort=default backend=tmux endpoint=firstmate:fm-live-reviewer-reopen worktree=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M362YDJJDBANWQV3EPF3TMAY/.nm-live-reviewer/repo/.treehouse/repo-7b4365/1/repo
+### teardown after reviewer relaunch
+WARNING: watcher still down (same stale episode; last beat: never, grace 300s) - full banner already printed this episode.
+REFUSED: reviewer task live-reviewer-reopen report does not match the canonical reasoning-critique section contract.
+rc=1
+latest_status=working: revisão final reaberta por relaunch
+window=present
+meta=present
+report=present
+relaunched live-reviewer-reopen harness=omp from=omp model=default effort=default backend=tmux endpoint=firstmate:fm-live-reviewer-reopen worktree=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M362YDJJDBANWQV3EPF3TMAY/.nm-live-reviewer/repo/.treehouse/repo-7b4365/1/repo
+### valid report plus reopened status
+latest_before_teardown=working: revisão final reaberta por relaunch
+WARNING: watcher still down (same stale episode; last beat: never, grace 300s) - full banner already printed this episode.
+REFUSED: reviewer task live-reviewer-reopen status does not match report verdict 'Aprovado com ressalvas' and path /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M362YDJJDBANWQV3EPF3TMAY/.nm-live-reviewer/home/data/live-reviewer-reopen/report.md.
+rc=1
+latest_after_teardown=working: revisão final reaberta por relaunch
+window=present
+meta=present
+report=present
+WARNING: watcher still down (same stale episode; last beat: never, grace 300s) - full banner already printed this episode.
+teardown: reaping leaked worktree process(es) for live-reviewer-reopen: 19813 55524
+teardown: force-killing leaked worktree process(es) for live-reviewer-reopen: 19813
+🌳 Worktree returned to pool.
+teardown live-reviewer-reopen complete (window firstmate:fm-live-reviewer-reopen, worktree /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M362YDJJDBANWQV3EPF3TMAY/.nm-live-reviewer/repo/.treehouse/repo-7b4365/1/repo)
+Backlog: live-reviewer-reopen just finished (this home keeps no markdown backlog at /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M362YDJJDBANWQV3EPF3TMAY/.nm-live-reviewer/home/data/backlog.md). Update /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M362YDJJDBANWQV3EPF3TMAY/.nm-live-reviewer/home/data/backlog.md - move live-reviewer-reopen to Done, keep Done to the 10 most recent, then re-scan Queued and dispatch only work whose blockers are gone and date is due.

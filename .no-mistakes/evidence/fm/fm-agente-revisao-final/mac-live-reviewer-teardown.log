@@ -1,0 +1,10 @@
+WARNING: watcher still down (same stale episode; last beat: never, grace 300s) - full banner already printed this episode.
+fm-captain-hold: origin live-reviewer-e2e3 has no completed captain-call inventory
+REFUSED: reviewer task live-reviewer-e2e3 has not passed the captain-call completion gate.
+Inventory its report through bin/fm-captain-hold.sh before teardown.
+WARNING: watcher still down (same stale episode; last beat: never, grace 300s) - full banner already printed this episode.
+teardown: reaping leaked worktree process(es) for live-reviewer-e2e3: 81423 82051
+teardown: force-killing leaked worktree process(es) for live-reviewer-e2e3: 81423
+🌳 Worktree returned to pool.
+teardown live-reviewer-e2e3 complete (window firstmate:fm-live-reviewer-e2e3, worktree /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M362YDJJDBANWQV3EPF3TMAY/.nm-live-reviewer/repo/.treehouse/repo-7b4365/1/repo)
+Backlog: live-reviewer-e2e3 just finished (this home keeps no markdown backlog at /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M362YDJJDBANWQV3EPF3TMAY/.nm-live-reviewer/home/data/backlog.md). Update /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M362YDJJDBANWQV3EPF3TMAY/.nm-live-reviewer/home/data/backlog.md - move live-reviewer-e2e3 to Done, keep Done to the 10 most recent, then re-scan Queued and dispatch only work whose blockers are gone and date is due.

@@ -1,0 +1,8 @@
+### raw launch command
+error: final reviewer live-reviewer-raw requires a verified harness family that can load the reasoning-critique skill; free-form launch commands are not accepted. Pass --harness with a supported harness name.
+rc=1
+meta=absent
+### rovo family
+error: rovo cannot run final reviewer live-reviewer-rovo because it cannot load the required reasoning-critique skill outside the reviewed worktree. Select another verified harness for this reviewer.
+rc=1
+meta=absent

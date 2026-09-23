@@ -1,0 +1,20 @@
+### dirty worktree relaunch
+error: reviewer live-reviewer-relaunch's worktree /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M362YDJJDBANWQV3EPF3TMAY/.nm-live-reviewer/repo/.treehouse/repo-7b4365/1/repo has uncommitted changes; refusing to relaunch before stopping the agent
+rc=1
+status_lines=1
+window=present
+meta=present
+### committed HEAD mismatch relaunch
+error: reviewer live-reviewer-relaunch's HEAD e69ffcf7d37fc369180d2ee2d76fb5dd4be91693 does not match recorded initial review HEAD b827159912ffef22a5c1ea92996f4231d85a9029; refusing to relaunch before stopping the agent
+rc=1
+review_head=b827159912ffef22a5c1ea92996f4231d85a9029
+current_head=e69ffcf7d37fc369180d2ee2d76fb5dd4be91693
+worktree_status_lines=0
+window=present
+meta=present
+WARNING: watcher still down (same stale episode; last beat: never, grace 300s) - full banner already printed this episode.
+teardown: reaping leaked worktree process(es) for live-reviewer-relaunch: 12151 12784
+teardown: force-killing leaked worktree process(es) for live-reviewer-relaunch: 12151
+🌳 Worktree returned to pool.
+teardown live-reviewer-relaunch complete (window firstmate:fm-live-reviewer-relaunch, worktree /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M362YDJJDBANWQV3EPF3TMAY/.nm-live-reviewer/repo/.treehouse/repo-7b4365/1/repo)
+Backlog: live-reviewer-relaunch just finished (this home keeps no markdown backlog at /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M362YDJJDBANWQV3EPF3TMAY/.nm-live-reviewer/home/data/backlog.md). Update /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M362YDJJDBANWQV3EPF3TMAY/.nm-live-reviewer/home/data/backlog.md - move live-reviewer-relaunch to Done, keep Done to the 10 most recent, then re-scan Queued and dispatch only work whose blockers are gone and date is due.
