@@ -1485,7 +1485,7 @@ review_report_headings() {  # <markdown-file>
 }
 
 review_report_verdict() {  # <report> <template>
-  local report=$1 template=$2 line choices choice matched= match_len=0 choice_len
+  local report=$1 template=$2 line choices choice matched='' match_len=0 choice_len
   line=$(LC_ALL=C awk '
     $0 == "## Veredito" { in_verdict = 1; next }
     in_verdict && /^#{1,6}[[:space:]]/ { exit }

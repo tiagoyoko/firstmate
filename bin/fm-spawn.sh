@@ -3764,7 +3764,7 @@ if [ "$KIND" = reviewer ]; then
   }
 fi
 reviewer_wiring_ancestor_check() {
-  local rel=$1 parent prefix= current=$WT component staged mode resolved wt_real
+  local rel=$1 parent prefix='' current=$WT component staged mode resolved wt_real
   local -a components
   case "$rel" in
     '' | /* | . | .. | ./* | ../* | */.. | */../*)
