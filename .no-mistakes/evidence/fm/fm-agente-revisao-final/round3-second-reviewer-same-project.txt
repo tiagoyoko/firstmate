@@ -1,0 +1,28 @@
+===== Um segundo revisor consegue nascer no mesmo projeto depois do primeiro =====
+(o slot do pool é reutilizado; o wiring do harness anterior não pode bloquear a próxima revisão)
+
+--- 1. revisor A encerrado pelo produto ---
+wiring presente antes do teardown:
+settings.local.json
+$ bin/fm-teardown.sh rev-a
+🌳 Worktree returned to pool.
+teardown rev-a complete (window firstmate:fm-rev-a, worktree /Users/tiagoyoko/.treehouse/project-aac973/1/project)
+Backlog: rev-a just finished (this home keeps no markdown backlog at /private/tmp/fm-r3b.jewfUa/home/data/backlog.md). Update /private/tmp/fm-r3b.jewfUa/home/data/backlog.md - move rev-a to Done, keep Done to the 10 most recent, then re-scan Queued and dispatch only work whose blockers are gone and date is due.
+metadata de rev-a: removida
+
+--- 2. o slot devolvido ao pool não guarda o wiring do revisor anterior ---
+ls: /Users/tiagoyoko/.treehouse/project-aac973/1/project/.claude/: No such file or directory
+(diretório .claude ausente)
+
+--- 3. o capitão lança o revisor final da PRÓXIMA entrega, no mesmo projeto ---
+$ bin/fm-spawn.sh rev-b <project> --final-reviewer --harness claude
+spawned rev-b harness=claude kind=reviewer window=firstmate:fm-rev-b worktree=/Users/tiagoyoko/.treehouse/project-aac973/1/project
+metadata de rev-b criada: sim
+janelas tmux:
+zsh
+fm-rev-b
+
+--- 4. o segundo revisor também encerra pelo caminho normal do produto ---
+teardown rev-b complete; metadata removida; slot devolvido ao pool.
+(o resíduo de wiring que aparecera antes vinha de um `treehouse return --force` manual,
+ fora do teardown; pelo caminho do produto o wiring é removido antes da devolução.)

@@ -1,0 +1,100 @@
+Full live drive of the dedicated final-review agent, end to end.
+Every step below ran against the real bin/*.sh in an isolated lab home.
+
+LAB=/private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-r2-live.KCb0Pi
+delivery commit = 466bedde766f65f38fb00428dc65c2312931cc01
+
+########## 1. Firstmate scaffolds the dedicated final-review brief ##########
+scaffolded: /private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-r2-live.KCb0Pi/home/data/r2-rev-final/brief.md (final reviewer; replace {TASK} and {FIRSTMATE_SPEC})
+brief: /private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-r2-live.KCb0Pi/home/data/r2-rev-final/brief.md (placeholders filled)
+
+########## 2. Captain spawns the dedicated reviewer (real LLM in a real tmux pane) ##########
+spawned r2-rev-final harness=claude kind=reviewer window=firstmate:fm-r2-rev-final worktree=/private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-r2-live.KCb0Pi/project/.treehouse/project-104bbc/1/project
+spawn exit=0
+
+--- published task metadata ---
+window=firstmate:fm-r2-rev-final
+endpoint_task_id=r2-rev-final
+worktree=/private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-r2-live.KCb0Pi/project/.treehouse/project-104bbc/1/project
+project=/private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-r2-live.KCb0Pi/project
+harness=claude
+kind=reviewer
+review_head=466bedde766f65f38fb00428dc65c2312931cc01
+tasktmp=/tmp/fm-r2-rev-final
+model=default
+effort=default
+busy_gen=g1790194991.72344.132
+spawn_gen=s1790194991.71310.17004
+
+--- the tmux window the captain can look at ---
+error connecting to /private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-r2-live.KCb0Pi/tmux/tmux-501/firstmate (No such file or directory)
+
+########## 3. Waiting for the reviewer to deliver its own report (max 14 min) ##########
+--- status file the reviewer wrote ---
+working: revisão final de preco_final iniciada (HEAD 466bedd)
+done: revisão final Não aprovado report=/private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-r2-live.KCb0Pi/home/data/r2-rev-final/report.md
+
+LAB=/private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-r2-live.KCb0Pi
+WT=/private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-r2-live.KCb0Pi/project/.treehouse/project-104bbc/1/project
+
+--- the reviewer's own tmux pane, captured while it was still open ---
+$ TMUX_TMPDIR=$LAB/tmux tmux list-windows -t firstmate
+1: zsh* (1 panes) [80x24] [layout b25d,80x24,0,0,0] @0 (active)
+2: fm-r2-rev-final (1 panes) [80x24] [layout b25e,80x24,0,0,1] @1
+
+$ tmux display-message -p -t firstmate:fm-r2-rev-final '#{pane_width}x#{pane_height} #{pane_current_command}'
+80x24 2.1.273
+
+$ tmux capture-pane -p -t firstmate:fm-r2-rev-final   (tail, blank lines dropped)
+⏺ Veredito: Não aprovado — a entrega preco_final (HEAD 466bedd) falha no
+  critério de aceite escrito no seu próprio ENTREGA.md: preco_final(200, 10)
+  retorna -1800, não 180.
+  Causa: falta a divisão por 100 em desconto.py:3 (valor - valor * desconto_pct)
+  — a função trata o argumento como fração enquanto o documento declara pontos
+  percentuais. Reproduzido em cópia isolada (sha256 idêntico, Python 3.12.13): 3
+  de 5 casos falham, todos com resultado negativo. Segundo apontamento: a frase
+  "pronto e conferido" não tem nenhum artefato que a sustente — não existe
+  teste nem log no repositório.
+  Relatório com as nove seções do contrato da skill em
+  /private/var/.../home/data/r2-rev-final/report.md. O worktree ficou intacto
+  (git status vazio) e nenhuma correção foi aplicada, conforme a regra de
+  independência.
+✻ Crunched for 5m 46s · done 17:29
+────────────────────────────────────────────────────────────────────────────────
+❯
+────────────────────────────────────────────────────────────────────────────────
+  🤖 Opus 5 1M | 📁 project | 🌿 detached ✓ | ⚡️ 13.9% · 138.9k tokens
+  -- INSERT -- ⏵⏵ bypass permissions on (shift+tab to cycle) · ← 3 agents
+
+--- the nine contract sections the reviewer produced on its own ---
+1:## Veredito
+20:## Resultado Esperado
+33:## O Que Foi Entregue
+60:## Apontamentos
+86:## Cobertura de Requisitos
+96:## Riscos
+108:## Validação
+132:## Avaliação Final
+152:## Prevenção
+
+--- the reviewed copy was never altered ---
+git status --porcelain in the reviewer worktree: (empty)
+worktree HEAD = 466bedde766f65f38fb00428dc65c2312931cc01 = recorded review_head
+
+########## 4. Captain inventories the review's captain-calls (none were raised) ##########
+complete: r2-rev-final captain-call inventory reviewed
+exit=0
+
+########## 5. Captain closes the review: bin/fm-teardown.sh r2-rev-final ##########
+WARNING: watcher still down (same stale episode; last beat: 422s ago, grace 300s) - full banner already printed this episode.
+teardown: reaping leaked worktree process(es) for r2-rev-final: 72088 72803 73064 73066 73431 73435 73493 73494 73521 73535 73676 73709 73710 73743 73834 74122 74476 74733 74800 74837 75106 75856 75963 76054 76055 76056 76064 76120 76260 76294 76295 76319 76320 76443 76476 76477 76501 76506 76511 76512 76680 76713 76728
+teardown: force-killing leaked worktree process(es) for r2-rev-final: 72088
+🌳 Worktree returned to pool.
+teardown r2-rev-final complete (window firstmate:fm-r2-rev-final, worktree /private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-r2-live.KCb0Pi/project/.treehouse/project-104bbc/1/project)
+Backlog: r2-rev-final just finished (this home keeps no markdown backlog at /private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-r2-live.KCb0Pi/home/data/backlog.md). Update /private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-r2-live.KCb0Pi/home/data/backlog.md - move r2-rev-final to Done, keep Done to the 10 most recent, then re-scan Queued and dispatch only work whose blockers are gone and date is due.
+teardown exit=0
+
+task metadata: removed
+report preserved as the durable work product: yes
+reviewer tmux window still open: 0
+reviewer worktree returned to pool: slot present (pool-managed)

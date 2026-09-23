@@ -1,0 +1,48 @@
+===== A26: a conclusão de um revisor fecha a decisão que ele mesmo abriu =====
+Superfície dirigida: bin/fm-wake-drain.sh, o que firstmate lê a cada batida.
+
+--- 1. revisor com decisão aberta: firstmate precisa ver a pendência ---
+working: revisão final iniciada
+needs-decision: contradição entre o aceite e o código [key=aceite-ambiguo]
+$ bin/fm-wake-drain.sh
+OPEN DECISIONS (still open, folded from the durable status logs - not just the latest line):
+rev needs-decision: contradição entre o aceite e o código [key=aceite-ambiguo]
+OPEN DECISIONS: close one by answering it: bin/fm-send.sh <task> --resolve-key <key> '<answer>'
+●━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+●  WATCHER DOWN - SUPERVISION IS OFF
+●  1 task(s) in flight, but no watcher has a fresh beacon (last beat: never, grace 300s).
+●  Trust the emitted supervision protocol for this harness; do not use shell & for watcher repair.
+●  This is a supervision warning only; the guarded operation WILL still run.
+●  watcher supervision needs Stop-owned automatic recovery; inspect the hook registration and startup status before ending the turn.
+●━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+--- 2. o revisor conclui: a decisão dele não pode continuar bloqueando o fluxo ---
+working: revisão final iniciada
+needs-decision: contradição entre o aceite e o código [key=aceite-ambiguo]
+done: revisão final Aprovado report=/tmp/x/report.md
+$ bin/fm-wake-drain.sh
+STATUS OUTCOME BACKSTOP (newest captain-facing task event has no covering branch outcome):
+rev done: revisão final Aprovado report=/tmp/x/report.md
+WARNING: watcher still down (same stale episode; last beat: never, grace 300s) - full banner already printed this episode.
+
+--- 3. cursor persistido de uma versão anterior do fold é reconstruído ---
+cursor plantado (version=8, já apontando para o fim do log, com a decisão ainda marcada aberta):
+version=8
+offset=165
+ident=x
+aceite-ambiguo	needs-decision	waiting
+$ bin/fm-wake-drain.sh
+WARNING: watcher still down (same stale episode; last beat: never, grace 300s) - full banner already printed this episode.
+
+--- 4. controle: com um kind que o classificador não conhece, a decisão continua aberta ---
+$ bin/fm-wake-drain.sh
+OPEN DECISIONS (still open, folded from the durable status logs - not just the latest line):
+rev needs-decision: contradição entre o aceite e o código [key=aceite-ambiguo]
+OPEN DECISIONS: close one by answering it: bin/fm-send.sh <task> --resolve-key <key> '<answer>'
+(a decisão segue aberta: o fechamento da etapa 2 vem de kind=reviewer, não de qualquer 'done:')
+
+--- como ler este arquivo ---
+A condição de aprovação das etapas 2 e 3 é a AUSÊNCIA do bloco 'OPEN DECISIONS'
+na saída do drain. A linha 'WARNING: watcher still down' é ruído de supervisão
+do lab (nenhum watcher roda aqui) e não tem relação com o fold de decisões.
+A etapa 4 é o controle negativo: com um kind desconhecido, o bloco reaparece.

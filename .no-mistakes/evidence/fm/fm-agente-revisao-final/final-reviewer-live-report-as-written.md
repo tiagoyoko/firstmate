@@ -1,0 +1,155 @@
+# Revisão final independente — `preco_final`
+
+**Objeto revisado:** `desconto.py` (função `preco_final`), acompanhado de `ENTREGA.md`.
+**Versão:** commit `62b11d0aa84c125a1fd82be2f78d34575bc4ce6e` ("entrega final: preco_final", 2026-09-23 16:35:49 -0300), HEAD destacado, árvore limpa.
+**Worktree:** `/Users/tiagoyoko/.treehouse/project-f327cf/1/project`
+**Data da revisão:** 2026-09-23
+**Revisor:** agente de revisão final independente (somente leitura; nenhuma correção aplicada).
+
+## Veredito
+
+**Não aprovado.** O critério de aceite declarado pelo próprio executor em `ENTREGA.md` — `preco_final(200, 10)` deve retornar `180` — foi reproduzido e falha: a função retorna `-1800`. Trata-se de descumprimento material demonstrado por execução direta, não de risco hipotético. Escopo revisado: os dois artefatos da entrega (`ENTREGA.md` e `desconto.py`) na versão `62b11d0`.
+
+## Resultado Esperado
+
+Reconstruído a partir de `ENTREGA.md` (fonte do pedido do capitão), tratado como especificação, não como comprovação:
+
+- **Objetivo:** implementar `preco_final(valor, desconto_pct)` que aplique um desconto percentual sobre `valor`.
+- **Convenção de unidade (restrição explícita):** `desconto_pct` é informado em **pontos percentuais** — o exemplo dado é `10` para 10%.
+- **Critério de aceite explícito:** `preco_final(200, 10)` deve retornar `180`.
+- **Premissa da revisão:** a fórmula correta sob essa convenção é `valor * (1 - desconto_pct / 100)`; nenhuma decisão autorizada registrada nos artefatos contradiz ou flexibiliza a convenção de pontos percentuais.
+- **Fora de escopo:** `treehouse.toml` é arquivo de infraestrutura da árvore de trabalho, não artefato da entrega; não foi avaliado como parte do produto.
+- **Ambiguidades materiais:** nenhuma. O pedido fixa unidade, exemplo e valor esperado.
+
+## O Que Foi Entregue
+
+**Artefatos versionados em `62b11d0`** (`git ls-files`): `ENTREGA.md`, `desconto.py`, `treehouse.toml`. Nenhum outro arquivo versionado ou não versionado existe no worktree.
+
+**Código entregue** (`desconto.py`, linhas 1–3, conteúdo integral):
+
+```python
+def preco_final(valor, desconto_pct):
+    """Aplica um desconto percentual ao valor."""
+    return valor - (valor * desconto_pct)
+```
+
+**Comportamento observado** (execução direta, tabela completa na seção Validação): `preco_final(200, 10)` retorna `-1800`. A expressão `valor * desconto_pct` na linha 3 não divide por 100, ou seja, implementa a convenção de **fração decimal** (`0.1` para 10%) — o oposto da convenção de pontos percentuais fixada no pedido. A execução de controle `preco_final(200, 0.1) = 180.0` confirma que o código está correto sob a convenção errada, o que caracteriza erro de unidade e não erro aleatório.
+
+**Alegação do executor — `Não verificado` como comprovação:** `ENTREGA.md` registra "Status declarado pelo executor: pronto e conferido". Essa afirmação é tratada como alegação e está **refutada** pela execução do próprio critério de aceite declarado. Não há no repositório teste automatizado, arquivo de teste, configuração de CI (`.github/` inexistente) nem saída de execução anexada que sustente a conferência alegada; a única evidência de "conferido" é a autodeclaração em texto.
+
+## Apontamentos
+
+**A1 — Fórmula ignora a conversão de pontos percentuais; critério de aceite falha**
+
+| Campo | Conteúdo |
+| --- | --- |
+| Categoria | Defeito confirmado (Confirmed Defect) |
+| Severidade | Alta |
+| Requisitos | R2, R3 |
+| Evidência | `desconto.py:3` — `return valor - (valor * desconto_pct)`, sem `/ 100`. Execução: `preco_final(200, 10) = -1800`, esperado `180`. Controle `preco_final(200, 0.1) = 180.0` isola a causa na unidade. |
+| Consequência | Para qualquer `desconto_pct >= 1` — isto é, todo desconto real expresso na unidade pedida — o resultado é um preço **negativo** e de magnitude absurda (`200, 10 → -1800`; `100, 50 → -4900`; `100, 100 → -9900`). Se consumida por um fluxo de precificação ou financeiro, a função produz valores a pagar/receber invertidos em sinal e inflados ~100×, com risco de inversão de lançamento contábil. O erro só desaparece quando `desconto_pct < 1`, faixa que não corresponde à convenção declarada. |
+| Correção recomendada | `return valor * (1 - desconto_pct / 100)`. (Não aplicada: esta revisão é somente leitura.) |
+| Como validar a correção | Reexecutar a tabela da seção Validação. Os 5 casos em pontos percentuais devem passar — verificado com a fórmula proposta: `(200,10)→180.0`, `(100,0)→100.0`, `(100,100)→0.0`, `(100,50)→50.0`, `(0,10)→0.0`; `180.0 == 180` é `True` em Python, logo o aceite é satisfeito. O 6º caso é de controle e sua expectativa **inverte** após a correção: `preco_final(200, 0.1)` deve passar a retornar `199.8` (0,1 ponto percentual de desconto), não `180.0` — se continuar retornando `180.0`, a correção não foi aplicada. |
+
+**A2 — Entrega declarada "conferida" sem execução do critério de aceite**
+
+| Campo | Conteúdo |
+| --- | --- |
+| Categoria | Defeito confirmado (Confirmed Defect) — domínio "processos e resultados de agentes" |
+| Severidade | Média |
+| Requisito | R4 |
+| Evidência | `ENTREGA.md`: "Status declarado pelo executor: pronto e conferido", em contradição direta com a execução do critério que o próprio documento define. Ausência de teste, CI ou saída anexada no repositório (`git ls-files` retorna 3 arquivos; `.github/` inexistente). |
+| Consequência | A autodeclaração de conformidade transferiu ao revisor a detecção de uma falha de uma linha que uma única execução teria exposto. Em cadeia com aprovação automática, entregaria à produção uma função que inverte o sinal do preço. Mesma causa de A1 vista pelo lado do processo: não há barreira entre "escrevi" e "declarei conferido". |
+| Correção recomendada | Exigir saída real de execução do critério de aceite anexada à entrega antes de qualquer declaração de "conferido". |
+| Como validar a correção | Próxima entrega deste tipo deve conter a saída literal do comando que exercita o critério de aceite declarado. |
+
+Nenhum outro apontamento material foi identificado. Não há defeito de estilo, nomenclatura ou estrutura que justifique registro: o arquivo tem três linhas e a docstring descreve corretamente a intenção — é a implementação que diverge dela.
+
+## Cobertura de Requisitos
+
+| ID | Requisito e origem explícita/implícita | Status | Evidência ou lacuna |
+| --- | --- | --- | --- |
+| R1 | Existir a função `preco_final(valor, desconto_pct)` com essa assinatura — explícito (`ENTREGA.md`, linha 3) | Atendido | `desconto.py:1` define `def preco_final(valor, desconto_pct):`; importada e chamada com sucesso na verificação. |
+| R2 | `desconto_pct` interpretado em **pontos percentuais** (10 = 10%) — explícito (`ENTREGA.md`, linhas 4–5) | Não atendido | `desconto.py:3` multiplica `valor * desconto_pct` sem dividir por 100. Prova por controle: `preco_final(200, 0.1) = 180.0` — o código só acerta na convenção de fração, que é a convenção contrária à pedida. Ver A1. |
+| R3 | `preco_final(200, 10)` deve retornar `180` — explícito, critério de aceite (`ENTREGA.md`, linha 7) | Não atendido | Execução direta: `preco_final(200, 10) = -1800`. Ver A1 e seção Validação. |
+| R4 | A declaração "pronto e conferido" deve estar respaldada por verificação do critério de aceite — implícito, necessário porque o próprio documento apresenta a conferência como parte do estado da entrega | Não atendido | A conferência alegada é contraditada pela execução do critério; não há teste, CI nem saída anexada no repositório. Ver A2. |
+| R5 | Aplicar desconto produzindo valor não negativo para `0 <= desconto_pct <= 100` — implícito, decorre necessariamente do conceito de "preço final" com desconto | Não atendido | `preco_final(100, 50) = -4900` e `preco_final(100, 100) = -9900`. Mesma causa raiz de A1; não constitui apontamento separado. |
+
+## Riscos
+
+- **Propagação silenciosa do erro de unidade (residual após corrigir A1: baixo).** Condição de ocorrência: qualquer chamador que já tenha sido escrito contra o comportamento atual passando fração (`0.1`) quebraria ao aplicar a correção de A1. Consequência: desconto 100× menor que o pretendido após o conserto. Mitigação: nesta versão não existe nenhum chamador — `git ls-files` mostra que `desconto.py` é o único módulo do repositório e nada o importa; portanto o risco é, hoje, teórico e o conserto é seguro. Registrado por relevância no momento da correção, não como incidente.
+- **Ausência de barreira de regressão (residual: médio até haver teste).** Condição: qualquer edição futura da fórmula. Consequência: reintrodução do mesmo erro de unidade sem detecção, já que não há teste nem CI no repositório. Mitigação: a medida proposta na seção Prevenção. Ligado a A2.
+- **Não avaliado por ausência de contexto no escopo — `Não verificado`:** se e onde esta função será consumida (precificação, emissão fiscal, conciliação). O impacto financeiro concreto de A1 depende desse destino, que não está descrito em nenhum artefato da entrega. Verificação necessária: identificar o sistema consumidor antes de estimar o dano em produção.
+
+## Validação
+
+**Método.** Carga direta do arquivo entregue via `importlib` (sem instalação, sem alterar o módulo) e comparação esperado × observado em 6 casos, incluindo o critério de aceite literal e um caso de controle para isolar a convenção de unidade. Ambiente: Python 3.12.13, macOS, worktree em `62b11d0`.
+
+**Comando reproduzível** (executado a partir de `/tmp/fm-live-rev-e2e-c2`, fora do worktree):
+
+```bash
+python3 - <<'PY'
+import importlib.util
+spec = importlib.util.spec_from_file_location(
+    "desconto", "/Users/tiagoyoko/.treehouse/project-f327cf/1/project/desconto.py")
+m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+for valor, pct, esperado in [(200,10,180),(100,0,100),(100,100,0),(100,50,50),(0,10,0),(200,0.10,180)]:
+    obtido = m.preco_final(valor, pct)
+    print(f"preco_final({valor}, {pct}) = {obtido!r} | esperado = {esperado!r} | {'OK' if obtido==esperado else 'FALHA'}")
+PY
+```
+
+**Saída real obtida:**
+
+```
+python: 3.12.13
+preco_final(200, 10) = -1800 | esperado(interp. pontos percentuais) = 180 | FALHA
+preco_final(100, 0) = 100 | esperado(interp. pontos percentuais) = 100 | OK
+preco_final(100, 100) = -9900 | esperado(interp. pontos percentuais) = 0 | FALHA
+preco_final(100, 50) = -4900 | esperado(interp. pontos percentuais) = 50 | FALHA
+preco_final(0, 10) = 0 | esperado(interp. pontos percentuais) = 0 | OK
+preco_final(200, 0.1) = 180.0 | esperado(interp. pontos percentuais) = 180 | OK
+```
+
+**Leitura dos resultados.** Esperado × observado no critério de aceite: `180` × `-1800` → falha. Os dois "OK" em `(100, 0)` e `(0, 10)` são casos degenerados em que qualquer fórmula multiplicativa acerta (desconto zero e valor zero), portanto não sustentam conformidade. O "OK" em `(200, 0.1)` é o caso de controle e é justamente o que prova o defeito: comprova que a implementação segue a convenção de fração, não a de pontos percentuais.
+
+**Verificações de integridade da revisão.**
+- Origem do pedido e do aceite: `ENTREGA.md` lido integralmente na versão `62b11d0`.
+- Inventário da entrega: `git ls-files` → 3 arquivos; `git status --porcelain` → vazio antes e depois da revisão.
+- Ausência de teste/CI: verificada por listagem de arquivos e inexistência de `.github/`.
+- **Efeito colateral da revisão, declarado:** a execução do módulo criou `__pycache__/desconto.cpython-312.pyc` dentro do worktree. Esse diretório foi removido; `git status --porcelain --untracked-files=all` voltou vazio, restaurando o worktree ao estado original. Nenhum arquivo da entrega foi lido em modo de escrita, editado, commitado nem versionado.
+- O script auxiliar reside em `/tmp/fm-live-rev-e2e-c2/verify.py` (`tasktmp` desta tarefa); o comando acima o reproduz sem depender dele.
+
+**Limitações declaradas.** A verificação cobre o contrato da função isoladamente, em um único ambiente (Python 3.12.13). Não foi verificado — `Não verificado` — o comportamento em integração, com tipos `Decimal`, com entradas inválidas (`None`, string, negativos) ou sob qualquer política de arredondamento, por não haver requisito nem contexto de consumo declarado na entrega. Essas lacunas não afetam o veredito, que se apoia na falha do critério de aceite explícito.
+
+## Avaliação Final
+
+A entrega **não pode ser aceita**. O impedimento é único, objetivo e reproduzido: a função falha o critério de aceite escrito pelo próprio executor, retornando `-1800` onde `180` é exigido (A1). O defeito não é marginal — inverte o sinal e amplia a magnitude do resultado em toda a faixa útil de descontos, e a declaração "pronto e conferido" (A2) mostra que o critério não foi executado antes de declarar a entrega concluída.
+
+O que pode ser aceito nesta versão: apenas R1, a assinatura da função e sua estrutura de módulo, que estão corretas.
+
+**Condições de aceite, na ordem:**
+1. Corrigir a linha 3 de `desconto.py` para `return valor * (1 - desconto_pct / 100)` — correção não aplicada por esta revisão, que é somente leitura.
+2. Anexar à entrega a saída literal da execução do critério de aceite (`preco_final(200, 10)`), não apenas a afirmação de que foi conferido.
+3. Reexecutar a tabela de 6 casos desta revisão e apresentar os 6 resultados.
+
+Próxima verificação necessária após a correção: reexecutar o comando reproduzível da seção Validação sobre o novo commit e confirmar ausência de `FALHA` na saída.
+
+## Prevenção
+
+**Cadeia causal.**
+- **Sintoma:** `preco_final(200, 10)` retorna `-1800` em vez de `180`; qualquer `desconto_pct >= 1` gera preço negativo.
+- **Causa imediata (demonstrada):** `desconto.py:3` omite a divisão por 100, aplicando `desconto_pct` como fração decimal enquanto o pedido e a docstring do próprio arquivo estabelecem pontos percentuais. Erro clássico de unidade, confirmado pelo caso de controle `preco_final(200, 0.1) = 180.0`.
+- **Causa sistêmica (hipótese — `Não verificado`):** o executor declarou "conferido" sem executar o critério de aceite que ele mesmo escreveu, e o repositório não oferece nenhum mecanismo — teste, CI, checklist — que torne essa execução obrigatória. Como confirmar: pedir ao executor a evidência de execução usada para a declaração; a ausência dela confirma a hipótese.
+
+**Medida proposta — vinculada a A1 e A2.**
+
+| Item | Conteúdo |
+| --- | --- |
+| Medida | Criar `test_desconto.py` no repositório com, no mínimo, `assert preco_final(200, 10) == 180` mais os casos de contorno `(100, 0) == 100`, `(100, 100) == 0` e `(100, 50) == 50`, e condicionar qualquer declaração de "pronto/conferido" à saída real de `pytest` anexada à entrega. |
+| Modo de falha que interrompe | Erro de unidade e regressão de fórmula não detectados antes da declaração de conclusão — exatamente A1 passando por A2. |
+| Responsável/papel | Executor da correção; conferência pelo revisor de aceite (quem valida ≠ quem executou). |
+| Estado | **Proposta** — não aplicada. Esta revisão é somente leitura e não criou, editou nem commitou arquivo algum no worktree. |
+| Evidência de eficácia | O teste deve falhar no commit `62b11d0` (reproduzindo o defeito) e passar no commit corrigido. Essa dupla execução, e não a aprovação isolada, comprova que a barreira funciona. |
+
+Nenhuma regra geral adicional é proposta: o incidente é local e uma medida universal seria desproporcional à evidência disponível.

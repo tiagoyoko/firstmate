@@ -1,0 +1,31 @@
+Scenario: a dedicated final reviewer raised a captain decision, it was answered,
+and the reviewer then appended its terminal 'done: revisão final Aprovado' line.
+What does firstmate see when it reads that crewmate's current state?
+
+BEFORE (bin/fm-classify-lib.sh reverted to base 7c2b227):
+  state: parked · source: status-log · confirmar escopo da revisão [key=escopo]
+AFTER  (this branch):
+  state: done · source: status-log · revisão final Aprovado report=/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-reviewer-state.GBNXCH/after/report.md
+
+Control - the same log on a ship task, which always folded correctly:
+  ship, this branch: state: done · source: status-log · revisão final Aprovado report=/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-reviewer-state.GBNXCH/ship/report.md
+
+Adversarial: the same reviewer with a stale version=8 open-decisions fold cache
+left on disk by the previous firstmate release.
+  state: done · source: status-log · revisão final Aprovado report=/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-reviewer-state.GBNXCH/stale/report.md
+  cursor on disk before firstmate's wake drain: version=8
+  firstmate wake drain output: STATUS OUTCOME BACKSTOP (newest captain-facing task event has no covering branch outcome):
+rev-1 done: revisão final Aprovado report=/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-reviewer-state.GBNXCH/stale/report.md
+●━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+●  WATCHER DOWN - SUPERVISION IS OFF
+●  1 task(s) in flight, but no watcher has a fresh beacon (last beat: never, grace 300s).
+●  Trust the emitted supervision protocol for this harness; do not use shell & for watcher repair.
+●  This is a supervision warning only; the guarded operation WILL still run.
+●  watcher supervision needs Stop-owned automatic recovery; inspect the hook registration and startup status before ending the turn.
+●━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  cursor rebuilt to: version=9:reviewer
+
+Adversarial: a reviewer whose decision is still genuinely open (no terminal line).
+  state: parked · source: status-log · confirmar escopo da revisão [key=escopo]
+
+LAB=/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-reviewer-state.GBNXCH

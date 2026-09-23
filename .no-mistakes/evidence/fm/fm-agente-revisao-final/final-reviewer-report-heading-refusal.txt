@@ -1,0 +1,34 @@
+# Isolating why the live reviewer's report was refused
+
+The live dedicated reviewer (harness=claude, real tmux pane) reviewed a real delivery,
+reproduced its defect by executing it, wrote the nine-section pt-BR report, and appended:
+  done: revisão final Não aprovado report=.../report.md
+
+## 1. Teardown on the report exactly as the reviewer wrote it
+$ bin/fm-teardown.sh live-rev-e2e-c2
+REFUSED: reviewer task live-rev-e2e-c2 report does not match the canonical reasoning-critique section contract.
+teardown exit=1 | backlog row: in_flight | task metadata: present
+
+## 2. The only structural difference from the template
+# Revisão final independente — `preco_final`
+
+**Objeto revisado:** `desconto.py` (função `preco_final`), acompanhado de `ENTREGA.md`.
+**Versão:** commit `62b11d0aa84c125a1fd82be2f78d34575bc4ce6e` ("entrega final: preco_final", 2026-09-23 16:35:49 -0300), HEAD destacado, árvore limpa.
+**Worktree:** `/Users/tiagoyoko/.treehouse/project-f327cf/1/project`
+**Data da revisão:** 2026-09-23
+**Revisor:** agente de revisão final independente (somente leitura; nenhuma correção aplicada).
+
+
+Heading list the reviewer produced vs the template (bin/fm-teardown.sh review_report_headings
+collects every '#'..'######' heading, so the document title counts as a section):
+1d0
+< # Revisão final independente — `preco_final`
+
+## 3. Same report, body untouched, only the title+preamble removed
+$ bin/fm-teardown.sh live-rev-e2e-c2
+🌳 Worktree returned to pool.
+teardown live-rev-e2e-c2 complete (window firstmate:fm-live-rev-e2e-c2, worktree /Users/tiagoyoko/.treehouse/project-f327cf/1/project)
+Backlog: live-rev-e2e-c2 is closed ... | task metadata: removed | report preserved: yes
+
+Note: the brief's own Definition of done tells the reviewer "The report must identify the
+reviewed object and version", which is what the refused preamble does.

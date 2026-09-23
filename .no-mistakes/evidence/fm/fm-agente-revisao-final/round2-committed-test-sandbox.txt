@@ -1,0 +1,38 @@
+Target commit 13d06f5 swept a test sandbox into the branch.
+
+$ git show 13d06f5 --stat   (files it added besides the fix)
+ .live-reviewer/project                             |  1 +
+ bin/fm-teardown.sh                                 |  5 +-
+ tests/fm-teardown.test.sh                          | 86 ++++++++++++++++++++++
+
+$ git ls-tree -r 13d06f5 -- .live-reviewer/
+100644 blob a56725970ee79de621bfe42d00a6d202cfc8280d	.live-reviewer/archived-meta/live-review-final-a1.meta
+160000 commit 9575e12e0314283a51c1872552a5eac5af0918d2	.live-reviewer/project
+
+Mode 160000 is a gitlink. There is no .gitmodules entry for it, so the
+branch tip carries a submodule pointer nothing can resolve:
+
+$ git -c core.hooksPath=/dev/null submodule status   (run against 13d06f5)
+fatal: no submodule mapping found in .gitmodules for path '.live-reviewer/project'
+
+The committed meta file also leaks this machine's absolute paths:
+$ git show 13d06f5:.live-reviewer/archived-meta/live-review-final-a1.meta
+window=firstmate:fm-live-review-final-a1
+endpoint_task_id=live-review-final-a1
+worktree=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M37PH0JFX9W0K1F6VQ5X902G/.live-reviewer/project/.treehouse/project-16856c/1/project
+project=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M37PH0JFX9W0K1F6VQ5X902G/.live-reviewer/project
+harness=codex
+kind=reviewer
+review_head=9575e12e0314283a51c1872552a5eac5af0918d2
+tasktmp=/tmp/fm-live-review-final-a1
+model=default
+effort=default
+spawn_gen=s1790188421.54019.6551
+
+Removed from the index and from disk in this run (left uncommitted for the fix step):
+$ git rm -r --cached .live-reviewer && rm -rf .live-reviewer
+$ git status --porcelain
+D  .live-reviewer/archived-meta/live-review-final-a1.meta
+D  .live-reviewer/project
+$ git submodule status
+(no output = resolved)

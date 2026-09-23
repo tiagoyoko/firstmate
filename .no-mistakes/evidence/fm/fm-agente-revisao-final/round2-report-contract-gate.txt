@@ -1,0 +1,71 @@
+The regression this round had to close: a real reviewer's report, refused before the fix.
+Each scenario builds its own firstmate home from scratch and drives bin/fm-teardown.sh.
+The report is byte-for-byte the one a live LLM reviewer wrote in round 1
+(final-reviewer-live-report-as-written.md) — nothing about it was edited for these runs
+except where a scenario says it deliberately broke it.
+
+LAB=/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-r2-reviewer.sZVxmg
+
+########## The artifact under test: the report a live LLM reviewer wrote (round 1) ##########
+source: /Users/tiagoyoko/.no-mistakes/evidence/01M37PH0JFX9W0K1F6VQ5X902G/final-reviewer-live-report-as-written.md
+--- first 8 lines: the document title and the identification block the brief's
+--- Definition of done demands ('identify the reviewed object and version') ---
+# Revisão final independente — `preco_final`
+
+**Objeto revisado:** `desconto.py` (função `preco_final`), acompanhado de `ENTREGA.md`.
+**Versão:** commit `62b11d0aa84c125a1fd82be2f78d34575bc4ce6e` ("entrega final: preco_final", 2026-09-23 16:35:49 -0300), HEAD destacado, árvore limpa.
+**Worktree:** `/Users/tiagoyoko/.treehouse/project-f327cf/1/project`
+**Data da revisão:** 2026-09-23
+**Revisor:** agente de revisão final independente (somente leitura; nenhuma correção aplicada).
+
+--- every markdown heading in it ---
+1:# Revisão final independente — `preco_final`
+9:## Veredito
+13:## Resultado Esperado
+24:## O Que Foi Entregue
+40:## Apontamentos
+68:## Cobertura de Requisitos
+78:## Riscos
+84:## Validação
+125:## Avaliação Final
+138:## Prevenção
+
+========== 1. BEFORE the fix (code at 569160b) — the reviewer's own report, byte for byte ==========
+REFUSED: reviewer task task-x1 report does not match the canonical reasoning-critique section contract.
+exit=1 | backlog row: in flight | task metadata: present | report on disk: preserved
+
+========== 2. AFTER the fix (code at HEAD) — the same report, byte for byte, untouched ==========
+teardown task-x1 complete (window firstmate:fm-task-x1, worktree /var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-r2-reviewer.sZVxmg/c2-after/wt)
+Backlog: task-x1 is closed in /private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-r2-reviewer.sZVxmg/c2-after/data/backlog.md. Run bin/fm-tasks-axi.sh ready for dependency-cleared candidates, check date gates, and dispatch only work whose blockers are gone and date is due.
+exit=0 | backlog row: done | task metadata: removed | report on disk: preserved
+
+--- the backlog row the captain sees afterwards ---
+## Done
+- [x] task-x1 - revisão final da entrega preco_final data/task-x1/report.md (kind: reviewer) (reported 2026-09-23)
+--- the report survives teardown as the durable work product ---
+-rw-r--r--@ 1 tiagoyoko  staff  15891 Sep 23 17:12 /var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-r2-reviewer.sZVxmg/c2-after/data/task-x1/report.md
+
+### Adversarial: the contract must still hold ###
+
+========== 3. One section renamed off the contract (## Riscos -> ## Risco) ==========
+REFUSED: reviewer task task-x1 report does not match the canonical reasoning-critique section contract.
+exit=1 | backlog row: in flight | task metadata: present | report on disk: preserved
+
+========== 4. A required section demoted to ### (only eight ## sections remain) ==========
+REFUSED: reviewer task task-x1 report does not match the canonical reasoning-critique section contract.
+exit=1 | backlog row: in flight | task metadata: present | report on disk: preserved
+
+(section order now: 9 sections, last two swapped: ## Prevenção ## Avaliação Final )
+========== 5. All nine sections present but two swapped out of contract order ==========
+REFUSED: reviewer task task-x1 report does not match the canonical reasoning-critique section contract.
+exit=1 | backlog row: in flight | task metadata: present | report on disk: preserved
+
+========== 6. An extra ## Veredito smuggled into the preamble (ten sections) ==========
+REFUSED: reviewer task task-x1 report does not match the canonical reasoning-critique section contract.
+exit=1 | backlog row: in flight | task metadata: present | report on disk: preserved
+
+========== 7. The preamble quotes the template inside a fenced block (must NOT count as a section) ==========
+REFUSED: reviewer task task-x1 report has no valid reasoning-critique verdict.
+exit=1 | backlog row: in flight | task metadata: present | report on disk: preserved
+
+LAB=/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-r2-reviewer.sZVxmg

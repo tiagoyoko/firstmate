@@ -1,0 +1,42 @@
+PROVA: 'git submodule status' num clone do tip do branch sai com exit=0 e sem saída.
+Antes da correção, o mesmo comando terminava com
+'fatal: no submodule mapping found in .gitmodules for path .live-reviewer/project'.
+
+===== O branch entregue não carrega mais o sandbox de teste com gitlink órfão =====
+
+--- commit alvo 1b21636: o que o branch contém em .live-reviewer/ ---
+$ git ls-tree -r HEAD -- .live-reviewer/
+(nada: o diretório saiu do branch)
+
+--- o commit anterior (13d06f5) ainda mostra o gitlink órfão no histórico ---
+$ git ls-tree -r 13d06f5 -- .live-reviewer/
+100644 blob a56725970ee79de621bfe42d00a6d202cfc8280d	.live-reviewer/archived-meta/live-review-final-a1.meta
+160000 commit 9575e12e0314283a51c1872552a5eac5af0918d2	.live-reviewer/project
+
+--- prova de produto: um clone do tip do branch ---
+Note: switching to '1b216365ed1b76eeb2a70159fd0619b1ca114c65'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+$ git -C <clone> submodule status
+(sem saída: nenhum submódulo)
+submodule status exit=0
+
+$ git -C <clone> status --porcelain  ->  (vazio = árvore limpa)
+
+--- o diretório também não existe no worktree de trabalho ---
+ls: /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M37PH0JFX9W0K1F6VQ5X902G/.live-reviewer: No such file or directory
+ausente

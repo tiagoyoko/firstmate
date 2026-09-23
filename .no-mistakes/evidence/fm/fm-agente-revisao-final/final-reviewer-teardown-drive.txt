@@ -1,0 +1,49 @@
+
+========== 1. Reviewer without a report — captain runs teardown ==========
+REFUSED: reviewer task task-x1 has no report at /var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-reviewer-teardown.UlIiiM/case/data/task-x1/report.md.
+The report is the work product. Have the worker write it, or use --force after explicit discard approval.
+exit=1 | backlog=in_flight | meta=present
+
+========== 2. Reviewer writes a free-form report instead of the reasoning-critique format ==========
+REFUSED: reviewer task task-x1 report does not match the canonical reasoning-critique section contract.
+exit=1 | backlog=in_flight | meta=present
+
+========== 3. Canonical nine sections, but 'Riscos' left empty ==========
+REFUSED: reviewer task task-x1 report section '## Riscos' has no content.
+exit=1 | backlog=in_flight | meta=present
+
+========== 4. Complete report, but the status line claims a different verdict ==========
+REFUSED: reviewer task task-x1 status does not match report verdict 'Aprovado com ressalvas' and path /var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-reviewer-teardown.UlIiiM/case/data/task-x1/report.md.
+exit=1 | backlog=in_flight | meta=present
+
+========== 5. Correct verdict recorded, then the review is reopened afterwards ==========
+REFUSED: reviewer task task-x1 status does not match report verdict 'Aprovado com ressalvas' and path /var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-reviewer-teardown.UlIiiM/case/data/task-x1/report.md.
+exit=1 | backlog=in_flight | meta=present
+
+========== 6. Reviewer left a private note under .claude/ in the reviewed copy ==========
+REFUSED: worktree /var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-reviewer-teardown.UlIiiM/case/wt has uncommitted changes.
+uncommitted changes present
+A final reviewer must not alter the reviewed object; restore the reviewed snapshot before cleanup.
+exit=1 | backlog=in_flight | meta=present
+
+========== 7. Reviewer edited the delivery it was reviewing ==========
+REFUSED: worktree /var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-reviewer-teardown.UlIiiM/case/wt has uncommitted changes.
+uncommitted changes present
+A final reviewer must not alter the reviewed object; restore the reviewed snapshot before cleanup.
+exit=1 | backlog=in_flight | meta=present
+
+========== 8. Reviewer reviewed a different commit than the one it was handed ==========
+REFUSED: reviewer task task-x1 current HEAD 37a59b7d332e47373a6dae221c5d64a026e93fc1 does not match recorded initial review HEAD 3b598e2c9c7e3697ab2fd153f925fb1f1f620701.
+exit=1 | backlog=in_flight | meta=present
+
+========== 9. HAPPY PATH — canonical report, matching verdict, untouched delivery ==========
+teardown task-x1 complete (window firstmate:fm-task-x1, worktree /var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-reviewer-teardown.UlIiiM/case/wt)
+Backlog: task-x1 is closed in /private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-reviewer-teardown.UlIiiM/case/data/backlog.md. Run bin/fm-tasks-axi.sh ready for dependency-cleared candidates, check date gates, and dispatch only work whose blockers are gone and date is due.
+exit=0 | backlog=done | meta=gone
+--- backlog Done row ---
+## Done
+- [x] task-x1 - revisão final da entrega X data/task-x1/report.md (kind: reviewer) (reported 2026-09-23)
+--- report survives teardown ---
+-rw-r--r--@ 1 tiagoyoko  staff  714 Sep 23 16:00 /var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-reviewer-teardown.UlIiiM/case/data/task-x1/report.md
+
+LAB=/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-reviewer-teardown.UlIiiM

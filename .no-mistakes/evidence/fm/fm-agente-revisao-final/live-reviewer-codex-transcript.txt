@@ -1,0 +1,62 @@
+=== spawn ===
+spawned live-review-final-a1 harness=codex kind=reviewer window=firstmate:fm-live-review-final-a1
+
+=== tmux size/process ===
+80x24 codex
+
+=== visible TUI ===
+treehouse get
+
+project on  main
+❯ treehouse get
+🌳 Setting up worktree...
+🌳 Entered worktree at ~/.no-mistakes/worktrees/2b0478335959/01M37PH0JFX9W0K1F6V
+Q5X902G/.live-reviewer/project/.treehouse/project-16856c/1/project. Type 'exit'
+to return.
+
+project on  HEAD (9575e12)
+❯ export GOTMPDIR=/tmp/fm-live-review-final-a1/gotmp
+export FM_TASK_ID=live-review-final-a1
+
+project on  HEAD (9575e12)
+❯ export FM_TASK_ID=live-review-final-a1
+
+project on  HEAD (9575e12)
+❯ . '/tmp/fm-live-review-final-a1/launch.Geuunn'
+
+  Folder access
+  /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M37PH0JFX9W0K1F6VQ5X9
+  02G/.live-reviewer/project/.treehouse/project-16856c/1/project
+
+  Note: You’re in a subdirectory of a Git project. Trusting will apply to the
+  repository root:
+  /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M37PH0JFX9W0K1F6VQ5X9
+  02G/.live-reviewer/project
+
+  Trust this folder? Codex can read, edit, and run files here, subject to your
+  permission settings. Folder settings can run code automatically, even
+  without a model request. Continue only if you trust these files. Your trust
+  decision will be saved.
+
+› 1. Trust and continue
+  2. Quit
+
+  enter continue · esc quit
+
+
+
+
+
+
+=== metadata ===
+window=firstmate:fm-live-review-final-a1
+endpoint_task_id=live-review-final-a1
+worktree=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M37PH0JFX9W0K1F6VQ5X902G/.live-reviewer/project/.treehouse/project-16856c/1/project
+project=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M37PH0JFX9W0K1F6VQ5X902G/.live-reviewer/project
+harness=codex
+kind=reviewer
+review_head=9575e12e0314283a51c1872552a5eac5af0918d2
+tasktmp=/tmp/fm-live-review-final-a1
+model=default
+effort=default
+spawn_gen=s1790188421.54019.6551

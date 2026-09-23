@@ -1,0 +1,40 @@
+# Targeted suites driven for the dedicated final-review agent
+
+Runner: bin/fm-test-run.sh <file> (each file drives the real bin/*.sh against temp git repos and fake backends)
+
+FM_TEST_END 2026-09-23T18:58:55Z tests/fm-spawn-batch.test.sh exit=0 duration_ms=12569 gate_skip=false
+FM_TEST_END 2026-09-23T18:59:20Z tests/fm-brief.test.sh exit=0 duration_ms=37463 gate_skip=false
+FM_TEST_END 2026-09-23T19:00:01Z tests/fm-rovo-harness.test.sh exit=0 duration_ms=40575 gate_skip=false
+FM_TEST_END 2026-09-23T19:01:06Z tests/fm-wake-drain-open-decisions-cursor.test.sh exit=0 duration_ms=138762 gate_skip=false
+FM_TEST_END 2026-09-23T19:02:33Z tests/fm-spawn-pool-base-freshen.test.sh exit=0 duration_ms=226176 gate_skip=false
+FM_TEST_END 2026-09-23T19:03:06Z tests/fm-control-relaunch.test.sh exit=0 duration_ms=267922 gate_skip=false
+FM_TEST_END 2026-09-23T19:06:27Z tests/fm-task-delivery.test.sh exit=0 duration_ms=61224 gate_skip=false
+FM_TEST_END 2026-09-23T19:08:59Z tests/fm-teardown.test.sh exit=0 duration_ms=623390 gate_skip=false
+FM_TEST_END 2026-09-23T19:16:49Z tests/fm-backlog-atomicity.test.sh exit=0 duration_ms=621788 gate_skip=false
+
+# Final-reviewer cases inside those runs
+
+ok - batch dispatch refuses final reviewers before spawning any pair
+ok - final reviewers record the exact refreshed HEAD and allow new untracked harness wiring
+ok - final reviewers refuse existing or tracked worktree wiring collisions before launch
+ok - final reviewers refuse free-form launch commands before launch
+ok - final reviewers refuse symlink and gitlink wiring ancestors before launch
+ok - fm-brief: scout, final-reviewer, and secondmate code paths scaffold well-formed briefs
+ok - fm-brief.sh: final-reviewer scaffold is read-only and renders the reasoning-critique report contract
+ok - fm-control relaunch: reviewers keep their snapshot identity and reopen completed status
+ok - fm-spawn: a final-reviewer spawn accepts its role and resolves no delivery posture
+ok - fm-spawn: rovo refuses final reviewers before launch
+ok - fm-teardown: final reviewers require and preserve their report deliverable
+ok - Orca reviewer cleanup recovery skips delivery and backlog gates
+
+# Live drives performed in this run (real bin/*.sh against real git state)
+
+final-reviewer-end-to-end-flow.txt        fm-brief.sh --final-reviewer -> fm-spawn.sh --final-reviewer -> launch-brief.md delivered to the agent
+final-reviewer-spawn-drive.txt            spawn happy path + rovo / raw-command / --mode / double-role / wiring-collision / batch refusals
+final-reviewer-live-tmux-launch.txt       reviewer launched into a real 200x50 tmux pane on a real harness
+final-reviewer-live-llm-review.txt        a real dedicated reviewer critiquing a real delivery end to end
+final-reviewer-live-report-as-written.md  the nine-section pt-BR report that live reviewer wrote
+final-reviewer-report-heading-refusal.txt why teardown refused that real report, isolated to one line
+final-reviewer-teardown-drive.txt         nine teardown scenarios: 8 refusals + the accepting close
+final-reviewer-harness-wiring-clean.txt   claude/opencode/grok/kimi wiring does not trip the read-only gate
+final-reviewer-crew-state-drive.txt       finished reviewer reads done, not parked (before/after the fix)

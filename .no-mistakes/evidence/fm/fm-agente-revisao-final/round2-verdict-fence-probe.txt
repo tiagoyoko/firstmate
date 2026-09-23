@@ -1,0 +1,66 @@
+Adversarial probe: can the verdict the ledger records diverge from the verdict a human reads?
+
+LAB=/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-r2b.a9NWVg
+
+A reviewer's report whose HUMAN-VISIBLE verdict is 'Não aprovado', but whose
+identification block quotes the template inside a fenced code block showing
+'Aprovado'. The recorded status claims the review was APPROVED.
+
+--- what a human reads in the report ---
+## Veredito
+
+Aprovado
+```
+## Veredito
+
+**Não aprovado.** O critério de aceite declarado pelo próprio executor em `ENTREGA.md` — `preco_final(200, 10)` deve retornar `180` — foi reproduzido e falha: a função retorna `-1800`. Trata-se de descumprimento material demonstrado por execução direta, não de risco hipotético. Escopo revisado: os dois artefatos da entrega (`ENTREGA.md` e `desconto.py`) na versão `62b11d0`.
+
+--- what the status ledger claims ---
+done: revisão final Aprovado report=/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-r2b.a9NWVg/c8-fence-verdict/data/task-x1/report.md
+
+========== 8. Report says 'Não aprovado', status claims 'Aprovado', fenced template above ==========
+teardown task-x1 complete (window firstmate:fm-task-x1, worktree /var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-r2b.a9NWVg/c8-fence-verdict/wt)
+Backlog: task-x1 is closed in /private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-r2b.a9NWVg/c8-fence-verdict/data/backlog.md. Run bin/fm-tasks-axi.sh ready for dependency-cleared candidates, check date gates, and dispatch only work whose blockers are gone and date is due.
+exit=0 | backlog row: done | task metadata: removed
+
+--- for contrast: the same fenced preamble, status honestly 'Não aprovado' ---
+========== 9. Same report, status honestly 'Não aprovado' ==========
+REFUSED: reviewer task task-x1 status does not match report verdict 'Aprovado' and path /var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-r2b.a9NWVg/c9-fence-honest/data/task-x1/report.md.
+exit=1 | backlog row: in flight | task metadata: present
+
+LAB=/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-r2b.a9NWVg
+
+==========================================================================
+Is this confusion introduced by the change under test (13d06f5), or older?
+Same probe with no document title, so the report was already legal before.
+==========================================================================
+Is the fenced-verdict confusion introduced by 13d06f5, or older?
+Report: no document title, fenced template quote showing 'Aprovado' at the top,
+real '## Veredito' saying 'Não aprovado'. Status claims 'Aprovado'.
+
+========== BEFORE the fix (569160b) ==========
+teardown task-x1 complete (window firstmate:fm-task-x1, worktree /var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-r2c.fa0Vcv/b1/wt)
+Backlog: task-x1 is closed in /private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-r2c.fa0Vcv/b1/data/backlog.md. Run bin/fm-tasks-axi.sh ready for dependency-cleared candidates, check date gates, and dispatch only work whose blockers are gone and date is due.
+exit=0 | backlog row: done | metadata: removed
+
+========== AFTER the fix (HEAD) ==========
+teardown task-x1 complete (window firstmate:fm-task-x1, worktree /var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-r2c.fa0Vcv/b2/wt)
+Backlog: task-x1 is closed in /private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-r2c.fa0Vcv/b2/data/backlog.md. Run bin/fm-tasks-axi.sh ready for dependency-cleared candidates, check date gates, and dispatch only work whose blockers are gone and date is due.
+exit=0 | backlog row: done | metadata: removed
+
+
+==========================================================================
+Scope note
+==========================================================================
+$ git show 7c2b227:bin/fm-teardown.sh | grep -c 'review_report_verdict\|review_report_headings'
+0
+
+The whole final-review closing gate — review_report_headings,
+review_report_empty_section and review_report_verdict — is NEW in this branch.
+So the comparison above only shows the hole arrived earlier inside the branch
+(at or before 569160b), not that it predates the change under review.
+
+The asymmetry is the defect: review_report_headings and
+review_report_empty_section skip fenced code blocks; review_report_verdict does
+not. A fenced '## Veredito' anywhere above the real one decides the verdict the
+gate records.

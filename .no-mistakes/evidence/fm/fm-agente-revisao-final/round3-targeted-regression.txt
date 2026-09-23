@@ -1,0 +1,8 @@
+===== Testes de regressão dirigidos (bin/fm-teardown.sh real, via tests/fm-teardown.test.sh) =====
+Seleção: os três casos do gate de revisão final.
+
+ok - fm-teardown: final reviewers require and preserve their report deliverable
+ok - fm-teardown: a final report may identify the reviewed object above its nine sections
+ok - fm-teardown: a fenced quote of the template never stands in for the report verdict
+
+exit=0

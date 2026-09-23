@@ -1,0 +1,24 @@
+===== O parecer real do revisor, exatamente como ele o escreveu, passa pelo gate =====
+
+--- relatório restaurado ao byte exato que o revisor entregou ---
+sha256 do relatório = 17fcd91b7a9fb124f0c5a45a6a18b9b4aeb5d01ac67600fedfcde178b8acef6d
+status exatamente como o revisor escreveu:
+working: revisão final iniciada em desconto.py/ENTREGA.md (commit a4ef4bf)
+done: revisão final Não aprovado report=/private/tmp/fm-r3-live.XnOqvm/home/data/r3-rev-final/report.md
+
+--- o capitão encerra a revisão ---
+$ bin/fm-teardown.sh r3-rev-final
+teardown: reaping leaked worktree process(es) for r3-rev-final: 11855 13158 13419 13421 13627 13654 13708 13709 13714 13728 13845 13872 13899 13900 13963 14144 14165 14289 14331 14333 14337 14386 14414 14823 14851 14869 14891 14938 14939 14965 14966 14967 14968 14970 15015 15026 15027 15028 15031 15033 15075 15076 15125
+teardown: force-killing leaked worktree process(es) for r3-rev-final: 11855 13158
+🌳 Worktree returned to pool.
+teardown r3-rev-final complete (window firstmate:fm-r3-rev-final, worktree /Users/tiagoyoko/.treehouse/project-ea658c/1/project)
+Backlog: r3-rev-final just finished (this home keeps no markdown backlog at /private/tmp/fm-r3-live.XnOqvm/home/data/backlog.md). Update /private/tmp/fm-r3-live.XnOqvm/home/data/backlog.md - move r3-rev-final to Done, keep Done to the 10 most recent, then re-scan Queued and dispatch only work whose blockers are gone and date is due.
+teardown exit=0 (linha final: 'teardown r3-rev-final complete')
+
+--- o que sobrou depois do encerramento ---
+metadata da tarefa: removida
+relatório preservado como produto durável: sim
+sha256 do relatório após o teardown = 17fcd91b7a9fb124f0c5a45a6a18b9b4aeb5d01ac67600fedfcde178b8acef6d
+janelas tmux restantes:
+1: zsh* (1 panes) [80x24] [layout b25d,80x24,0,0,0] @0 (active)
+worktree do pool: /Users/tiagoyoko/.treehouse/project-ea658c/1/project

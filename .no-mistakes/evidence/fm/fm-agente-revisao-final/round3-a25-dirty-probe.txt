@@ -1,0 +1,24 @@
+===== A25: uma alteração do revisor sob .claude/ não pode ser descartada em silêncio =====
+(inventário de captain-calls já registrado: complete r3-rev-final --none)
+
+--- 1. cópia limpa logo após a revisão (o wiring do harness vive em info/exclude) ---
+$ git -C <worktree do revisor> status --porcelain  ->  (vazio)
+
+--- 2. o revisor deixa uma anotação própria dentro de .claude/ ---
+$ git -C <worktree> status --porcelain
+?? .claude/
+
+--- 3. o capitão tenta encerrar a revisão ---
+$ bin/fm-teardown.sh r3-rev-final
+WARNING: watcher still down (same stale episode; last beat: 722s ago, grace 300s) - full banner already printed this episode.
+REFUSED: worktree /Users/tiagoyoko/.treehouse/project-ea658c/1/project has uncommitted changes.
+uncommitted changes present
+A final reviewer must not alter the reviewed object; restore the reviewed snapshot before cleanup.
+teardown exit=1
+
+metadata da tarefa ainda presente: sim
+janela tmux do revisor ainda aberta: 1
+relatório preservado: sim
+
+--- 4. anotação removida, a cópia volta ao snapshot revisado ---
+$ git -C <worktree> status --porcelain  ->  (vazio)

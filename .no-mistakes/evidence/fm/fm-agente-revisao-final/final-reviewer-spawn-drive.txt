@@ -1,0 +1,60 @@
+
+========== 1. Captain asks for a dedicated final reviewer on the completed delivery ==========
+$ bin/fm-spawn.sh rev-final-1 <project> --final-reviewer --harness claude
+spawned rev-final-1 harness=claude kind=reviewer window=firstmate:fm-rev-final-1 worktree=/private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-reviewer-spawn-drive.G3rKKo/happy/pool
+exit=0
+--- state/rev-final-1.meta ---
+window=firstmate:fm-rev-final-1
+endpoint_task_id=rev-final-1
+worktree=/private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-reviewer-spawn-drive.G3rKKo/happy/pool
+project=/private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-reviewer-spawn-drive.G3rKKo/happy/project
+harness=claude
+kind=reviewer
+review_head=cde779e229a735f37c06475e0dee709767c1c65e
+tasktmp=/tmp/fm-rev-final-1
+model=default
+effort=default
+busy_gen=g1790190256.92784.22996
+spawn_gen=s1790190256.91564.26480
+--- the reviewer's copy is the published delivery, untouched ---
+worktree HEAD      = cde779e229a735f37c06475e0dee709767c1c65e
+origin/main tip    = cde779e229a735f37c06475e0dee709767c1c65e
+recorded review_head = cde779e229a735f37c06475e0dee709767c1c65e
+git status --porcelain:
+(empty above = clean)
+--- launch brief handed to the reviewer (Definition of done) ---
+
+========== 2. Captain picks a harness that cannot load the reasoning-critique skill ==========
+$ bin/fm-spawn.sh rev-final-2 <project> --final-reviewer --harness rovo
+error: rovo cannot run final reviewer rev-final-2 because it cannot load the required reasoning-critique skill outside the reviewed worktree. Select another verified harness for this reviewer.
+exit=1
+task metadata: none - nothing was launched
+
+========== 3. Captain tries to smuggle rovo in behind a free-form launch command ==========
+$ bin/fm-spawn.sh rev-final-3 <project> --final-reviewer --harness 'env FOO=1 rovo run --yolo'
+error: final reviewer rev-final-3 requires a verified harness family that can load the reasoning-critique skill; free-form launch commands are not accepted. Pass --harness with a supported harness name.
+exit=1
+task metadata: none - nothing was launched
+
+========== 4. Captain tries to give the reviewer a delivery contract ==========
+$ bin/fm-spawn.sh rev-final-4 <project> --final-reviewer --harness claude --mode no-mistakes --yolo on
+error: --mode applies only to ship spawns; scouts and final reviewers deliver reports, and a secondmate records its own fixed posture
+exit=1
+
+========== 5. Captain combines two role flags ==========
+$ bin/fm-spawn.sh rev-final-5 <project> --final-reviewer --scout
+error: role flags are mutually exclusive; choose one of --scout, --final-reviewer, or --secondmate
+exit=1
+
+========== 6. Project already owns the file the harness wiring would write ==========
+$ bin/fm-spawn.sh rev-final-6 <project> --final-reviewer --harness claude
+error: reviewer rev-final-6 cannot use harness 'claude' because its required wiring path '.claude/settings.local.json' already exists in the reviewed worktree. Remove or relocate that file, or choose a reviewer harness that does not write there.
+exit=1
+existing project file after the refusal: project-owned
+
+========== 7. Captain asks for a batch of final reviewers ==========
+$ bin/fm-spawn.sh rev-final-7=<project> rev-final-8=<project> --final-reviewer --harness claude
+error: batch dispatch does not support --final-reviewer; spawn each final reviewer explicitly
+exit=1
+
+TMP_ROOT=/private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-reviewer-spawn-drive.G3rKKo

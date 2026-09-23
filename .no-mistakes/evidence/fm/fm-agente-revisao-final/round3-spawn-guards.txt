@@ -1,0 +1,16 @@
+===== O revisor final só pode nascer num harness que consegue carregar a skill =====
+
+--- 1. --harness rovo: o adaptador não consegue carregar reasoning-critique ---
+$ bin/fm-spawn.sh r3-guard <project> --final-reviewer --harness rovo
+error: rovo cannot run final reviewer r3-guard because it cannot load the required reasoning-critique skill outside the reviewed worktree. Select another verified harness for this reviewer.
+metadata criada: NÃO
+
+--- 2. comando de lançamento livre tentando contrabandear o rovo ---
+$ bin/fm-spawn.sh r3-guard <project> --final-reviewer --harness 'env FOO=1 rovo run'
+error: final reviewer r3-guard requires a verified harness family that can load the reasoning-critique skill; free-form launch commands are not accepted. Pass --harness with a supported harness name.
+metadata criada: NÃO
+
+--- 3. revisão em lote não é oferecida (par id=repo, decisão funcional deliberada) ---
+$ bin/fm-spawn.sh r3-guard=<project> r3-guard2=<project> --final-reviewer
+error: batch dispatch does not support --final-reviewer; spawn each final reviewer explicitly
+metadata criada: NÃO

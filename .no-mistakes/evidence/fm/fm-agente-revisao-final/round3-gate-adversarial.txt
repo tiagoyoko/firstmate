@@ -1,0 +1,29 @@
+===== Probes adversariais do gate de encerramento da revisão =====
+
+--- A: seção '## Veredito' vazia (cabeçalho seguido direto do próximo) ---
+$ bin/fm-teardown.sh task-x1
+REFUSED: reviewer task task-x1 report section '## Veredito' has no content.
+metadata presente: sim
+
+--- B: o revisor mexeu na cópia revisada e commitou (árvore limpa, HEAD adulterado) ---
+HEAD atual  = e3a5013b3f89f0fc75e482dc239b28377550733b
+review_head = 5b400092d1f4cc3da4562224cfd3db34fc18ecd6
+git status --porcelain: (vazio)
+$ bin/fm-teardown.sh task-x1
+REFUSED: reviewer task task-x1 current HEAD e3a5013b3f89f0fc75e482dc239b28377550733b does not match recorded initial review HEAD 5b400092d1f4cc3da4562224cfd3db34fc18ecd6.
+metadata presente: sim
+
+--- C: HEAD restaurado ao snapshot revisado, relatório e status honestos ---
+HEAD atual = 5b400092d1f4cc3da4562224cfd3db34fc18ecd6
+$ bin/fm-teardown.sh task-x1
+teardown task-x1 complete (window firstmate:fm-task-x1, worktree <lab>/gate-case/wt)
+teardown exit=0
+metadata presente: removida
+
+(A e B recusam e preservam a tarefa; C, com a cópia restaurada ao snapshot revisado
+e o status batendo com o veredito do relatório, encerra e remove a metadata.)
+
+--- método ---
+Dirigido contra o binário real bin/fm-teardown.sh, com git e estado de tarefa reais.
+tmux/treehouse/gh são stubs exit-0 porque não há janela nem slot de pool vivos
+neste caso montado à mão; por isso NÃO conta como drive ao vivo do produto inteiro.

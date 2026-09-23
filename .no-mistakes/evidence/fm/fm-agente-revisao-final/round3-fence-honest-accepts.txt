@@ -1,0 +1,47 @@
+===== O revisor honesto, com título, bloco de identificação e citação cercada, encerra sua revisão =====
+Relatório = o parecer REAL do revisor desta rodada, precedido de:
+  * um título de documento (#) e o bloco de identificação que a Definition of done exige
+  * uma citação cercada do modelo da skill dizendo 'Aprovado'
+
+# Revisão final independente — `preco_final`
+
+**Objeto revisado:** `desconto.py` (função `preco_final`) e `ENTREGA.md`.
+**Versão:** commit registrado, árvore limpa.
+
+O modelo da skill abre a primeira seção assim:
+
+```markdown
+## Veredito
+
+Aprovado
+```
+
+## Veredito
+  [... as nove seções do contrato, exatamente como o revisor as escreveu ...]
+
+seções que o gate conta (cabeçalhos ## fora de cercas):
+## Veredito
+## Resultado Esperado
+## O Que Foi Entregue
+## Apontamentos
+## Cobertura de Requisitos
+## Riscos
+## Validação
+## Avaliação Final
+## Prevenção
+
+--- status honesto, igual ao veredito do relatório ---
+done: revisão final Não aprovado report=/private/tmp/fm-r3-live.XnOqvm/fence-case/data/task-x1/report.md
+
+$ bin/fm-teardown.sh task-x1
+teardown task-x1 complete (window firstmate:fm-task-x1, worktree /private/tmp/fm-r3-live.XnOqvm/fence-case/wt)
+Backlog: task-x1 just finished (this home keeps no markdown backlog at /private/tmp/fm-r3-live.XnOqvm/fence-case/data/backlog.md). Update /private/tmp/fm-r3-live.XnOqvm/fence-case/data/backlog.md - move task-x1 to Done, keep Done to the 10 most recent, then re-scan Queued and dispatch only work whose blockers are gone and date is due.
+teardown exit=0
+
+metadata da tarefa: removida
+relatório preservado: sim
+
+--- método ---
+Dirigido contra o binário real bin/fm-teardown.sh, com git e estado de tarefa reais.
+tmux/treehouse/gh são stubs exit-0 porque não há janela nem slot de pool vivos
+neste caso montado à mão; por isso NÃO conta como drive ao vivo do produto inteiro.

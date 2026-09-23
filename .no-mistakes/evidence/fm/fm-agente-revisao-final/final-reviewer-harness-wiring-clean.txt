@@ -1,0 +1,37 @@
+
+===== final reviewer on harness=claude =====
+spawn: ok
+harness wiring written into the reviewed copy:
+  .claude/settings.local.json
+git status --porcelain: (empty)
+  -> clean: the reviewer's own wiring does not trip teardown's read-only gate
+
+===== final reviewer on harness=opencode =====
+spawn: ok
+harness wiring written into the reviewed copy:
+  .opencode/plugins/fm-busy-state.js
+git status --porcelain: (empty)
+  -> clean: the reviewer's own wiring does not trip teardown's read-only gate
+
+===== final reviewer on harness=grok =====
+spawn: ok
+harness wiring written into the reviewed copy:
+  .fm-grok-turnend
+git status --porcelain: (empty)
+  -> clean: the reviewer's own wiring does not trip teardown's read-only gate
+
+===== final reviewer on harness=kimi =====
+spawn stopped later in the launch sequence (not wiring): error: kimi did not show a verified ready signal before brief delivery; inspect window firstmate:fm-rev-wiring-kimi
+harness wiring written into the reviewed copy:
+  .fm-kimi-turnend
+git status --porcelain: (empty)
+  -> clean: the reviewer's own wiring does not trip teardown's read-only gate
+reviewer harness wiring present: settings.local.json
+git status --porcelain: []
+
+$ bin/fm-teardown.sh task-w1
+teardown task-w1 complete (window firstmate:fm-task-w1, worktree /var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-rev-td-wiring.Gaq7gn/case/wt)
+Backlog: task-w1 just finished (this home keeps no markdown backlog at /private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-rev-td-wiring.Gaq7gn/case/data/backlog.md). Update /private/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T/fm-rev-td-wiring.Gaq7gn/case/data/backlog.md - move task-w1 to Done, keep Done to the 10 most recent, then re-scan Queued and dispatch only work whose blockers are gone and date is due.
+exit=0
+task metadata: removed
+report preserved: yes

@@ -1,0 +1,48 @@
+===== Revisor final dedicado: drive ao vivo (rodada 3) =====
+LAB=/private/tmp/fm-r3-live.XnOqvm
+worktree do revisor=/Users/tiagoyoko/.treehouse/project-ea658c/1/project
+
+--- janela tmux que o capitão enxerga ---
+1: zsh* (1 panes) [80x24] [layout b25d,80x24,0,0,0] @0 (active)
+2: fm-r3-rev-final (1 panes) [80x24] [layout b25e,80x24,0,0,1] @1
+
+--- painel do revisor, capturado com a janela ainda aberta ---
+  recomendei.
+  Dois apontamentos: A1 (defeito confirmado, severidade Alta) é o impedimento ao
+  merge. A2 (defeito confirmado, Média) é o aceite declarado sem evidência —
+  não há teste nem saída de execução no repositório, e é o que deixou passar. A
+  prevenção proposta liga-se a esse modo de falha: exigir a saída real do
+  comando que exercita o critério, ou um teste versionado.
+  Registrei como Não verificado a busca por consumidores de preco_final fora
+  deste worktree — o contrato me limita a ele. Se existir chamador que hoje
+  compense o erro passando 0.1 para 10%, a correção o quebraria silenciosamente;
+  vale conferir antes do merge.
+  Relatório completo (nove seções da skill, pt-BR):
+  /private/tmp/fm-r3-live.XnOqvm/home/data/r3-rev-final/report.md. Status done:
+  registrado. Inbox estava ausente — nenhuma mensagem a tratar.
+✻ Brewed for 3m 36s · done 18:19
+────────────────────────────────────────────────────────────────────────────────
+❯ 
+────────────────────────────────────────────────────────────────────────────────
+  🤖 Opus 5 1M | 📁 project | 🌿 detached ✓ | ⚡️ 12.9% · 129.1k tokens
+  -- INSERT -- ⏵⏵ bypass permissions on (shift+tab to cycle) · ← 3 agents
+
+--- arquivo de status que o revisor escreveu ---
+working: revisão final iniciada em desconto.py/ENTREGA.md (commit a4ef4bf)
+done: revisão final Não aprovado report=/private/tmp/fm-r3-live.XnOqvm/home/data/r3-rev-final/report.md
+
+--- as nove seções do contrato, produzidas pelo próprio revisor ---
+1:## Veredito
+18:## Resultado Esperado
+31:## O Que Foi Entregue
+54:## Apontamentos
+84:## Cobertura de Requisitos
+93:## Riscos
+102:## Validação
+126:## Avaliação Final
+142:## Prevenção
+
+--- a cópia revisada nunca foi alterada ---
+git status --porcelain no worktree do revisor:
+HEAD do worktree = a4ef4bf518e05cbeb7f8ad9669bed3cc5cf80b0d
+review_head registrado = a4ef4bf518e05cbeb7f8ad9669bed3cc5cf80b0d
