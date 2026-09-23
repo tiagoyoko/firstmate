@@ -79,8 +79,8 @@ fm_agent_process_classify_name() {  # <path> [argv0] -> agent|shell|other
 #            on Linux the exec name, on macOS argv[0] truncated to 16 bytes.
 #   <argv0>  argv[0] as the process reports it - a bare name or an install
 #            path, whichever the launcher used (empty when unknown).
-#   <args>   the flattened command line, read only for the node-bundle
-#            harnesses whose identity sits in argv[1] (bin/fm-gemini-lib.sh).
+#   <args>   the flattened command line, read for the node-bundle identities in
+#            bin/fm-gemini-lib.sh and for Bun whose script operand names omp.
 #   [pid]    when given, lets the Gemini rule read argv boundaries from the
 #            live process instead of the flattened line.
 fm_agent_process_classify() {  # <name> <argv0> <args> [pid] -> agent|shell|other
@@ -103,13 +103,11 @@ fm_agent_process_classify() {  # <name> <argv0> <args> [pid] -> agent|shell|othe
     printf 'agent'
     return 0
   fi
-  # A harness that ships as an interpreter script is named by its script path
-  # and by nothing else: a bun-installed omp reports name and argv[0] `bun`
-  # with args "bun ~/.bun/bin/omp" (verified, omp 18.2.6, macOS). The
-  # session-lock library owns that interpreter rule, so ask it rather than
-  # growing a second copy here; without this a bun-installed omp worker reads
-  # as `other` and its pane is reported ambiguous instead of alive.
-  if [ -n "$args" ] && fm_harness_process_matches "$name" "$args"; then
+  # A bun-installed omp is named only by its script operand; other interpreter
+  # identities remain outside this liveness path.
+  if [ -n "$args" ] &&
+    { [ "${name##*/}" = bun ] || [ "${argv0##*/}" = bun ]; } &&
+    fm_bun_args_are_omp "$args"; then
     printf 'agent'
     return 0
   fi

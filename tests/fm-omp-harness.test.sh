@@ -13,8 +13,9 @@
 # catches vendor drift against a real omp. Neither replaces the other.
 #
 # The load-bearing contracts:
-#   1. omp publishes no marker; the anchored process name `omp` is the ancestry
-#      evidence, and ompd/comp never identify.
+#   1. omp publishes no marker; ancestry accepts the anchored process name
+#      `omp` or a Bun script operand with that exact basename, and decoys never
+#      identify.
 #   2. FM_OMP_HARNESS=omp is a precedence override that needs a real omp
 #      ancestor: it beats an inherited CLAUDECODE under omp and is inert when it
 #      leaks into a worker whose ancestry holds no omp.
@@ -192,6 +193,8 @@ test_lock_identity_and_liveness_classification() {
     || fail "liveness must not classify an omp directory component as an agent"
   [ "$(fm_agent_process_classify bun bun 'bun /workspace/build.ts --output /tmp/omp')" != agent ] \
     || fail "liveness must not classify a later omp argument as an agent"
+  [ "$(fm_agent_process_classify node node 'node /srv/codex/report.js')" != agent ] \
+    || fail "liveness must not classify another interpreter through a harness-shaped path"
   pass "session lock and tmux liveness: omp is anchored, decoys stay out"
 }
 
