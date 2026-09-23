@@ -531,7 +531,7 @@ _fm_status_kind() {
     done < "$meta"
     kind=${kind:-ship}
   fi
-  case "$kind" in ship|scout|secondmate) printf '%s' "$kind" ;; *) printf unknown ;; esac
+  case "$kind" in ship|scout|reviewer|secondmate) printf '%s' "$kind" ;; *) printf unknown ;; esac
 }
 
 _fm_decision_fold_line() {  # <open-set> <status-line> <resolve-verb> <held-verb> <kind>
@@ -549,7 +549,7 @@ _fm_decision_fold_line() {  # <open-set> <status-line> <resolve-verb> <held-verb
   esac
   status_line_verb "$line" verb
   case "$line" in
-    *:*) case "$verb:$kind" in done:ship|done:scout|failed:ship|failed:scout) return 0 ;; esac ;;
+    *:*) case "$verb:$kind" in done:ship|done:scout|done:reviewer|failed:ship|failed:scout|failed:reviewer) return 0 ;; esac ;;
   esac
   case "$verb" in
     needs-decision|blocked|"$resolve"|"$held") ;;
@@ -680,7 +680,7 @@ status_key_closing_verb() {  # <status-file> <key>
   while IFS= read -r line || [ -n "$line" ]; do
     status_line_verb "$line" event
     case "$event:$kind" in
-      done:ship|done:scout|failed:ship|failed:scout) ;;
+      done:ship|done:scout|done:reviewer|failed:ship|failed:scout|failed:reviewer) ;;
       *)
         case "$event" in
           needs-decision|blocked|"$resolve"|"$held") ;;
@@ -811,7 +811,7 @@ _fm_open_decisions_cursor_path() {  # <status-file>
 # Version 4 was already spent on the bracketed-tag parser change above, and a
 # cursor persisted under that reading predates this one, so it must still be
 # discarded and rebuilt from byte 0 under the new reading.
-FM_OPEN_DECISIONS_FOLD_VERSION=8
+FM_OPEN_DECISIONS_FOLD_VERSION=9
 
 # Portable device:inode identity for the rotation/recreation check below.
 _fm_open_decisions_file_ident() {  # <file> -> strongest available identity
