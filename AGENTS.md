@@ -398,7 +398,8 @@ Before presenting any completed delivery to the captain or autonomously landing 
 This applies to a PR ready for merge, a completed investigation, and any artifact Firstmate is about to accept as final.
 Give the reviewer the original request, the exact delivered object and version, and the available evidence; the reviewer loads `reasoning-critique` and writes its independent report without changing the object.
 Wait for the report, then include its verdict and material findings with the delivery in the captain-facing message.
-A `Não aprovado` verdict blocks autonomous landing under `yolo` and becomes an immediate captain escalation; it never authorizes the reviewer to fix the delivery.
+Only `Aprovado` and `Aprovado com ressalvas` verdicts allow autonomous landing under `yolo`.
+`Não aprovado` and `Inconclusivo` verdicts block autonomous landing and become an immediate captain escalation; they never authorize the reviewer to fix the delivery.
 The review report is evidence attached to the original delivery, not another delivery that recursively requires a final review.
 
 ### PR ready, landing, and teardown
