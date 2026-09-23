@@ -597,6 +597,34 @@ test_relaunch_requires_a_note_for_a_ship_task() {
   pass "fm-control relaunch: a ship task refuses without the progress note its replacement needs"
 }
 
+test_reviewer_relaunch_requires_and_records_progress() {
+  local dir out rc brief
+  dir=$(new_case reviewer rl45)
+  add_ship_task "$dir" rl45 claude
+  sed 's/^kind=ship$/kind=reviewer/' "$dir/home/state/rl45.meta" > "$dir/home/state/rl45.meta.new"
+  mv "$dir/home/state/rl45.meta.new" "$dir/home/state/rl45.meta"
+
+  out=$(run_control "$dir" rl45 relaunch); rc=$?
+  expect_code 1 "$rc" "a reviewer relaunch without a note should refuse"
+  assert_contains "$out" "relaunch of a reviewer task requires --note" \
+    "reviewer relaunch refusal did not require the progress note"
+  [ "$(cat "$dir/fake/command")" = claude ] \
+    || fail "a reviewer relaunch refused before progress recording must leave the agent running"
+
+  out=$(run_control "$dir" rl45 relaunch --note "continue the independent evidence review"); rc=$?
+  expect_code 0 "$rc" "a reviewer relaunch with progress should succeed"$'\n'"$out"
+  [ "$(meta_field "$dir" rl45 kind)" = reviewer ] \
+    || fail "reviewer kind did not survive relaunch"
+  [ "$(journal_field "$dir" rl45 kind)" = reviewer ] \
+    || fail "reviewer relaunch journal did not preserve its kind"
+  brief="$dir/home/data/rl45/brief.md"
+  assert_grep "continue the independent evidence review" "$brief" \
+    "reviewer replacement instructions did not receive the progress note"
+  assert_grep "continue the independent evidence review" "$dir/home/state/rl45.control-relaunch.note" \
+    "reviewer relaunch did not preserve the durable progress note"
+  pass "fm-control relaunch: reviewers require and receive durable progress"
+}
+
 # --- 2. harness switch -------------------------------------------------------
 
 test_harness_switch_moves_the_record_and_clears_prior_wiring() {
@@ -1720,6 +1748,7 @@ test_relaunch_serializes_concurrent_durable_metadata_publication
 test_disabled_relaunch_clears_prior_trace_context
 test_relaunch_appends_the_progress_note_to_the_instructions
 test_relaunch_requires_a_note_for_a_ship_task
+test_reviewer_relaunch_requires_and_records_progress
 test_harness_switch_moves_the_record_and_clears_prior_wiring
 test_harness_switch_does_not_carry_the_old_profile_axes
 test_harness_switch_resolves_a_prefixed_recorded_harness

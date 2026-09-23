@@ -38,11 +38,11 @@
 #              axis for the replacement. With no explicit axis, a secondmate
 #              re-resolves its durable config/secondmate-harness pin (harness
 #              plus its optional model and effort tokens) exactly as any other
-#              respawn does, while a ship or scout keeps the exact adapter
+#              respawn does, while a ship, scout, or reviewer keeps the exact adapter
 #              already recorded for it.
 #              A prefixed raw-command basename cannot reconstruct its launch
 #              command, so relaunch requires an explicit --harness for it.
-#              --note is required for a ship or scout, whose replacement
+#              --note is required for a ship, scout, or reviewer, whose replacement
 #              inherits the local copy but none of the conversation; a
 #              secondmate reconciles its own home's records at startup, so its
 #              standing charter is never rewritten.
@@ -767,7 +767,7 @@ safe_checkpoint() {
 }
 
 # record_note: put the required progress note somewhere durable, and - for a
-# ship or scout, whose only record of the interrupted reasoning is the
+# ship, scout, or reviewer, whose only record of the interrupted reasoning is the
 # conversation about to be discarded - into the instructions the replacement
 # actually reads. A secondmate's charter is a durable standing document and is
 # never rewritten: a secondmate reconciles its own home's records at startup,
@@ -778,7 +778,7 @@ record_note() {
   stamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)
   printf '%s\n' "$NOTE" > "$NOTE_FILE"
   case "$KIND" in
-    ship|scout)
+    ship|scout|reviewer)
       cp -p "$RELAUNCH_BRIEF" "$BRIEF_PRIOR" \
         || die "could not preserve task $ID's instructions before recording the progress note"
       {
@@ -807,7 +807,7 @@ do_relaunch() {
   resolve_relaunch_profile
 
   case "$KIND" in
-    ship|scout)
+    ship|scout|reviewer)
       RELAUNCH_BRIEF="$DATA/$ID/brief.md"
       [ -f "$RELAUNCH_BRIEF" ] \
         || die "task $ID has no instructions at $RELAUNCH_BRIEF; refusing to relaunch a worker with nothing to work from"
