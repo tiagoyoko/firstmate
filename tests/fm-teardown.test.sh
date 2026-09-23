@@ -722,7 +722,68 @@ test_final_reviewer_requires_and_preserves_its_report() {
   mkdir -p "$case_dir/data/task-x1"
   printf '%s\n' '# review report' > "$case_dir/data/task-x1/report.md"
   printf '%s\n' 'decisions_reviewed=1' 'decision_keys=' >> "$case_dir/state/task-x1.meta"
-  printf '%s\n' 'done: revisão final Aprovado report=data/task-x1/report.md' \
+  printf '%s\n' "done: revisão final Aprovado report=$case_dir/data/task-x1/report.md" \
+    > "$case_dir/state/task-x1.status"
+  set +e
+  out=$(run_teardown "$case_dir" 2>&1)
+  rc=$?
+  set -e
+  [ "$rc" -ne 0 ] || fail "final-reviewer teardown with an invalid report should refuse"
+  assert_contains "$out" "does not match the canonical reasoning-critique section contract" \
+    "final-reviewer teardown did not reject an invalid serialized report"
+  assert_present "$case_dir/state/task-x1.meta" \
+    "final-reviewer teardown removed task metadata after an invalid report"
+
+  cat > "$case_dir/data/task-x1/report.md" <<'EOF'
+## Veredito
+
+Aprovado
+
+## Resultado Esperado
+
+Resultado esperado.
+
+## O Que Foi Entregue
+
+Entrega observada.
+
+## Apontamentos
+
+Nenhum apontamento material.
+
+## Cobertura de Requisitos
+
+Cobertura conferida.
+
+## Riscos
+
+Nenhum risco material identificado.
+
+## Validação
+
+Validação focada concluída.
+
+## Avaliação Final
+
+Entrega aprovada.
+
+## Prevenção
+
+Nenhuma medida adicional.
+EOF
+  printf '%s\n' "done: revisão final Inconclusivo report=$case_dir/data/task-x1/report.md" \
+    > "$case_dir/state/task-x1.status"
+  set +e
+  out=$(run_teardown "$case_dir" 2>&1)
+  rc=$?
+  set -e
+  [ "$rc" -ne 0 ] || fail "final-reviewer teardown with a mismatched verdict should refuse"
+  assert_contains "$out" "status does not match report verdict 'Aprovado'" \
+    "final-reviewer teardown did not reject a status/report verdict mismatch"
+  assert_present "$case_dir/state/task-x1.meta" \
+    "final-reviewer teardown removed task metadata after a verdict mismatch"
+
+  printf '%s\n' "done: revisão final Aprovado report=$case_dir/data/task-x1/report.md" \
     > "$case_dir/state/task-x1.status"
   run_teardown "$case_dir" >/dev/null \
     || fail "final-reviewer teardown with a completed report should succeed"

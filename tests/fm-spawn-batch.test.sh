@@ -143,8 +143,21 @@ test_scout_batch_refuses_delivery_flags() {
   pass "scout batch refuses ship delivery flags instead of ignoring them"
 }
 
+test_final_reviewer_batch_is_refused() {
+  local out status
+  out=$(run_spawn nope-batch-review-z13=projects/none-a nope-batch-review-z14=projects/none-b --final-reviewer)
+  status=$?
+  [ "$status" -ne 0 ] || fail "a final-reviewer batch should exit non-zero"
+  printf '%s\n' "$out" | grep -F 'batch dispatch does not support --final-reviewer; spawn each final reviewer explicitly' >/dev/null \
+    || fail "final-reviewer batch refusal did not explain the single-review requirement"
+  printf '%s\n' "$out" | grep -F 'batch: FAILED' >/dev/null \
+    && fail "final-reviewer batch dispatched a pair before refusing"
+  pass "batch dispatch refuses final reviewers before spawning any pair"
+}
+
 test_batch_dispatches_every_pair
 test_batch_mode_boundaries
 test_batch_requires_the_shared_delivery_contract
 test_scout_batch_refuses_delivery_flags
+test_final_reviewer_batch_is_refused
 test_projects_path_scoping

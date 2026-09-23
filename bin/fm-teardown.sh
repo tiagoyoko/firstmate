@@ -1449,6 +1449,109 @@ work_is_landed() {
   content_in_default
 }
 
+review_report_headings() {  # <markdown-file>
+  LC_ALL=C awk '
+    {
+      scan = $0
+      spaces = 0
+      while (spaces < 3 && substr(scan, 1, 1) == " ") {
+        scan = substr(scan, 2)
+        spaces++
+      }
+      marker = substr(scan, 1, 1)
+      marker_len = 0
+      if (marker == "`" || marker == "~") {
+        while (substr(scan, marker_len + 1, 1) == marker) marker_len++
+      }
+      if (marker_len >= 3) {
+        if (!in_fence) {
+          in_fence = 1
+          fence_marker = marker
+          fence_len = marker_len
+        } else if (marker == fence_marker && marker_len >= fence_len) {
+          rest = substr(scan, marker_len + 1)
+          if (rest ~ /^[[:space:]]*$/) in_fence = 0
+        }
+        next
+      }
+      if (!in_fence && scan ~ /^#{1,6}[[:space:]]/) {
+        sub(/[[:space:]]+#+[[:space:]]*$/, "", scan)
+        print scan
+      }
+    }
+  ' "$1"
+}
+
+review_report_verdict() {  # <report> <template>
+  local report=$1 template=$2 line choices choice matched= match_len=0 choice_len
+  line=$(LC_ALL=C awk '
+    $0 == "## Veredito" { in_verdict = 1; next }
+    in_verdict && /^#{1,6}[[:space:]]/ { exit }
+    in_verdict && $0 !~ /^[[:space:]]*$/ { print; exit }
+  ' "$report") || return 1
+  line=${line//\*\*/}
+  line=${line#"${line%%[![:space:]]*}"}
+  line=${line%"${line##*[![:space:]]}"}
+  choices=$(LC_ALL=C awk '
+    $0 == "## Veredito" { in_verdict = 1; next }
+    in_verdict && $0 !~ /^[[:space:]]*$/ {
+      value = $0
+      sub(/^\[/, "", value)
+      sub(/,.*$/, "", value)
+      print value
+      exit
+    }
+  ' "$template") || return 1
+  while [ -n "$choices" ]; do
+    case "$choices" in
+      *" / "*) choice=${choices%% / *}; choices=${choices#* / } ;;
+      *) choice=$choices; choices= ;;
+    esac
+    choice=${choice#"${choice%%[![:space:]]*}"}
+    choice=${choice%"${choice##*[![:space:]]}"}
+    [ -n "$choice" ] || continue
+    case "$line" in
+      "$choice"|"$choice "*|"$choice:"*|"$choice."*|"$choice,"*|"$choice;"*)
+        choice_len=${#choice}
+        if [ "$choice_len" -gt "$match_len" ]; then
+          matched=$choice
+          match_len=$choice_len
+        fi
+        ;;
+    esac
+  done
+  [ -n "$matched" ] || return 1
+  printf '%s\n' "$matched"
+}
+
+validate_final_review_report() {  # <report>
+  local report=$1 template expected_headings actual_headings verdict status_line
+  template="$FM_ROOT/.agents/skills/reasoning-critique/assets/relatorio.md"
+  [ -f "$template" ] && [ ! -L "$template" ] && [ -r "$template" ] || {
+    echo "REFUSED: cannot read the canonical reasoning-critique report template at $template." >&2
+    return 1
+  }
+  [ -f "$report" ] && [ ! -L "$report" ] && [ -r "$report" ] || {
+    echo "REFUSED: reviewer task $ID has no readable regular report at $report." >&2
+    return 1
+  }
+  expected_headings=$(review_report_headings "$template") || return 1
+  actual_headings=$(review_report_headings "$report") || return 1
+  if [ "$actual_headings" != "$expected_headings" ]; then
+    echo "REFUSED: reviewer task $ID report does not match the canonical reasoning-critique section contract." >&2
+    return 1
+  fi
+  if ! verdict=$(review_report_verdict "$report" "$template"); then
+    echo "REFUSED: reviewer task $ID report has no valid reasoning-critique verdict." >&2
+    return 1
+  fi
+  status_line="done: revisão final $verdict report=$report"
+  if [ ! -f "$STATE/$ID.status" ] || ! grep -Fqx -- "$status_line" "$STATE/$ID.status"; then
+    echo "REFUSED: reviewer task $ID status does not match report verdict '$verdict' and path $report." >&2
+    return 1
+  fi
+}
+
 # The completion links this teardown already holds locally. A scout or final
 # reviewer delivers its report, a local-only ship lands on local main, and every
 # other ship carries the PR recorded on its own record.
@@ -3218,6 +3321,9 @@ if { [ "$KIND" = scout ] || [ "$KIND" = reviewer ]; } && [ "$FORCE" != "--force"
     echo "REFUSED: $KIND task $ID has no report at $REPORT." >&2
     echo "The report is the work product. Have the worker write it, or use --force after explicit discard approval." >&2
     exit 1
+  fi
+  if [ "$KIND" = reviewer ]; then
+    validate_final_review_report "$REPORT" || exit 1
   fi
   if ! FM_HOME="$FM_HOME" FM_STATE_OVERRIDE="$STATE" FM_DATA_OVERRIDE="$DATA" \
       FM_CONFIG_OVERRIDE="$CONFIG" "$SCRIPT_DIR/fm-captain-hold.sh" verify "$ID" >/dev/null; then
