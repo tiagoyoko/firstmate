@@ -737,6 +737,9 @@ safe_checkpoint() {
   else
     dirty=no
   fi
+  if [ "$KIND" = reviewer ] && [ "$dirty" = yes ]; then
+    die "reviewer $ID's worktree $WT has uncommitted changes; refusing to relaunch before stopping the agent"
+  fi
   CHECKPOINT_LINES+=("worktree_head=$head" "worktree_dirty=$dirty")
   if [ "$KIND" = secondmate ]; then
     # A secondmate's own crewmates outlive its relaunch: they run in their own

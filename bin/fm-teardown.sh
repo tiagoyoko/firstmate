@@ -1570,7 +1570,7 @@ review_report_empty_section() {  # <report>
 }
 
 validate_final_review_report() {  # <report>
-  local report=$1 template expected_headings actual_headings empty_section verdict status_line
+  local report=$1 template expected_headings actual_headings empty_section verdict status_file status_line latest_status_line
   template="$FM_ROOT/.agents/skills/reasoning-critique/assets/relatorio.md"
   [ -f "$template" ] && [ ! -L "$template" ] && [ -r "$template" ] || {
     echo "REFUSED: cannot read the canonical reasoning-critique report template at $template." >&2
@@ -1595,8 +1595,16 @@ validate_final_review_report() {  # <report>
     echo "REFUSED: reviewer task $ID report has no valid reasoning-critique verdict." >&2
     return 1
   fi
+  status_file="$STATE/$ID.status"
   status_line="done: revisão final $verdict report=$report"
-  if [ ! -f "$STATE/$ID.status" ] || ! grep -Fqx -- "$status_line" "$STATE/$ID.status"; then
+  latest_status_line=
+  if [ -f "$status_file" ]; then
+    latest_status_line=$(LC_ALL=C awk '
+      index($0, "done: revisão final ") == 1 { latest = $0 }
+      END { if (latest != "") print latest }
+    ' "$status_file") || return 1
+  fi
+  if [ "$latest_status_line" != "$status_line" ]; then
     echo "REFUSED: reviewer task $ID status does not match report verdict '$verdict' and path $report." >&2
     return 1
   fi

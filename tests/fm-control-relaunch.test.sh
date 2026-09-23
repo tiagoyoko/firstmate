@@ -611,6 +611,17 @@ test_reviewer_relaunch_requires_and_records_progress() {
   [ "$(cat "$dir/fake/command")" = claude ] \
     || fail "a reviewer relaunch refused before progress recording must leave the agent running"
 
+  printf '%s\n' 'reviewer changed the reviewed copy' > "$dir/wt/reviewer-edit.txt"
+  out=$(run_control "$dir" rl45 relaunch --note "continue the independent evidence review"); rc=$?
+  expect_code 1 "$rc" "a dirty reviewer worktree should refuse relaunch"
+  assert_contains "$out" "has uncommitted changes; refusing to relaunch before stopping the agent" \
+    "reviewer relaunch did not reject a modified reviewed copy"
+  [ "$(cat "$dir/fake/command")" = claude ] \
+    || fail "a dirty reviewer refusal must leave the original agent running"
+  assert_absent "$dir/home/state/rl45.control-relaunch" \
+    "a dirty reviewer relaunch created a transaction before refusing"
+  rm "$dir/wt/reviewer-edit.txt"
+
   out=$(run_control "$dir" rl45 relaunch --note "continue the independent evidence review"); rc=$?
   expect_code 0 "$rc" "a reviewer relaunch with progress should succeed"$'\n'"$out"
   [ "$(meta_field "$dir" rl45 kind)" = reviewer ] \
@@ -622,7 +633,7 @@ test_reviewer_relaunch_requires_and_records_progress() {
     "reviewer replacement instructions did not receive the progress note"
   assert_grep "continue the independent evidence review" "$dir/home/state/rl45.control-relaunch.note" \
     "reviewer relaunch did not preserve the durable progress note"
-  pass "fm-control relaunch: reviewers require and receive durable progress"
+  pass "fm-control relaunch: reviewers require progress and a clean reviewed copy"
 }
 
 # --- 2. harness switch -------------------------------------------------------
