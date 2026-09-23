@@ -1,0 +1,18 @@
+SCENARIO real-bun-omp-liveness
+omp_version=omp/18.2.10
+omp_path=/Users/tiagoyoko/.bun/bin/omp
+omp_shebang=#!/usr/bin/env bun
+backend_state=alive
+pane_title=bun
+foreground_comms=bun 
+foreground_args=bun /Users/tiagoyoko/.bun/bin/omp 
+ancestry_verdicts=args omp
+crew_state=state: working · source: pane · harness busy (omp-ext)
+SCENARIO lifecycle-exit
+composer_before_exit=empty
+control_exit=stopped live-omp harness=omp backend=tmux endpoint=probe:fm-live-omp worktree=/var/folders/2y/x61j5d_j3jv19s3b5q392dhc0000gn/T//fm-omp-live.Vr3Iv0/wt
+backend_state_after_exit=dead
+SCENARIO interpreter-decoys
+bun_omp_directory_decoy=ambiguous
+node_codex_directory_decoy=ambiguous
+RESULT all-live-scenarios-passed

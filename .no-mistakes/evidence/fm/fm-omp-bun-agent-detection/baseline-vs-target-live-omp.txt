@@ -1,0 +1,7 @@
+SCENARIO reported-regression-reproduction
+process=bun /Users/tiagoyoko/.bun/bin/omp
+base_commit=0bec88d0e331f454de8db5ab2e2549c5917a5f55
+base_backend_state=ambiguous
+target_commit=7813ae6ba3cab3a90fd7483881567119c9589289
+target_backend_state=alive
+RESULT regression-reproduced-and-fixed
