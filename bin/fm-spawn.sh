@@ -2330,6 +2330,12 @@ case "$LAUNCH" in
     echo "error: refusing Kimi spawn because backend '$BACKEND' has no verified viewport-bounded capture; Kimi 2.0.0 gates a fresh worktree on a trust dialog that can only be answered and confirmed cleared from a scrollback-free read of the live pane" >&2
     exit 1
   }
+  if [ "$KIND" != secondmate ] && [ "$KIND" != reviewer ]; then
+    "$FM_ROOT/bin/fm-kimi-turnend-hook.sh" install || {
+      echo "error: refusing Kimi spawn because the global turn-end hook could not be installed safely" >&2
+      exit 1
+    }
+  fi
   ;;
 esac
 
@@ -3863,7 +3869,7 @@ $paths
 EOF
 }
 reviewer_wiring_collision_check || exit 1
-if [ "$KIND" != secondmate ] \
+if [ "$KIND" = reviewer ] \
   && [ "$(fm_control_harness_family "$HARNESS" 2>/dev/null || true)" = kimi ]; then
   "$FM_ROOT/bin/fm-kimi-turnend-hook.sh" install || {
     echo "error: refusing Kimi spawn because the global turn-end hook could not be installed safely" >&2

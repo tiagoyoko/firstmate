@@ -1934,8 +1934,25 @@ test_orca_cleanup_recovery_never_transitions_the_backlog() {
   id=atomic-orca-cleanup-recovery-b8
   case_dir=$(make_home orca-cleanup-recovery)
   add_item "$case_dir" "$id"
-  write_task_meta "$case_dir" "$id" reviewer no-mistakes "cleanup_recovery=orca"
   meta="$(home_of "$case_dir")/state/$id.meta"
+  fm_write_meta "$meta" \
+    "window=fm-$id" \
+    "endpoint_task_id=$id" \
+    "terminal=term-$id" \
+    "worktree=$case_dir/absent-worktree" \
+    "project=$case_dir/absent-project" \
+    "harness=claude" \
+    "kind=reviewer" \
+    "mode=no-mistakes" \
+    "yolo=off" \
+    "backend=orca" \
+    "orca_worktree_id=wt-$id::/orca/wt-$id" \
+    "cleanup_recovery=orca"
+  cat > "$case_dir/fakebin/orca" <<'SH'
+#!/usr/bin/env bash
+printf '%s\n' '{"ok":true,"result":{}}'
+SH
+  chmod +x "$case_dir/fakebin/orca"
 
   out=$(run_bootstrap "$case_dir")
   [ "$(row_state "$case_dir" "$id")" = queued ] \
