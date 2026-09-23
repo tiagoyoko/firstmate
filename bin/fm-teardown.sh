@@ -69,10 +69,11 @@
 # local-only projects additionally accept work merged into the local default
 # branch (firstmate performs that merge after configured approval) as a fallback
 # for the common case where there is no remote at all.
-# Scout tasks (kind=scout in meta) carve out of that check: their worktree is
-# declared scratch and the report at data/<task-id>/report.md is the work
-# product. Teardown proceeds only once the report exists and the shared
-# unresolved-decision completion gate verifies its captain-held inventory.
+# Report tasks (kind=scout or kind=reviewer in meta) carve out of that check:
+# their worktree is declared scratch and the report at
+# data/<task-id>/report.md is the work product. Teardown proceeds only once the
+# report exists and the shared unresolved-decision completion gate verifies its
+# captain-held inventory.
 # Before destructive cleanup, teardown validates task check artifacts as
 # ordinary single-link files on the state device. It refuses and preserves
 # task state when that proof fails; otherwise it removes the task's check,
@@ -1448,15 +1449,15 @@ work_is_landed() {
   content_in_default
 }
 
-# The completion links this teardown already holds locally. A scout's
-# deliverable is its report, a local-only ship lands on local main, and every
+# The completion links this teardown already holds locally. A scout or final
+# reviewer delivers its report, a local-only ship lands on local main, and every
 # other ship carries the PR recorded on its own record.
 BACKLOG_DONE_ARGS=()
 backlog_done_args() {
   local data_relative
   BACKLOG_DONE_ARGS=()
   case "$KIND" in
-    scout)
+    scout|reviewer)
       data_relative=$(fm_backlog_data_relative "$DATA") || return 1
       BACKLOG_DONE_ARGS=(--report "$data_relative/$ID/report.md")
       ;;
@@ -1716,7 +1717,7 @@ validate_worktree_teardown_safety() {
   [ -d "$WT" ] || return 0
   [ "$FORCE" != "--force" ] || return 0
   case "$KIND" in
-    secondmate|scout) return 0 ;;
+    secondmate|scout|reviewer) return 0 ;;
   esac
 
   if ! dirty_raw=$(git -C "$WT" status --porcelain 2>/dev/null); then
@@ -3211,17 +3212,17 @@ if [ "$KIND" = secondmate ] && [ "$FORCE" = "--force" ]; then
   cleanup_firstmate_home_children "$HOME_PATH" || exit $?
 fi
 
-if [ "$KIND" = scout ] && [ "$FORCE" != "--force" ]; then
+if { [ "$KIND" = scout ] || [ "$KIND" = reviewer ]; } && [ "$FORCE" != "--force" ]; then
   REPORT="$DATA/$ID/report.md"
   if [ ! -f "$REPORT" ]; then
-    echo "REFUSED: scout task $ID has no report at $REPORT." >&2
-    echo "The report is the work product. Have the crewmate write it, or use --force after explicit discard approval." >&2
+    echo "REFUSED: $KIND task $ID has no report at $REPORT." >&2
+    echo "The report is the work product. Have the worker write it, or use --force after explicit discard approval." >&2
     exit 1
   fi
   if ! FM_HOME="$FM_HOME" FM_STATE_OVERRIDE="$STATE" FM_DATA_OVERRIDE="$DATA" \
       FM_CONFIG_OVERRIDE="$CONFIG" "$SCRIPT_DIR/fm-captain-hold.sh" verify "$ID" >/dev/null; then
-    echo "REFUSED: scout task $ID has not passed the captain-call completion gate." >&2
-    echo "Inventory its report and any visual review through bin/fm-captain-hold.sh before teardown." >&2
+    echo "REFUSED: $KIND task $ID has not passed the captain-call completion gate." >&2
+    echo "Inventory its report through bin/fm-captain-hold.sh before teardown." >&2
     exit 1
   fi
 fi
@@ -3264,7 +3265,7 @@ if [ -n "$X_REQUEST" ]; then
   echo "warning: task $ID still carries an unreconciled Relay request link ($X_REQUEST) on its task record." >&2
 fi
 
-if [ "$BACKEND" = orca ] && [ "$KIND" != scout ] && [ "$KIND" != secondmate ] && [ "$FORCE" != "--force" ]; then
+if [ "$BACKEND" = orca ] && [ "$KIND" != scout ] && [ "$KIND" != reviewer ] && [ "$KIND" != secondmate ] && [ "$FORCE" != "--force" ]; then
   if ! inspectable_git_worktree "$WT"; then
     echo "REFUSED: Orca ship task $ID has no inspectable git worktree at ${WT:-<missing>}." >&2
     echo "Cannot verify dirty or unlanded work; restore the worktree path or get explicit OK to discard, then --force." >&2
@@ -3439,7 +3440,7 @@ elif [ -d "$WT" ] && [ "$KIND" != secondmate ]; then
   # the project. teardown_treehouse_return tolerates transient and stale git locks
   # left by a killed crew process; see the script header for retry and stale-lock proof.
   post_lock_cleanup_check=
-  if [ "$FORCE" != "--force" ] && [ "$KIND" != scout ] && [ "$KIND" != secondmate ]; then
+  if [ "$FORCE" != "--force" ] && [ "$KIND" != scout ] && [ "$KIND" != reviewer ] && [ "$KIND" != secondmate ]; then
     post_lock_cleanup_check=validate_worktree_teardown_safety
   fi
   teardown_treehouse_return "$WT" "$PROJ" "worktree" "$post_lock_cleanup_check" || {
@@ -3611,7 +3612,7 @@ else
 fi
 fm_lock_release "$META_LOCK"
 META_LOCK_HELD=0
-if [ "$KIND" != scout ] && [ "$KIND" != secondmate ] && [ "$MODE" != local-only ]; then
+if [ "$KIND" != scout ] && [ "$KIND" != reviewer ] && [ "$KIND" != secondmate ] && [ "$MODE" != local-only ]; then
   "$FM_ROOT/bin/fm-fleet-sync.sh" "$PROJ" || true
 fi
 # A secondmate retirement may remove the home containing an overridden control

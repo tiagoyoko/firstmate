@@ -3,19 +3,22 @@
 # secondmate in its isolated firstmate home.
 # Usage: fm-spawn.sh <task-id> <project-dir> --mode <no-mistakes|direct-PR|local-only> --yolo <on|off> [--harness <name>|harness|launch-command] [--model <name>] [--effort <level>] [--backend <name>]
 #        fm-spawn.sh <task-id> <project-dir> --scout [--harness <name>|harness|launch-command] [--model <name>] [--effort <level>] [--backend <name>]
+#        fm-spawn.sh <task-id> <project-dir> --final-reviewer [--harness <name>|harness|launch-command] [--model <name>] [--effort <level>] [--backend <name>]
 #        fm-spawn.sh <task-id> [<firstmate-home>] [--harness <name>|harness|launch-command] [--model <name>] [--effort <level>] [--backend <name>] --secondmate
 #   --mode and --yolo are this task's delivery contract, REQUIRED for every ship
-#   spawn and refused on --scout and --secondmate spawns. Firstmate resolves both
-#   per task at intake (AGENTS.md section 7); data/projects.md holds the captain's
-#   standing posture as context, not as this task's answer, so a spawn never looks
-#   the mode up. A ship spawn additionally reads the brief's recorded
-#   "Delivery contract: mode=<mode>" line and REFUSES a mismatch, so the worker's
-#   instructions and the recorded task delivery cannot drift apart; a brief
-#   scaffolded before that line existed warns once and launches on the flag. A
-#   ship or scout spawn also refuses leftover `{TASK}` / `{FIRSTMATE_SPEC}`
-#   placeholders, an empty Task, an incomplete pair of Task subsections, or a
-#   `## Captain's intent` line opening with a Captain label or address.
-#   Every ship or scout spawn renders `launch-brief.md`; for a no-mistakes ship
+#   spawn and refused on --scout, --final-reviewer, and --secondmate spawns.
+#   Firstmate resolves both per task at intake (AGENTS.md section 7);
+#   data/projects.md holds the captain's standing posture as context, not as this
+#   task's answer, so a spawn never looks the mode up. A ship spawn additionally
+#   reads the brief's recorded "Delivery contract: mode=<mode>" line and REFUSES
+#   a mismatch, so the worker's instructions and the recorded task delivery
+#   cannot drift apart; a brief
+#   scaffolded before that line existed warns once and launches on the flag.
+#   A ship, scout, or final-reviewer spawn also refuses leftover `{TASK}` /
+#   `{FIRSTMATE_SPEC}` placeholders, an empty Task, an incomplete pair of Task
+#   subsections, or a `## Captain's intent` line opening with a Captain label or
+#   address. Every ship, scout, and final-reviewer spawn renders
+#   `launch-brief.md`; for a no-mistakes ship
 #   it also carries the current `--intent` contract and the extracted captain
 #   intent. A legacy mixed Task is accepted there only under bin/fm-dod-lib.sh's
 #   provenance-marking rules; unmarked legacy Tasks stop for migration rather
@@ -24,10 +27,10 @@
 #   loud one-line deviation notice is printed and the spawn continues.
 #   no-mistakes-prod-only is a registry policy rather than a task mode and is
 #   refused as a flag value.
-#   Ship/scout launches always put fm-dod-lib.sh's current worker role scope
-#   first in the private launch-brief overlay, including the exact task-owned
-#   steering inbox. This never rewrites a project's instruction files or a
-#   secondmate's charter.
+#   Worker launches always put fm-dod-lib.sh's current worker role scope first
+#   in the private launch-brief overlay, including the exact task-owned steering
+#   inbox. This never rewrites a project's instruction files or a secondmate's
+#   charter.
 #        fm-spawn.sh <task-id> --relaunch [--harness <name>] [--model <name>] [--effort <level>]
 #   --relaunch launches a replacement agent for an EXISTING task into that
 #   task's own recorded endpoint and worktree instead of creating either. It is
@@ -36,15 +39,16 @@
 #   transaction; call fm-control rather than this flag directly unless you are
 #   deliberately re-launching an already-stopped task. Every identity axis -
 #   backend, kind, project or home, worktree, endpoint - comes from the task's
-#   validated state/<id>.meta, so --backend, --scout, --secondmate, a project
-#   positional, and batch pairs are all refused alongside it; only harness,
-#   model, and effort may change, which is what makes a harness switch one
-#   ordinary relaunch. It refuses unless the recorded endpoint is positively
-#   agent-free on a backend with a recovery-grade agent-state classifier (tmux
-#   or herdr), and clears the previous harness's per-task wiring before arming
-#   the new incarnation. The replacement still never starts outside the copy
-#   holding the work: a Herdr shell that has drifted out of the recorded
-#   worktree is told once to return, and only a shell that will not go refuses.
+#   validated state/<id>.meta, so --backend, --scout, --final-reviewer,
+#   --secondmate, a project positional, and batch pairs are all refused alongside
+#   it; only harness, model, and effort may change, which is what makes a harness
+#   switch one ordinary relaunch. It refuses unless the recorded endpoint is
+#   positively agent-free on a backend with a recovery-grade agent-state
+#   classifier (tmux or herdr), and clears the previous harness's per-task
+#   wiring before arming the new incarnation. The replacement still never starts
+#   outside the copy holding the work: a Herdr shell that has drifted out of the
+#   recorded worktree is told once to return, and only a shell that will not go
+#   refuses.
 #   --harness <name> is the explicit per-spawn harness/profile adapter. The old
 #   positional harness arg still works for back-compat.
 #   --model <name> and --effort <low|medium|high|xhigh|max|ultra> are concrete profile
@@ -63,9 +67,9 @@
 #   then tmux.
 #   Spawn-capable backends are the reference tmux adapter and experimental
 #   herdr, zellij, orca, and cmux. Orca owns both the task worktree and
-#   terminal, so ship/scout Orca spawns do not run treehouse get; cmux is a
-#   session provider only, exactly like herdr/zellij, so it does. An
-#   auto-detected herdr or cmux spawn prints a loud stderr notice;
+#   terminal, so worktree-task Orca spawns do not run treehouse get; cmux is a
+#   session provider only, exactly like herdr/zellij, so it does.
+#   An auto-detected herdr or cmux spawn prints a loud stderr notice;
 #   auto-detected tmux stays silent; zellij and orca are never auto-detected.
 #   codex-app is not a known backend yet; docs/codex-app-backend.md owns that
 #   blocked backend contract. Default tmux spawns do not write backend= to meta;
@@ -73,8 +77,8 @@
 #   A backend spawn refusal (missing dependency, version gate, unauthenticated
 #   socket, or unsupported secondmate mode) is terminal for that selected backend;
 #   callers must surface it instead of silently retrying another backend.
-#   A herdr crewmate or scout is placed in the exact workspace of the firstmate
-#   or secondmate process launching it, resolved from that process's own herdr
+#   A Herdr worktree worker is placed in the exact workspace of the firstmate or
+#   secondmate process launching it, resolved from that process's own Herdr
 #   pane rather than from a workspace label (herdr enforces no label uniqueness,
 #   so a label cannot tell two "firstmate" workspaces apart). A claimed parent
 #   identity that is unreadable, contradictory, stale, or from another herdr
@@ -129,10 +133,11 @@
 #   fm_firstmate_root_home resolves, so a home seeded from another machine anchors
 #   that lock itself rather than failing to resolve one;
 #   contention refuses rather than waits.
-#   With no harness arg, a crewmate/scout spawn resolves the CREW harness only when
-#   config/crew-dispatch.json is absent. When that file exists, crewmate/scout
-#   spawns require an explicit harness so firstmate cannot silently skip dispatch
-#   profile consultation. A --secondmate spawn is exempt and resolves the SECONDMATE
+#   With no harness arg, a non-secondmate spawn resolves the CREW harness only
+#   when config/crew-dispatch.json is absent. When that file exists,
+#   non-secondmate spawns require an explicit harness so firstmate cannot silently
+#   skip dispatch profile consultation. A --secondmate spawn is exempt and
+#   resolves the SECONDMATE
 #   harness (config/secondmate-harness -> config/crew-harness -> own), so the
 #   secondmate-vs-crewmate split is DURABLE across every respawn (recovery,
 #   /updatefirstmate, restart). A bare adapter name (claude|codex|opencode|pi|pi-signed|grok|kimi|cursor|gemini|muse|rovo|omp|agy)
@@ -159,7 +164,7 @@
 #   only when that provider appears in the listing; a provider absent from the
 #   listing (an extension-registered provider such as claude-bridge, which omp
 #   never lists) passes through unvalidated with a stderr notice, and a bare
-#   fuzzy pattern is left to omp's own matcher. A crewmate or scout loads its
+#   fuzzy pattern is left to omp's own matcher. A worktree worker loads its
 #   per-task busy-state extension with -e from state/ (outside the worktree, so
 #   auto-discovery cannot load it a second time); a secondmate passes no -e at
 #   all and relies on omp auto-discovering the home's tracked .omp/extensions/
@@ -179,13 +184,14 @@
 #   secondmate receives the primary's read-only shared captain-preference file
 #   (fm-config-inherit-lib.sh). A successful launch clears pending inherited
 #   config reread generations because the new agent reads the converged files.
-#   --scout records kind=scout in the task's meta (report deliverable, scratch worktree;
-#   see AGENTS.md task lifecycle); --secondmate records kind=secondmate and launches in a
-#   provisioned firstmate home; the default is kind=ship.
+#   --scout records kind=scout and --final-reviewer records kind=reviewer in the
+#   task's meta; both deliver a report from a scratch worktree. --secondmate
+#   records kind=secondmate and launches in a provisioned firstmate home; the
+#   default is kind=ship.
 #   Before a secondmate launch, the home is fast-forwarded to the primary's
 #   default-branch commit when safe: directly for a local home, or through the
 #   configured host for a remote home. Skipped syncs warn and launch unchanged.
-#   Ship/scout spawns refuse to launch unless the resolved task path is a real
+#   Worktree-task spawns refuse to launch unless the resolved task path is a real
 #   git worktree root distinct from both the spawning project and its repository's
 #   primary checkout, including when the spawning project is a linked worktree.
 #   On the backends that discover that path by reading the task pane's own cwd,
@@ -195,13 +201,13 @@
 #   itself a linked worktree of the project repository still launches. A pane
 #   that never reaches an isolated worktree refuses at the end of that wait,
 #   naming the last path seen and why it was rejected.
-#   That placement is proven only at launch. Every ship or scout pane therefore
+#   That placement is proven only at launch. Every worktree worker pane therefore
 #   also receives `export FM_TASK_ID=<task-id>` before the launch command, on
 #   the same channel as GOTMPDIR, and bin/fm-test-run.sh refuses to execute the
 #   behavior suite from the repository primary checkout while that marker is
 #   set (its header owns the refusal). A secondmate runs in its own home and is
 #   not marked.
-#   Only after this isolation check, every fresh ship or scout requires a clean
+#   Only after this isolation check, every fresh worktree task requires a clean
 #   task worktree. When an origin configuration is detected, spawn fetches it,
 #   resolves the current remote default branch, and resets to its tip. When none
 #   is detected, spawn skips that remote freshness check and launches from the
@@ -219,19 +225,19 @@
 #   usable offline; a stale remote-tracking ref can therefore make an unpushed
 #   commit look contained, which is exactly why no remedy command is printed.
 # Batch dispatch: pass one or more `id=repo` pairs instead of a single <id> <project>, e.g.
-#     fm-spawn.sh fix-a-k3=projects/foo add-b-q7=projects/bar [--scout]
+#     fm-spawn.sh fix-a-k3=projects/foo add-b-q7=projects/bar [--scout|--final-reviewer]
 #   Each pair re-execs this script in single-task mode, so the single path stays the only
-#   source of truth; shared --scout/--harness/--model/--effort/--backend/--mode/--yolo
-#   applies to every pair. A ship batch therefore carries one delivery contract, and each
+#   source of truth; the selected role and shared harness/model/effort/backend/mode/yolo
+#   apply to every pair. A ship batch therefore carries one delivery contract, and each
 #   pair still checks it against its own brief; a batch spanning modes is two invocations.
-#   If config/crew-dispatch.json exists, shared --harness is required for crewmate
-#   and scout batches. The loop lives here, in bash, so callers never hand-write a
+#   If config/crew-dispatch.json exists, shared --harness is required for worktree-task
+#   batches. The loop lives here, in bash, so callers never hand-write a
 #   multi-task shell loop (the tool shell is zsh, which does not word-split unquoted
 #   $vars and silently breaks ad-hoc `for ... in $pairs` loops).
 # Launch environment (config/launch-env-allowlist):
 #   Absent means unchanged ambient inheritance. A present readable regular file
-#   opts every launch (ship, scout, secondmate, raw command, and relaunch) into
-#   /usr/bin/env -i followed by /bin/sh -c of the existing launch command.
+#   opts every launch (ship, scout, final reviewer, secondmate, raw command, and
+#   relaunch) into /usr/bin/env -i followed by /bin/sh -c of the existing launch command.
 #   Each line is one POSIX environment name, never a value or shell expression;
 #   blank lines and lines beginning with # are ignored. Invalid input refuses
 #   before launch, as do path inspection errors such as inaccessible config
@@ -244,7 +250,7 @@
 #   TMUX TMUX_PANE HERDR_ENV HERDR_SESSION HERDR_SOCKET_PATH HERDR_PANE_ID
 #   CMUX_WORKSPACE_ID CMUX_SURFACE_ID CMUX_TAB_ID CMUX_PANEL_ID CMUX_SOCKET_PATH
 #   ZELLIJ ZELLIJ_SESSION_NAME ZELLIJ_PANE_ID FM_ZELLIJ_SESSION, plus the task
-#   marker FM_TASK_ID that ship and scout panes receive above.
+#   marker FM_TASK_ID that every worktree worker pane receives above.
 #   An enabled task trace also retains TRACEPARENT. Explicit Firstmate launch
 #   assignments still apply inside the filtered environment. Raw commands must
 #   be POSIX sh compatible under this opt-in; the absent-file path is unchanged.
@@ -253,8 +259,8 @@
 #   See docs/configuration.md for provider/Git setup and supported limits.
 # Claude permission mode (config/claude-permission-mode):
 #   One token selecting the permission flag every claude launch (ship, scout,
-#   secondmate, and relaunch) carries. Absent or `bypass` keeps today's
-#   `--dangerously-skip-permissions`; `auto` launches with `--permission-mode
+#   final reviewer, secondmate, and relaunch) carries. Absent or `bypass` keeps
+#   today's `--dangerously-skip-permissions`; `auto` launches with `--permission-mode
 #   auto` instead, Claude Code's classifier-reviewed mode, for a captain who
 #   refuses to run workers in bypass mode. Every other part of the claude launch
 #   is unchanged. The token is the file's whitespace-trimmed content; any other
@@ -345,22 +351,21 @@
 # Publishing the record and moving this home's backlog item to In flight are one
 # step, not two: bin/fm-backlog-transition-lib.sh owns that invariant, and this
 # script performs the transition under the task's own meta lock before it reports
-# success. A ship or scout dispatch therefore REFUSES up front, before any
+# success. A worktree-task dispatch therefore REFUSES up front, before any
 # endpoint, worktree, or record exists, unless the home's backlog has an
 # unheld, unblocked Queued or In flight item for the id; a transition that fails
 # after publication removes the record it just wrote rather than leaving a
 # worker the backlog does not own. A relaunch re-reads the row instead of
 # re-running the transition, so an eligible In-flight item is left untouched.
-# The transition is
-# skipped entirely for --secondmate spawns (persistent agents are not work
-# items), on a config/backlog-backend=manual home, and in a markdown home that
-# keeps no data/backlog.md. A configured non-markdown adapter remains
-# active without a markdown file; any active automatic backend without
-# compatible tasks-axi refuses before creating lifecycle state.
-# On success prints: spawned <id> harness=<name> kind=<ship|scout|secondmate> [mode=<mode> yolo=<on|off>] window=<backend-target> worktree=<path>
-# A ship task records the explicit mode/yolo it was passed; a secondmate spawn records
-# mode=secondmate, yolo=off, home=, and projects=; a scout records neither, and both the
-# success line and state/<id>.meta omit them.
+# The transition is skipped entirely for --secondmate spawns (persistent agents
+# are not work items), on a config/backlog-backend=manual home, and in a markdown
+# home that keeps no data/backlog.md. A configured non-markdown adapter remains
+# active without a markdown file; any active automatic backend without compatible
+# tasks-axi refuses before creating lifecycle state.
+# On success prints: spawned <id> harness=<name> kind=<ship|scout|reviewer|secondmate> [mode=<mode> yolo=<on|off>] window=<backend-target> worktree=<path>
+# A ship task records the explicit mode/yolo it was passed; a secondmate spawn
+# records mode=secondmate, yolo=off, home=, and projects=; scouts and final
+# reviewers record neither, so the success line and state/<id>.meta omit them.
 # Every fresh spawn or relaunch records a new spawn_gen= incarnation token so durable
 # consumers can distinguish a replacement worker that reuses the same task id.
 # When the home session's frozen trace-context decision is enabled (see
@@ -586,10 +591,26 @@ for a in "$@"; do
   fi
   case "$a" in
   --scout)
+    [ "$KIND_SET" -eq 0 ] || {
+      echo "error: role flags are mutually exclusive; choose one of --scout, --final-reviewer, or --secondmate" >&2
+      exit 1
+    }
     KIND=scout
     KIND_SET=1
     ;;
+  --final-reviewer)
+    [ "$KIND_SET" -eq 0 ] || {
+      echo "error: role flags are mutually exclusive; choose one of --scout, --final-reviewer, or --secondmate" >&2
+      exit 1
+    }
+    KIND=reviewer
+    KIND_SET=1
+    ;;
   --secondmate)
+    [ "$KIND_SET" -eq 0 ] || {
+      echo "error: role flags are mutually exclusive; choose one of --scout, --final-reviewer, or --secondmate" >&2
+      exit 1
+    }
     KIND=secondmate
     KIND_SET=1
     ;;
@@ -695,7 +716,7 @@ if [ "$RELAUNCH" -eq 1 ]; then
     exit 1
   }
   [ "$KIND_SET" -eq 0 ] || {
-    echo "error: --relaunch reuses the task's recorded kind; --scout/--secondmate cannot override it" >&2
+    echo "error: --relaunch reuses the task's recorded kind; --scout/--final-reviewer/--secondmate cannot override it" >&2
     exit 1
   }
   [ "$MODE_SET" -eq 0 ] || {
@@ -709,8 +730,9 @@ if [ "$RELAUNCH" -eq 1 ]; then
 else
   # Delivery contract (AGENTS.md section 7). A ship task's mode and yolo are
   # firstmate's per-task decision, so they are required and closed-set validated
-  # here rather than resolved from the project registry. Scouts deliver a report
-  # and record no delivery posture; secondmate spawns hardcode theirs.
+  # here rather than resolved from the project registry. Scouts and final
+  # reviewers deliver reports and record no delivery posture; secondmate spawns
+  # hardcode theirs.
   if [ "$KIND" = ship ]; then
     [ "$MODE_SET" -eq 1 ] || {
       echo "error: ship spawns require --mode <no-mistakes|direct-PR|local-only>; resolve it at intake from the captain's instruction and the project's registered posture in data/projects.md" >&2
@@ -740,11 +762,11 @@ else
     esac
   else
     [ "$MODE_SET" -eq 0 ] || {
-      echo "error: --mode applies only to ship spawns; a scout delivers a report and a secondmate records its own fixed posture" >&2
+      echo "error: --mode applies only to ship spawns; scouts and final reviewers deliver reports, and a secondmate records its own fixed posture" >&2
       exit 1
     }
     [ "$YOLO_SET" -eq 0 ] || {
-      echo "error: --yolo applies only to ship spawns; a scout delivers a report and a secondmate records its own fixed posture" >&2
+      echo "error: --yolo applies only to ship spawns; scouts and final reviewers deliver reports, and a secondmate records its own fixed posture" >&2
       exit 1
     }
   fi
@@ -1325,6 +1347,11 @@ if [ "${#POS[@]}" -gt 0 ] && [ "${POS[0]}" != "$idpart" ] && case "$idpart" in *
       continue
     elif [ "$KIND" = scout ]; then
       if FM_SPAWN_NO_GUARD=1 "$FM_ROOT/bin/fm-spawn.sh" "${pair%%=*}" "${pair#*=}" "${shared_args[@]+"${shared_args[@]}"}" --scout; then :; else
+        echo "batch: FAILED to spawn ${pair%%=*} (${pair#*=})" >&2
+        rc=1
+      fi
+    elif [ "$KIND" = reviewer ]; then
+      if FM_SPAWN_NO_GUARD=1 "$FM_ROOT/bin/fm-spawn.sh" "${pair%%=*}" "${pair#*=}" "${shared_args[@]+"${shared_args[@]}"}" --final-reviewer; then :; else
         echo "batch: FAILED to spawn ${pair%%=*} (${pair#*=})" >&2
         rc=1
       fi
@@ -2561,7 +2588,7 @@ fi
   echo "error: task $ID has no brief at inaccessible data path $BRIEF" >&2
   exit 1
 }
-if [ "$KIND" = ship ] || [ "$KIND" = scout ]; then
+if [ "$KIND" = ship ] || [ "$KIND" = scout ] || [ "$KIND" = reviewer ]; then
   if fm_brief_task_placeholders_present "$BRIEF"; then
     echo "error: $BRIEF still contains {TASK} or {FIRSTMATE_SPEC}; fill ## Captain's intent and ## Firstmate spec before spawn" >&2
     exit 1
@@ -4151,15 +4178,15 @@ fi
 
 # Delivery posture recorded in meta so fm-teardown's safety check and the
 # validate/merge stages can branch on it. A ship task carries the explicit
-# per-task decision validated above; a secondmate's posture is fixed; a scout
-# records none at all, because its deliverable is a report rather than a merge
-# (fm-teardown.sh defaults an absent mode to no-mistakes, and fm-promote.sh
-# requires an explicit mode when a scout is promoted to a ship task).
+# per-task decision validated above; a secondmate's posture is fixed; scouts and
+# final reviewers record none because their deliverable is a report rather than
+# a merge. fm-teardown.sh defaults an absent mode to no-mistakes, while
+# fm-promote.sh accepts only a scout and requires an explicit mode there.
 if [ "$KIND" = secondmate ]; then
   MODE=secondmate
   YOLO=off
   : "${SECONDMATE_PROJECTS:=}"
-elif [ "$KIND" = scout ]; then
+elif [ "$KIND" = scout ] || [ "$KIND" = reviewer ]; then
   MODE=
   YOLO=
 fi
@@ -4470,7 +4497,7 @@ spawn_send_text_line "$T" "export GOTMPDIR=$TASK_TMP/gotmp"
 # ones assigned an isolated worktree; a secondmate runs its own home instead.
 # The id reached a validated bare-slug charset above, so it carries no shell
 # syntax of its own.
-if [ "$KIND" = ship ] || [ "$KIND" = scout ]; then
+if [ "$KIND" = ship ] || [ "$KIND" = scout ] || [ "$KIND" = reviewer ]; then
   spawn_send_text_line "$T" "export FM_TASK_ID=$ID"
 fi
 # Send through the exact channel that already ships GOTMPDIR, so every backend

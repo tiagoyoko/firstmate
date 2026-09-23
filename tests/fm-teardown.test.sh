@@ -704,6 +704,35 @@ test_local_only_fork_remote_allows() {
   pass "local-only worktree with HEAD on a fork remote is torn down and the home summary is refreshed"
 }
 
+test_final_reviewer_requires_and_preserves_its_report() {
+  local case_dir out rc
+  case_dir=$(make_case reviewer-report)
+  write_meta "$case_dir" no-mistakes reviewer
+
+  set +e
+  out=$(run_teardown "$case_dir" 2>&1)
+  rc=$?
+  set -e
+  [ "$rc" -ne 0 ] || fail "final-reviewer teardown without a report should refuse"
+  assert_contains "$out" "reviewer task task-x1 has no report" \
+    "final-reviewer teardown did not name its missing deliverable"
+  assert_present "$case_dir/state/task-x1.meta" \
+    "final-reviewer teardown removed task metadata without its report"
+
+  mkdir -p "$case_dir/data/task-x1"
+  printf '%s\n' '# review report' > "$case_dir/data/task-x1/report.md"
+  printf '%s\n' 'decisions_reviewed=1' 'decision_keys=' >> "$case_dir/state/task-x1.meta"
+  printf '%s\n' 'done: revisão final Aprovado report=data/task-x1/report.md' \
+    > "$case_dir/state/task-x1.status"
+  run_teardown "$case_dir" >/dev/null \
+    || fail "final-reviewer teardown with a completed report should succeed"
+  assert_absent "$case_dir/state/task-x1.meta" \
+    "completed final-reviewer teardown retained task metadata"
+  assert_present "$case_dir/data/task-x1/report.md" \
+    "completed final-reviewer teardown removed its durable report"
+  pass "fm-teardown: final reviewers require and preserve their report deliverable"
+}
+
 test_teardown_closes_the_backlog_item_itself() {
   local case_dir out
   case_dir=$(make_case tasks-axi-close)
@@ -3666,6 +3695,7 @@ EOF
   pass "the run abort and the leaked-process reap both complete before the destructive worktree return"
 }
 
+test_final_reviewer_requires_and_preserves_its_report
 test_local_only_fork_remote_allows
 test_teardown_closes_the_backlog_item_itself
 test_teardown_manual_backend_leaves_the_backlog_to_the_operator

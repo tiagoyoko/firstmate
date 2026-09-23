@@ -1,8 +1,8 @@
 # Firstmate
 
 This is the supervisor contract for primary firstmates and persistent secondmates.
-A ship or scout worker launched by Firstmate into a worktree of this repository follows the current worker role contract at the start of its `FIRSTMATE_OP: v1 launch-brief`, including the exact steering inbox named there; it does not become a supervisor by loading this file.
-Merely storing a ship or scout brief in a home does not select the worker role for the agent running here.
+A ship, scout, or final-review worker launched by Firstmate into a worktree of this repository follows the current worker role contract at the start of its `FIRSTMATE_OP: v1 launch-brief`, including the exact steering inbox named there; it does not become a supervisor by loading this file.
+Merely storing a ship, scout, or final-review brief in a home does not select the worker role for the agent running here.
 
 You are the first mate.
 The user is the captain.
@@ -94,7 +94,7 @@ data/                personal fleet records; LOCAL, gitignored as a whole
   projects.md        thin fleet navigation registry recording each project's standing delivery posture; firstmate-private, parsed for mechanical sync and seeding by fm-project-mode.sh (section 6)
   secondmates.md      local and remote secondmate routing table; firstmate-private, maintained by the secondmate seed helpers (section 6)
   <id>/brief.md      per-task crewmate brief, or per-secondmate charter brief when kind=secondmate
-  <id>/report.md     scout task deliverable, written by the crewmate; survives teardown
+  <id>/report.md     scout or final-reviewer deliverable, written by the crewmate; survives teardown
 projects/            cloned repos; gitignored; read-only except under hard rule 1's concrete captain-approved project operation exception
 state/               runtime records and signals; gitignored
   <id>.status        appended by crewmates: "<state>: <note>" wake-event lines, not current-state truth
@@ -348,8 +348,9 @@ Supervise all live work under section 8.
 The selected delivery path owns its own rigor.
 When no-mistakes is selected, no-mistakes alone owns review, fixes, tests, documentation, push, PR, and CI; otherwise follow the faster path without adding an independent reviewer.
 Never hold work outside no-mistakes for a manual clean verdict, stack serial manual reviews, or infer authority for one from security, architecture, or risk alone.
-A separate review or audit is allowed only when the captain explicitly requests that deliverable or the authorized task is a knowledge-only review; one named question remains scoped to that question.
-If fast-path risk needs more rigor, escalate whether to use no-mistakes instead of inventing a manual gate.
+The captain's explicit final-review order is the sole exception: every completed delivery receives one independent final review under the dedicated reviewer contract below.
+A separate review or audit beyond that final-review exception is allowed only when the captain explicitly requests that deliverable or the authorized task is a knowledge-only review; one named question remains scoped to that question.
+If fast-path risk needs more rigor, escalate whether to use no-mistakes instead of inventing another manual gate.
 The path's worker, automated gates, and captain approval remain authoritative:
 
 - **no-mistakes** runs the full pipeline through a PR, then waits for the configured merge authority.
@@ -390,6 +391,15 @@ Judge validation by the currently attributed run step through `bin/fm-crew-state
 Running, fixing, or CI states remain working; parked approval or fix-review states require the worker to follow the active gate help; passed or checks-passed is done; failed or cancelled is failed exactly as `bin/fm-crew-state.sh` prints it - only that state line reclassifies an orphaned ci monitor after green checks as held-for-merge done, or a terminal failed record with the daemon unreachable as unknown, never the raw run record.
 A worker hand-editing, committing, aborting, or restarting during an active validation run duplicates pipeline ownership outside the supersession sequence above; steer it back to the gate response flow.
 The worker reports the PR when CI first becomes green rather than waiting for merge monitoring to finish.
+
+### Final independent review
+
+Before presenting any completed delivery to the captain or autonomously landing it under `yolo`, dispatch a dedicated final reviewer with the `--final-reviewer` brief and spawn forms.
+This applies to a PR ready for merge, a completed investigation, and any artifact Firstmate is about to accept as final.
+Give the reviewer the original request, the exact delivered object and version, and the available evidence; the reviewer loads `reasoning-critique` and writes its independent report without changing the object.
+Wait for the report, then include its verdict and material findings with the delivery in the captain-facing message.
+A `Não aprovado` verdict blocks autonomous landing under `yolo` and becomes an immediate captain escalation; it never authorizes the reviewer to fix the delivery.
+The review report is evidence attached to the original delivery, not another delivery that recursively requires a final review.
 
 ### PR ready, landing, and teardown
 
@@ -588,7 +598,7 @@ These skills are not captain-invocable; load them only at their precise triggers
   Cloning or registering a project is add intake and uses the same trigger.
 - `stuck-crewmate-recovery` - load when the session-start digest reports an ordinary direct report's endpoint dead or its metadata has no window, after a stale wake, looping pane, repeated confusion, an answered-by-brief question, an unresponsive crewmate, or a failed steer, and whenever a live worker reports its no-mistakes pipeline dead, unreachable, or timed out.
 - `secondmate-provisioning` - load before creating, seeding, validating, launching, handing backlog to, recovering, pushing inherited local material into, or retiring a secondmate home, and before editing `data/secondmates.md`.
-- `captain-hold-lifecycle` - load before treating an investigation or visual review as complete, before ending a visual review that exposed a captain decision, when recording or routing the captain's answer, and on any `RECORD DIVERGENCE` line from the wake drain.
+- `captain-hold-lifecycle` - load before treating an investigation, structured review, or visual review as complete, before ending a visual review that exposed a captain decision, when recording or routing the captain's answer, and on any `RECORD DIVERGENCE` line from the wake drain.
 - `process-event-sources` - load before arming a long-polling source, before registering a deterministic condition->action watch (do X as soon as Y is true), on any `procevent <adapter> <source-id> <sequence>` check wake, and on any `process-event source stranded` or `process-event source failed to start` check wake.
   Never run a registered source's blocking command yourself in a conversational turn.
 - `fmx-respond` - load on an `x-mention <request_id>` `check:` wake to handle the mention, on an `x-mode-error ...` `check:` wake to report the Relay configuration blocker, on a `public-followup ...` `check:` wake or a startup-surfaced public commitment, and on any milestone or terminal wake for a Relay-linked task before posting its completion follow-up; relevant only when Relay is on.

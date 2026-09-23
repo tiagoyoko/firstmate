@@ -98,9 +98,9 @@ ROWS
   pass "fm-spawn: a ship spawn requires a valid explicit mode and yolo before anything is created"
 }
 
-# A scout has no merge to govern and a secondmate's posture is fixed, so the flags
-# are refused rather than accepted and quietly ignored.
-test_scout_and_secondmate_refuse_delivery_flags() {
+# Scouts and final reviewers have no merge to govern, and a secondmate's posture
+# is fixed, so the flags are refused rather than accepted and quietly ignored.
+test_nonship_roles_refuse_delivery_flags() {
   local rec home proj fakebin out status
   rec=$(make_home refused)
   IFS='|' read -r home proj fakebin <<EOF
@@ -118,11 +118,27 @@ EOF
   [ "$status" -ne 0 ] || fail "a scout spawn carrying --yolo should exit non-zero"
   assert_contains "$out" "--yolo applies only to ship spawns" "scout spawn did not refuse --yolo"
 
+  write_brief "$home" delivery-reviewer-a2
+  out=$(run_spawn "$home" "$fakebin" delivery-reviewer-a2 "$proj" claude --final-reviewer --mode direct-PR)
+  status=$?
+  [ "$status" -ne 0 ] || fail "a final-reviewer spawn carrying --mode should exit non-zero"
+  assert_contains "$out" "--mode applies only to ship spawns" "final-reviewer spawn did not refuse --mode"
+
+  out=$(run_spawn "$home" "$fakebin" delivery-reviewer-a2 "$proj" claude --final-reviewer --yolo on)
+  status=$?
+  [ "$status" -ne 0 ] || fail "a final-reviewer spawn carrying --yolo should exit non-zero"
+  assert_contains "$out" "--yolo applies only to ship spawns" "final-reviewer spawn did not refuse --yolo"
+
+  out=$(run_spawn "$home" "$fakebin" delivery-reviewer-a2 "$proj" claude --final-reviewer --scout)
+  status=$?
+  [ "$status" -ne 0 ] || fail "a spawn carrying conflicting report roles should exit non-zero"
+  assert_contains "$out" "role flags are mutually exclusive" "spawn did not refuse conflicting report roles"
+
   out=$(run_spawn "$home" "$fakebin" delivery-sm-a2 "$home" --secondmate --mode no-mistakes --yolo off)
   status=$?
   [ "$status" -ne 0 ] || fail "a secondmate spawn carrying delivery flags should exit non-zero"
   assert_contains "$out" "applies only to ship spawns" "secondmate spawn did not refuse the delivery flags"
-  pass "fm-spawn: scout and secondmate spawns refuse ship delivery flags"
+  pass "fm-spawn: non-ship roles refuse ship delivery flags and conflicting role forms"
 }
 
 # The brief is what the worker actually follows, so a spawn whose explicit mode
@@ -206,6 +222,20 @@ EOF
   assert_not_contains "$out" "less rigor" "a scout spawn consulted the registered delivery posture"
   assert_not_contains "$out" "delivery mismatch" "a scout spawn checked a delivery contract it does not carry"
   pass "fm-spawn: a scout spawn resolves no delivery posture from the registry"
+}
+
+test_reviewer_records_no_delivery_posture() {
+  local rec home proj fakebin out
+  rec=$(make_home reviewer-meta "- proj [direct-PR] - fixture (added 2026-01-01)")
+  IFS='|' read -r home proj fakebin <<EOF
+$rec
+EOF
+  write_brief "$home" delivery-reviewermeta-c2
+  out=$(run_spawn "$home" "$fakebin" delivery-reviewermeta-c2 "$proj" claude --final-reviewer)
+  assert_not_contains "$out" "applies only to ship spawns" "a final-reviewer spawn was rejected as an invalid role"
+  assert_not_contains "$out" "less rigor" "a final-reviewer spawn consulted the registered delivery posture"
+  assert_not_contains "$out" "delivery mismatch" "a final-reviewer spawn checked a delivery contract it does not carry"
+  pass "fm-spawn: a final-reviewer spawn accepts its role and resolves no delivery posture"
 }
 
 # Promotion is where a scout's ship contract is finally decided, so it requires the
@@ -847,11 +877,13 @@ EOF
     fi
     printf '@AGENTS.md\n' > "$proj/CLAUDE.md"
     cp "$proj/AGENTS.md" "$proj/agents-before"
-    for kind in no-mistakes direct-PR local-only scout; do
+    for kind in no-mistakes direct-PR local-only scout reviewer; do
       id="roles-$project_kind-$kind"
       write_brief "$home" "$id"
       if [ "$kind" = scout ]; then
         out=$(run_spawn "$home" "$fakebin" "$id" "$proj" codex --scout)
+      elif [ "$kind" = reviewer ]; then
+        out=$(run_spawn "$home" "$fakebin" "$id" "$proj" codex --final-reviewer)
       else
         out=$(run_spawn "$home" "$fakebin" "$id" "$proj" codex --mode "$kind" --yolo off)
       fi
@@ -872,7 +904,7 @@ EOF
       [ "$(cat "$proj/CLAUDE.md")" = '@AGENTS.md' ] || fail "spawn changed the project import"
     done
   done
-  role_line=$(grep -n 'A ship or scout worker launched by Firstmate into a worktree of this repository' "$ROOT/AGENTS.md" | cut -d: -f1)
+  role_line=$(grep -n 'A ship, scout, or final-review worker launched by Firstmate into a worktree of this repository' "$ROOT/AGENTS.md" | cut -d: -f1)
   supervisor_line=$(grep -n '^You are the first mate\.$' "$ROOT/AGENTS.md" | head -1 | cut -d: -f1)
   [ -n "$role_line" ] && [ "$role_line" -lt "$supervisor_line" ] ||
     fail "Firstmate AGENTS.md does not disambiguate a launched worker before assigning the supervisor identity"
@@ -883,10 +915,11 @@ EOF
 test_authorized_intent_keeps_words_without_composed_address
 test_spawn_refreshes_legacy_worker_roles
 test_ship_spawn_requires_a_valid_delivery_contract
-test_scout_and_secondmate_refuse_delivery_flags
+test_nonship_roles_refuse_delivery_flags
 test_spawn_refuses_a_brief_mode_mismatch
 test_spawn_notices_a_rigor_downgrade_against_the_registry
 test_scout_records_no_delivery_posture
+test_reviewer_records_no_delivery_posture
 test_promote_requires_and_records_the_delivery_contract
 test_promote_refuses_a_symlinked_task_record
 test_promotion_delivers_the_real_definition_of_done

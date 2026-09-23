@@ -87,7 +87,7 @@
 #      call is not daemon death, so that claim is answered by steering the crew
 #      to reattach, not by escalating.
 #   4. No current run for this crew (pre-validation, uninitialized repository,
-#      proven historical head, or kind=scout): fall back to the recorded
+#      proven historical head, or kind=scout/reviewer): fall back to the recorded
 #      backend's pane busy state, then the resolved status declaration
 #      when its verb maps to a recognized run-state. Decision-only events such as
 #      `resolved` never become current state or detail.

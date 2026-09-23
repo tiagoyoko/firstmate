@@ -14,8 +14,8 @@
 # so that line is published on the parent channel at once through
 # bin/fm-parent-channel-lib.sh as
 #   <state> [key=child-outcome-<child>-<state>-<fp8>]: child <child> <state>: <note> [pr=<url>] [mode=<mode>] [yolo=<posture>] [report=data/<child>/report.md]
-# carrying the child's recorded PR, delivery mode, merge posture, and scout
-# report pointer, without consulting fm-crew-state.sh and without waiting for
+# carrying the child's recorded PR, delivery mode, merge posture, and report
+# pointer, without consulting fm-crew-state.sh and without waiting for
 # the inactive cadence. A line still being appended (no trailing newline yet)
 # is left for the next poll. This is what keeps a mate's PR-ready, finding,
 # and failure outcomes from depending on the mate model appending them
@@ -315,10 +315,11 @@ meta_incarnation() { # <meta>
 # the fallback scrape accepts only a preferred terminal line in a mode's
 # ready-signal shape (`done: PR <url>` or `done: PR <url> checks green`), so a
 # PR a worker merely mentioned in prose is never claimed as the delivery.
-# A scout never delivers a PR, so it never carries one.
+# A scout or final reviewer never delivers a PR, so neither carries one.
 pr_for_task() { # <meta> [preferred-line]
-  local meta=$1 preferred=${2:-} value
-  [ "$(meta_field "$meta" kind)" != scout ] || return 0
+  local meta=$1 preferred=${2:-} value kind
+  kind=$(meta_field "$meta" kind)
+  [ "$kind" != scout ] && [ "$kind" != reviewer ] || return 0
   value=$(meta_field "$meta" pr)
   if [ -z "$value" ] && [ -n "$preferred" ]; then
     value=$(printf '%s\n' "$preferred" \
