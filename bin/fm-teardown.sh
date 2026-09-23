@@ -1489,10 +1489,39 @@ review_report_headings() {  # <markdown-file>
 
 review_report_verdict() {  # <report> <template>
   local report=$1 template=$2 line choices choice matched='' match_len=0 choice_len
+  # The verdict is read from the same `## Veredito` the section contract counts,
+  # so a fenced quote of the template in the preamble can never stand in for the
+  # section a human reads.
   line=$(LC_ALL=C awk '
-    $0 == "## Veredito" { in_verdict = 1; next }
-    in_verdict && /^#{1,6}[[:space:]]/ { exit }
-    in_verdict && $0 !~ /^[[:space:]]*$/ { print; exit }
+    {
+      if (in_verdict && $0 !~ /^[[:space:]]*$/) { print; exit }
+      scan = $0
+      spaces = 0
+      while (spaces < 3 && substr(scan, 1, 1) == " ") {
+        scan = substr(scan, 2)
+        spaces++
+      }
+      marker = substr(scan, 1, 1)
+      marker_len = 0
+      if (marker == "`" || marker == "~") {
+        while (substr(scan, marker_len + 1, 1) == marker) marker_len++
+      }
+      if (marker_len >= 3) {
+        if (!in_fence) {
+          in_fence = 1
+          fence_marker = marker
+          fence_len = marker_len
+        } else if (marker == fence_marker && marker_len >= fence_len) {
+          rest = substr(scan, marker_len + 1)
+          if (rest ~ /^[[:space:]]*$/) in_fence = 0
+        }
+        next
+      }
+      if (!in_fence && scan ~ /^##[[:space:]]/) {
+        sub(/[[:space:]]+#+[[:space:]]*$/, "", scan)
+        if (scan == "## Veredito") in_verdict = 1
+      }
+    }
   ' "$report") || return 1
   line=${line//\*\*/}
   line=${line#"${line%%[![:space:]]*}"}
