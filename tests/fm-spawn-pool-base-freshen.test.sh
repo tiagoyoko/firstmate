@@ -432,6 +432,23 @@ test_final_reviewer_records_the_refreshed_head() {
   pass "final reviewers record the exact refreshed HEAD and allow new untracked harness wiring"
 }
 
+test_final_reviewer_refuses_raw_launch_commands() {
+  local rec id out status
+  id='pool-final-reviewer-raw-r1'
+  rec=$(make_case final-reviewer-raw "$id")
+  read_case_record "$rec"
+  out=$(run_spawn "$id" --final-reviewer --harness 'env FOO=1 rovo run --yolo')
+  status=$?
+  expect_code 1 "$status" "final reviewer accepted a free-form launch command"
+  assert_contains "$out" "requires a verified harness family" \
+    "raw reviewer refusal did not explain the verified-family requirement"
+  assert_contains "$out" "Pass --harness with a supported harness name" \
+    "raw reviewer refusal did not provide an actionable replacement"
+  assert_absent "$HOME_DIR/state/$id.meta" \
+    "raw reviewer refusal published task metadata"
+  pass "final reviewers refuse free-form launch commands before launch"
+}
+
 test_final_reviewer_refuses_harness_wiring_collisions() {
   local spec harness rel rec id out status exclude target before publisher n=0
   for spec in \
@@ -485,6 +502,52 @@ test_final_reviewer_refuses_harness_wiring_collisions() {
   assert_absent "$HOME_DIR/state/$id.meta" \
     "claude reviewer published metadata after a tracked wiring collision"
   pass "final reviewers refuse existing or tracked worktree wiring collisions before launch"
+}
+
+test_final_reviewer_refuses_unsafe_wiring_ancestors() {
+  local rec id out status exclude outside sub publisher
+  id='pool-reviewer-symlink-ancestor-r1'
+  rec=$(make_case reviewer-symlink-ancestor "$id")
+  read_case_record "$rec"
+  outside="$CASE_DIR/outside-claude"
+  mkdir -p "$outside"
+  ln -s "$outside" "$POOL_DIR/.claude"
+  exclude=$(git -C "$POOL_DIR" rev-parse --git-path info/exclude)
+  printf '%s\n' '/.claude' >> "$exclude"
+  out=$(run_spawn "$id" --final-reviewer --harness claude)
+  status=$?
+  [ "$status" -ne 0 ] || fail "claude reviewer traversed a symlink wiring ancestor"
+  assert_contains "$out" "unsafe symlink ancestor '.claude'" \
+    "claude reviewer refusal did not identify the symlink ancestor"
+  assert_absent "$outside/settings.local.json" \
+    "claude reviewer wrote harness wiring through the symlink ancestor"
+  assert_absent "$HOME_DIR/state/$id.meta" \
+    "symlink-ancestor refusal published task metadata"
+
+  id='pool-reviewer-gitlink-ancestor-r2'
+  rec=$(make_case reviewer-gitlink-ancestor "$id")
+  read_case_record "$rec"
+  sub="$CASE_DIR/wiring-submodule"
+  git init --quiet -b main "$sub"
+  printf '%s\n' 'submodule content' > "$sub/content.txt"
+  git -C "$sub" add content.txt
+  git -C "$sub" -c user.name='Firstmate Tests' -c user.email='tests@example.invalid' \
+    commit -qm initial
+  publisher="$CASE_DIR/publisher"
+  git -C "$publisher" -c protocol.file.allow=always submodule --quiet add "file://$sub" .opencode
+  git -C "$publisher" -c user.name='Firstmate Tests' -c user.email='tests@example.invalid' \
+    commit -qm 'add opencode gitlink'
+  git -C "$publisher" push --quiet origin "$DEFAULT_BRANCH"
+  out=$(run_spawn "$id" --final-reviewer --harness opencode)
+  status=$?
+  [ "$status" -ne 0 ] || fail "opencode reviewer traversed a gitlink wiring ancestor"
+  assert_contains "$out" "unsafe gitlink ancestor '.opencode'" \
+    "opencode reviewer refusal did not identify the gitlink ancestor"
+  assert_absent "$POOL_DIR/.opencode/plugins/fm-busy-state.js" \
+    "opencode reviewer wrote harness wiring through the gitlink ancestor"
+  assert_absent "$HOME_DIR/state/$id.meta" \
+    "gitlink-ancestor refusal published task metadata"
+  pass "final reviewers refuse symlink and gitlink wiring ancestors before launch"
 }
 
 test_dirty_pool_refuses_without_discarding_work() {
@@ -828,7 +891,9 @@ test_stale_pool_base_refreshes_before_branching
 test_non_main_default_branch_refreshes_before_branching
 test_direct_pr_and_scout_refresh_before_launch
 test_final_reviewer_records_the_refreshed_head
+test_final_reviewer_refuses_raw_launch_commands
 test_final_reviewer_refuses_harness_wiring_collisions
+test_final_reviewer_refuses_unsafe_wiring_ancestors
 test_dirty_pool_refuses_without_discarding_work
 test_unresolved_remote_default_refuses_pool
 test_unreachable_origin_refuses_stale_pool_base

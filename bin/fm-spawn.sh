@@ -1998,6 +1998,10 @@ if [ "$KIND" = secondmate ] && [ "$HARNESS" = rovo ]; then
   echo "error: rovo is a verified crewmate/scout adapter only and cannot run a secondmate; it has no primary supervision protocol. Select a harness verified for secondmates." >&2
   exit 1
 fi
+if [ "$KIND" = reviewer ] && [ "$RAW_LAUNCH" = 1 ]; then
+  echo "error: final reviewer $ID requires a verified harness family that can load the reasoning-critique skill; free-form launch commands are not accepted. Pass --harness with a supported harness name." >&2
+  exit 1
+fi
 if [ "$KIND" = reviewer ] && [ "$(fm_control_harness_family "$HARNESS" 2>/dev/null || true)" = rovo ]; then
   echo "error: rovo cannot run final reviewer $ID because it cannot load the required reasoning-critique skill outside the reviewed worktree. Select another verified harness for this reviewer." >&2
   exit 1
@@ -3744,6 +3748,71 @@ if [ "$KIND" = reviewer ]; then
     exit 1
   }
 fi
+reviewer_wiring_ancestor_check() {
+  local rel=$1 parent prefix= current=$WT component staged mode resolved wt_real
+  local -a components
+  case "$rel" in
+    '' | /* | . | .. | ./* | ../* | */.. | */../*)
+      echo "error: reviewer $ID cannot use harness '$HARNESS' because wiring path '$rel' is not confined to the reviewed worktree" >&2
+      return 1
+      ;;
+  esac
+  wt_real=$(cd "$WT" 2>/dev/null && pwd -P) || {
+    echo "error: reviewer $ID cannot resolve the reviewed worktree before inspecting harness wiring" >&2
+    return 1
+  }
+  parent=${rel%/*}
+  [ "$parent" != "$rel" ] || return 0
+  IFS='/' read -r -a components <<<"$parent"
+  for component in "${components[@]}"; do
+    [ -n "$component" ] || continue
+    if [ -n "$prefix" ]; then
+      prefix="$prefix/$component"
+    else
+      prefix=$component
+    fi
+    staged=$(git -C "$WT" ls-files --stage -- "$prefix") || {
+      echo "error: reviewer $ID cannot inspect harness wiring ancestor '$prefix' in the reviewed worktree" >&2
+      return 1
+    }
+    mode=$(printf '%s\n' "$staged" | awk -v path="$prefix" '
+      { tab = index($0, "\t") }
+      tab && substr($0, tab + 1) == path { print $1; exit }
+    ')
+    case "$mode" in
+      120000)
+        echo "error: reviewer $ID cannot use harness '$HARNESS' because wiring path '$rel' has unsafe symlink ancestor '$prefix'. Remove or relocate that project path, or choose another reviewer harness." >&2
+        return 1
+        ;;
+      160000)
+        echo "error: reviewer $ID cannot use harness '$HARNESS' because wiring path '$rel' has unsafe gitlink ancestor '$prefix'. Remove or relocate that project path, or choose another reviewer harness." >&2
+        return 1
+        ;;
+    esac
+    current="$current/$component"
+    if [ -L "$current" ]; then
+      echo "error: reviewer $ID cannot use harness '$HARNESS' because wiring path '$rel' has unsafe symlink ancestor '$prefix'. Remove or relocate that project path, or choose another reviewer harness." >&2
+      return 1
+    fi
+    if [ -e "$current" ]; then
+      [ -d "$current" ] || {
+        echo "error: reviewer $ID cannot use harness '$HARNESS' because wiring path '$rel' has non-directory ancestor '$prefix'. Remove or relocate that project path, or choose another reviewer harness." >&2
+        return 1
+      }
+      resolved=$(cd "$current" 2>/dev/null && pwd -P) || {
+        echo "error: reviewer $ID cannot resolve harness wiring ancestor '$prefix'" >&2
+        return 1
+      }
+      case "$resolved" in
+        "$wt_real" | "$wt_real"/*) ;;
+        *)
+          echo "error: reviewer $ID cannot use harness '$HARNESS' because wiring path '$rel' resolves outside the reviewed worktree at ancestor '$prefix'" >&2
+          return 1
+          ;;
+      esac
+    fi
+  done
+}
 reviewer_wiring_collision_check() {
   local target_family prior_family paths prior_paths path prior_path rel tracked prior_owns
   [ "$KIND" = reviewer ] || return 0
@@ -3764,12 +3833,17 @@ reviewer_wiring_collision_check() {
       "$WT"/*) rel=${path#"$WT"/} ;;
       *) continue ;;
     esac
+    reviewer_wiring_ancestor_check "$rel" || return 1
     tracked=$(git -C "$WT" ls-files -- "$rel") || {
       echo "error: reviewer $ID cannot inspect harness wiring path '$rel' in the reviewed worktree" >&2
       return 1
     }
     if [ -n "$tracked" ]; then
       echo "error: reviewer $ID cannot use harness '$HARNESS' because its required wiring path '$rel' is tracked by the reviewed worktree. Remove or relocate that project file, or choose a reviewer harness that does not write there." >&2
+      return 1
+    fi
+    if [ -L "$path" ]; then
+      echo "error: reviewer $ID cannot use harness '$HARNESS' because its required wiring path '$rel' is an unsafe symlink. Remove or relocate that project path, or choose another reviewer harness." >&2
       return 1
     fi
     if [ -e "$path" ] || [ -L "$path" ]; then
