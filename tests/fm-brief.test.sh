@@ -260,8 +260,8 @@ test_ship_mode_is_explicit_not_registry() {
   brief="$home/data/brief-explicit-a5/brief.md"
   grep -qx "Delivery contract: mode=no-mistakes" "$brief" \
     || fail "registered direct-PR posture overrode the explicit --mode"
-  assert_grep "Firstmate will then instruct you to run /no-mistakes" "$brief" \
-    "explicit no-mistakes brief did not render the pipeline definition of done"
+  assert_grep "Immediately after committing the implementation, start /no-mistakes validation yourself" "$brief" \
+    "explicit no-mistakes brief did not render the worker-owned validation trigger"
 
   # An unregistered project is not a blocker either, because nothing is looked up.
   FM_HOME="$home" "$ROOT/bin/fm-brief.sh" brief-explicit-a6 never-registered --mode local-only >/dev/null 2>&1 \
@@ -321,6 +321,30 @@ test_faster_paths_use_configured_authority_without_stacked_review() {
   assert_no_grep "pass \`--intent\` as only this brief's \`## Captain's intent\`" "$home/data/$id/brief.md" \
     "direct-PR brief must not include the no-mistakes --intent contract"
   pass "fm-brief.sh: faster paths use configured authority without stacked review"
+}
+
+# A no-mistakes implementation commit is an input to validation, not a terminal
+# result. The generated brief must keep the worker moving into the pipeline and
+# reserve done: for the reviewed, CI-green PR.
+test_no_mistakes_starts_validation_before_done() {
+  local home id brief
+  home="$TMP_ROOT/no-mistakes-review-gate-home"
+  mkdir -p "$home/data"
+  id="brief-review-gate-b0"
+  FM_HOME="$home" "$ROOT/bin/fm-brief.sh" "$id" some-proj --mode no-mistakes >/dev/null 2>&1
+  brief="$home/data/$id/brief.md"
+  assert_present "$brief" "brief was not scaffolded"
+  assert_grep "Immediately after committing the implementation, start /no-mistakes validation yourself" "$brief" \
+    "no-mistakes brief must make the worker start validation after its implementation commit"
+  assert_grep "While validation is running, report supervisor-actionable transitions through the status protocol above" "$brief" \
+    "no-mistakes brief must use nonterminal status while validation runs"
+  assert_grep "The only completion signal for this mode is \`done: PR {url} checks green\`" "$brief" \
+    "no-mistakes brief must reserve completion for a reviewed, CI-green PR"
+  assert_no_grep "When you believe it is complete, append \`done: {summary}\`" "$brief" \
+    "no-mistakes brief still treats an unvalidated commit as complete"
+  assert_no_grep "Firstmate will then instruct you to run /no-mistakes" "$brief" \
+    "no-mistakes brief still waits for firstmate to trigger validation"
+  pass "fm-brief.sh: no-mistakes commits flow directly into review before done"
 }
 
 # Pin the specific line the bug lived on: the no-mistakes DOD's no-mistakes
@@ -933,6 +957,7 @@ test_ship_mode_is_required_and_closed_set
 test_ship_mode_is_explicit_not_registry
 test_delivery_flags_are_refused_where_they_do_not_apply
 test_faster_paths_use_configured_authority_without_stacked_review
+test_no_mistakes_starts_validation_before_done
 test_no_mistakes_dod_wording
 test_ask_user_escalation_format
 test_ship_project_memory_wording

@@ -260,9 +260,9 @@ EOF
       cat <<EOF
 # Definition of done
 Delivery contract: mode=no-mistakes
-The task is complete only when committed on your branch.
-When you believe it is complete, append \`done: {summary}\` to the status file and stop.
-Firstmate will then instruct you to run /no-mistakes to validate and ship a PR.
+An implementation commit is not task completion.
+Immediately after committing the implementation, start /no-mistakes validation yourself; do not stop or wait for firstmate to instruct you.
+Until CI is green, never append \`done:\`. While validation is running, report supervisor-actionable transitions through the status protocol above. The only completion signal for this mode is \`done: PR {url} checks green\`.
 
 You drive no-mistakes by responding to its gates, not by implementing fixes.
 Follow the guidance no-mistakes itself provides for the mechanics: it loads when you invoke /no-mistakes, and \`no-mistakes axi run --help\` plus the \`help\` lines in each \`axi\` response are authoritative and version-matched to the installed binary.
