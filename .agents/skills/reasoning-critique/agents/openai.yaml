@@ -1,0 +1,4 @@
+interface:
+  display_name: "Reasoning Critique"
+  short_description: "Revisão independente de resultados com evidências"
+  default_prompt: "Use $reasoning-critique para revisar esta entrega e produzir o relatório em pt-BR com evidências e lacunas de validação."

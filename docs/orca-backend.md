@@ -59,7 +59,9 @@ Grok alone retains its isolated rendered-tail fallback.
 
 Cleanup keeps all shared Firstmate safety checks.
 A scout still requires its report and completed decision inventory.
+A final reviewer still requires its report and the unchanged reviewed snapshot.
 A ship still refuses dirty or unlanded work.
+A `cleanup_recovery=orca` record, whose worktree never carried a launched worker, is exempt from the scout and reviewer report gates.
 Before release, cleanup resolves the recorded Orca worktree id and verifies its path matches the recorded worktree path.
 A missing, unreadable, or mismatched identity preserves metadata and stops rather than deleting anything.
 After those checks, Firstmate closes the exact terminal and releases the exact worktree with Orca's worktree command.

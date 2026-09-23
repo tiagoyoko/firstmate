@@ -149,7 +149,7 @@ The drain script calls that guard after presenting the queue; records remain dur
 The Pi supervision branch's deliberate queued-wake warning exception is owned by [`pi-supervision-branch.md`](pi-supervision-branch.md#components-and-their-owners), while [`watcher-continuity.md`](watcher-continuity.md#per-actor-acknowledgement) owns the guard's per-actor counting, the advisory main gets for rows a live branch grant holds, and main's retirement of queue rows no actor could ever present or acknowledge.
 It leads with a prominent bordered tangle banner, while `bin/fm-guard.sh` owns the watcher-down banner and reminder policy so repeated guarded commands stay noisy without reprinting the full banner in the same episode.
 On every verified primary harness, tracked hook integration gives the primary session a push-based backstop: when work, a process-event source, a registered custom check, or Relay polling needs supervision and no supervision owner provably holds this home with a fresh beacon, blocking-capable Stop hooks block and nonblocking turn-end integrations force one bounded follow-up.
-The guard covers the main primary and genuinely marked secondmate homes, exempts child crewmate/scout worktrees, is loop-safe per harness, and is documented in [turnend-guard.md](turnend-guard.md).
+The guard covers the main primary and genuinely marked secondmate homes, exempts child ship, scout, and final-reviewer worktrees, is loop-safe per harness, and is documented in [turnend-guard.md](turnend-guard.md).
 
 Away mode is a posture of the one supervision session, recorded in `state/.afk-contract` by `bin/fm-afk-contract.sh` after the captain confirms a read-back of their away words and mandate clauses, and announced at entry as hold-for-return only because no phone channel exists.
 The record owner's header is the single owner of the record schema and clause fields, and by the captain's mandate no static parser reads the clause text: the object and precondition are recorded verbatim, structural presence and the verb list are checked, and the coarse best-effort never-set flag can miss spellings including joined compounds such as `oneTimeCode`.
@@ -165,7 +165,7 @@ Terminal verbs remain captain-relevant, while a nonterminal progress verb cannot
 The shared latest-event read takes the most recent line that leads with a recognized verb or legacy token, so continuation prose and trailing blank lines after a multi-line record cannot hide a declared wait.
 Both supervisors classify the status bytes appended since they last classified that log, never its last line alone, and report every actionable event through the captured endpoint before committing that position.
 The watcher's `.seen-*` and `.hb-surfaced-<task>` markers and the daemon's `.subsuper-seen-status-<task>` marker independently track reported file state and successfully classified position, so an unchanged unreadable state reports once without advancing past unread content, while a changed state retries and an unusable position re-reads the whole log.
-A keyed `needs-decision` or `blocked` transition accepted by the whole-file decision fold is retired only when that fold retires it - an explicit close for its exact key, or a terminal declaration by the ship or scout that owns the log - while a reserved-key transition the fold rejects surfaces as a reconciliation signal without becoming an open decision.
+A keyed `needs-decision` or `blocked` transition accepted by the whole-file decision fold is retired only when that fold retires it - an explicit close for its exact key, or a terminal declaration by the ship, scout, or final reviewer that owns the log - while a reserved-key transition the fold rejects surfaces as a reconciliation signal without becoming an open decision.
 The fold remains the sole owner of open/closed semantics, including same-key reopening and reserved-key handling, shared with the durable OPEN DECISIONS surface.
 The always-on watcher also uses that library's absorb classification on no-verb signals and first-sighting stale panes before status-log terminality is trusted, while the daemon maintains distinct wedge and declared-wait recheck cadences.
 The daemon's declared-wait window ages against the crew's own latest status line rather than against pane busy state, because a declared wait can legitimately hold a pane busy, and only a status append that stops declaring the wait ends that routing and restores wedge detection.
@@ -239,7 +239,7 @@ Codex App support is recorded in `docs/codex-app-backend.md`; it is not selectab
 ## Worktrees, not branches in your checkout
 
 Crewmates never intentionally touch your project clone; [treehouse](https://github.com/kunchenguid/treehouse) pools clean worktrees for tmux, herdr, zellij, and cmux tasks, while Orca creates its own worktrees for `backend=orca`.
-The [`fm-spawn.sh` header](../bin/fm-spawn.sh) owns ship/scout worktree isolation and fresh-base refusal rules, including spawns from linked homes.
+The [`fm-spawn.sh` header](../bin/fm-spawn.sh) owns ship, scout, and final-reviewer worktree isolation and fresh-base refusal rules, including spawns from linked homes.
 Portable regressions live in [`tests/fm-spawn-pool-base-freshen.test.sh`](../tests/fm-spawn-pool-base-freshen.test.sh) for spawn isolation and base freshness, and [`tests/fm-control-relaunch.test.sh`](../tests/fm-control-relaunch.test.sh) for preserving the recorded copy on relaunch.
 
 The firstmate repo has one extra exposure because it can dispatch crewmates to work on itself.
@@ -251,7 +251,7 @@ Only a named non-default branch checked out in `FM_ROOT` is a worktree tangle.
 `fm-guard.sh` prints the repair command on the next mutable fleet action, while `bin/fm-session-start.sh` reports the same condition through bootstrap as a `TANGLE:` line at session start.
 If another live session holds the fleet lock, both surfaces keep the alarm but switch to read-only wording with no repair command.
 Ship briefs also tell the crewmate to verify `pwd -P` and `git rev-parse --show-toplevel` before creating `fm/<id>`, then stop with a blocked status if it landed in the primary checkout.
-Placement is proven only at launch, so `bin/fm-spawn.sh` also exports the task id as `FM_TASK_ID` into every ship and scout pane, and `bin/fm-test-run.sh` refuses to execute the behavior suite from the primary checkout while that marker is set; the runner's header owns the predicate and [`tests/fm-test-run.test.sh`](../tests/fm-test-run.test.sh) pins it.
+Placement is proven only at launch, so `bin/fm-spawn.sh` also exports the task id as `FM_TASK_ID` into every ship, scout, and final-reviewer pane, and `bin/fm-test-run.sh` refuses to execute the behavior suite from the primary checkout while that marker is set; the runner's header owns the predicate and [`tests/fm-test-run.test.sh`](../tests/fm-test-run.test.sh) pins it.
 
 ## No-mistakes gate authority boundary
 
@@ -261,18 +261,20 @@ Independently, `fm-spawn.sh`, `fm-send.sh`, `fm-control.sh`, and `fm-teardown.sh
 A normal primary checkout or crewmate worktree has neither signal and remains unaffected.
 The helper's header owns the exact signal detection, relocated-home limitation, test-harness bypass, and relationship to no-mistakes' HEAD-continuity guard.
 
-## Two task shapes
+## Three task roles
 
-Ship tasks change projects and ship by project mode (`no-mistakes`, `direct-PR`, or `local-only`); scout tasks leave standalone investigation reports at `data/<id>/report.md` and never push.
+Ship tasks change projects and ship by project mode (`no-mistakes`, `direct-PR`, or `local-only`); scout tasks leave standalone investigation reports at `data/<id>/report.md` and never push; final-reviewer tasks inspect completed deliveries read-only and leave the independent `reasoning-critique` verdict at that same report path.
 The intake and authority contract in `AGENTS.md` owns when separate scout research is warranted.
+Its final-review section owns when the dedicated reviewer is dispatched and how its verdict gates presentation or autonomous landing.
 
 ## Dispatch profiles
 
-Crewmate and scout dispatch can stay on the static crewmate harness resolved by `config/crew-harness`, or it can use local dispatch profiles in `config/crew-dispatch.json`.
+Ship, scout, and final-reviewer dispatch can stay on the static crew harness resolved by `config/crew-harness`, or it can use local dispatch profiles in `config/crew-dispatch.json`.
 The dispatch file is intentionally judgment-based: firstmate reads the natural-language rules at intake, chooses the best matching rule, resolves profile arrays itself from current quota output under the `AGENTS.md` section 4 intake boundary and the `quota-array-dispatch` selection procedure, and passes only concrete `--harness`, `--model`, and `--effort` axes to `fm-spawn.sh`.
 The shell scripts validate the JSON shape and verified harness/effort combinations, but they do not parse task intent, match natural-language rules, or own array selection.
 The session-start bootstrap step keeps valid dispatch configuration silent unless verbose facts are enabled and surfaces a concise invalid-config line when validation fails.
-When the file exists, `fm-spawn.sh` refuses crewmate and scout launches without an explicit harness, so `config/crew-harness` is only automatic when no dispatch profile file is active.
+When the file exists, `fm-spawn.sh` refuses ship, scout, and final-reviewer launches without an explicit harness, so `config/crew-harness` is only automatic when no dispatch profile file is active.
+Final reviewers additionally refuse free-form launch commands and the Rovo adapter because the required `reasoning-critique` skill must be loadable outside the reviewed worktree.
 Secondmate launches are exempt because they resolve the secondmate harness and any optional secondmate model or effort tokens instead.
 Unsupported effort values are still recorded in task meta when passed to `fm-spawn.sh`, but the launch template omits any effort flag that the selected harness does not accept.
 That keeps spawn launch compatible across claude, codex, opencode, pi, pi-signed, grok, kimi, cursor, gemini, muse, rovo, omp, and agy while preserving the requested profile for later audit.

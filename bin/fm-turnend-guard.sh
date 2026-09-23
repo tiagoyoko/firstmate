@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Turn-end guard for any firstmate PRIMARY session: the main home OR a
 # secondmate's own home. A secondmate runs its own primary firstmate session and
-# is guarded exactly like the main primary; only child crew/scout worktrees are
+# is guarded exactly like the main primary; only child worktree-worker worktrees are
 # exempt (see the scoping block below and docs/turnend-guard.md).
 #
 # fm-guard.sh (bin/fm-guard.sh) is pull-based: it only warns when some other
@@ -24,10 +24,10 @@
 #
 # Ships with TRACKED harness hook files at the repo root, so this file is
 # checked out into every worktree of this repo: the primary checkout, every
-# secondmate home (treehouse-leased or git-cloned), and any crewmate/scout task
+# secondmate home (treehouse-leased or git-cloned), and any worktree-worker task
 # worktree spawned to work on firstmate itself (the recursive "firstmate
 # improving itself" case). A secondmate home runs its OWN primary firstmate
-# session, so it must be guarded like the main primary; only child crew/scout
+# session, so it must be guarded like the main primary; only child worktree-worker
 # worktrees are exempt. It must therefore scope itself at runtime to a real
 # primary checkout - the main home or a genuinely marked secondmate home - and
 # stay a silent, fast no-op inside child task worktrees.
@@ -159,7 +159,7 @@ fi
 # worktree (git-dir != git-common-dir) or it is a git-cloned plain checkout. This
 # mirrors the cd-guard's intent that a secondmate's own session is a guarded
 # primary. Only an UNMARKED checkout (or one with an invalid marker) falls
-# through to the linked-worktree exemption: firstmate hands out crewmate/scout
+# through to the linked-worktree exemption: firstmate hands out worktree-worker
 # task worktrees as genuine linked `git worktree`s (bin/fm-spawn.sh aborts
 # otherwise), whose git-dir lives under the parent repo's .git/worktrees/<name>
 # and differs from the common (shared) git-dir, while a main, non-worktree

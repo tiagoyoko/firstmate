@@ -38,11 +38,11 @@
 #              axis for the replacement. With no explicit axis, a secondmate
 #              re-resolves its durable config/secondmate-harness pin (harness
 #              plus its optional model and effort tokens) exactly as any other
-#              respawn does, while a ship or scout keeps the exact adapter
+#              respawn does, while a ship, scout, or reviewer keeps the exact adapter
 #              already recorded for it.
 #              A prefixed raw-command basename cannot reconstruct its launch
 #              command, so relaunch requires an explicit --harness for it.
-#              --note is required for a ship or scout, whose replacement
+#              --note is required for a ship, scout, or reviewer, whose replacement
 #              inherits the local copy but none of the conversation; a
 #              secondmate reconciles its own home's records at startup, so its
 #              standing charter is never rewritten.
@@ -706,7 +706,7 @@ resolve_relaunch_profile() {
 # refuses outright when any of it cannot be established.
 CHECKPOINT_LINES=()
 safe_checkpoint() {
-  local wt_real wt_top wt_top_real head head_ref head_ref_status status_output dirty children marker child_meta
+  local wt_real wt_top wt_top_real head head_ref head_ref_status status_output dirty review_head children marker child_meta
   CHECKPOINT_LINES=()
   [ -n "$WT" ] || die "task $ID has no recorded worktree; refusing to relaunch without a recorded local copy to preserve"
   [ -d "$WT" ] || die "task $ID's recorded worktree $WT is missing; refusing to relaunch and lose track of its work"
@@ -737,6 +737,16 @@ safe_checkpoint() {
   else
     dirty=no
   fi
+  if [ "$KIND" = reviewer ] && [ "$dirty" = yes ]; then
+    die "reviewer $ID's worktree $WT has uncommitted changes; refusing to relaunch before stopping the agent"
+  fi
+  if [ "$KIND" = reviewer ]; then
+    review_head=$(fm_meta_get "$META" review_head)
+    [ -n "$review_head" ] \
+      || die "reviewer $ID has no recorded initial review HEAD; refusing to relaunch before stopping the agent"
+    [ "$head" = "$review_head" ] \
+      || die "reviewer $ID's HEAD $head does not match recorded initial review HEAD $review_head; refusing to relaunch before stopping the agent"
+  fi
   CHECKPOINT_LINES+=("worktree_head=$head" "worktree_dirty=$dirty")
   if [ "$KIND" = secondmate ]; then
     # A secondmate's own crewmates outlive its relaunch: they run in their own
@@ -766,8 +776,25 @@ safe_checkpoint() {
   fi
 }
 
+reopen_completed_review() {
+  local status_file latest_status
+  [ "$KIND" = reviewer ] || return 0
+  status_file="$STATE/$ID.status"
+  [ -f "$status_file" ] || return 0
+  latest_status=$(LC_ALL=C awk '
+    $0 !~ /^[[:space:]]*$/ { latest = $0 }
+    END { if (latest != "") print latest }
+  ' "$status_file") || die "could not inspect reviewer $ID's status before relaunch"
+  case "$latest_status" in
+    'done: revisão final '*)
+      printf '%s\n' 'working: revisão final reaberta por relaunch' >> "$status_file" \
+        || die "could not reopen reviewer $ID's completed status before relaunch"
+      ;;
+  esac
+}
+
 # record_note: put the required progress note somewhere durable, and - for a
-# ship or scout, whose only record of the interrupted reasoning is the
+# ship, scout, or reviewer, whose only record of the interrupted reasoning is the
 # conversation about to be discarded - into the instructions the replacement
 # actually reads. A secondmate's charter is a durable standing document and is
 # never rewritten: a secondmate reconciles its own home's records at startup,
@@ -778,7 +805,7 @@ record_note() {
   stamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)
   printf '%s\n' "$NOTE" > "$NOTE_FILE"
   case "$KIND" in
-    ship|scout)
+    ship|scout|reviewer)
       cp -p "$RELAUNCH_BRIEF" "$BRIEF_PRIOR" \
         || die "could not preserve task $ID's instructions before recording the progress note"
       {
@@ -807,7 +834,7 @@ do_relaunch() {
   resolve_relaunch_profile
 
   case "$KIND" in
-    ship|scout)
+    ship|scout|reviewer)
       RELAUNCH_BRIEF="$DATA/$ID/brief.md"
       [ -f "$RELAUNCH_BRIEF" ] \
         || die "task $ID has no instructions at $RELAUNCH_BRIEF; refusing to relaunch a worker with nothing to work from"
@@ -840,6 +867,7 @@ do_relaunch() {
   journal_write stopping "${CHECKPOINT_LINES[@]}" "$note_line"
   exit_result=$(do_exit)
   journal_write exited "${CHECKPOINT_LINES[@]}" "$note_line" "exit_result=$exit_result"
+  reopen_completed_review
 
   # The launch owner (fm-spawn --relaunch) clears the previous incarnation's
   # per-task harness wiring before arming the new one, so nothing to do here.

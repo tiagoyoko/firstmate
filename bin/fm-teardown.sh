@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Tear down a finished task: return the treehouse worktree, release the Orca
 # worktree, or retire a secondmate home; kill the recorded runtime endpoint,
-# clear volatile state, and transition this home's backlog item for ship and
-# scout tasks before reporting success (a secondmate teardown transitions none,
+# clear volatile state, and transition this home's backlog item for ship, scout,
+# and final-reviewer tasks before reporting success (a secondmate teardown transitions none,
 # since secondmates are not backlog items), then refresh/prune the project's
 # clone for PR-based ship tasks.
 # An endpoint whose close could not do its job REFUSES before any record naming
@@ -69,10 +69,18 @@
 # local-only projects additionally accept work merged into the local default
 # branch (firstmate performs that merge after configured approval) as a fallback
 # for the common case where there is no remote at all.
-# Scout tasks (kind=scout in meta) carve out of that check: their worktree is
-# declared scratch and the report at data/<task-id>/report.md is the work
-# product. Teardown proceeds only once the report exists and the shared
+# Scout and final-reviewer tasks carve out of that landed-work check because
+# their worktrees are scratch and the report at data/<task-id>/report.md is the
+# work product. A scout proceeds only once the report exists and the shared
 # unresolved-decision completion gate verifies its captain-held inventory.
+# A final reviewer additionally requires the canonical nine report sections,
+# a valid report verdict matching the latest unsuperseded terminal review event,
+# a clean worktree, and a current HEAD equal to its recorded initial review HEAD.
+# A cleanup_recovery=orca record is the exception: it names an Orca worktree whose
+# release failed before any worker launched, so the scout and reviewer report
+# gates and the reviewer worktree, HEAD, and Orca landing checks are all skipped,
+# leaving the recovery's own Orca worktree-identity match as the only one of them
+# that still runs.
 # Before destructive cleanup, teardown validates task check artifacts as
 # ordinary single-link files on the state device. It refuses and preserves
 # task state when that proof fails; otherwise it removes the task's check,
@@ -1448,15 +1456,222 @@ work_is_landed() {
   content_in_default
 }
 
-# The completion links this teardown already holds locally. A scout's
-# deliverable is its report, a local-only ship lands on local main, and every
+# The reasoning-critique contract names the nine `##` sections, so only those are
+# collected. A document title, and any identification the reviewer's Definition
+# of done asks for, may sit above them and are not sections.
+review_report_headings() {  # <markdown-file>
+  LC_ALL=C awk '
+    {
+      scan = $0
+      spaces = 0
+      while (spaces < 3 && substr(scan, 1, 1) == " ") {
+        scan = substr(scan, 2)
+        spaces++
+      }
+      marker = substr(scan, 1, 1)
+      marker_len = 0
+      if (marker == "`" || marker == "~") {
+        while (substr(scan, marker_len + 1, 1) == marker) marker_len++
+      }
+      if (marker_len >= 3) {
+        if (!in_fence) {
+          in_fence = 1
+          fence_marker = marker
+          fence_len = marker_len
+        } else if (marker == fence_marker && marker_len >= fence_len) {
+          rest = substr(scan, marker_len + 1)
+          if (rest ~ /^[[:space:]]*$/) in_fence = 0
+        }
+        next
+      }
+      if (!in_fence && scan ~ /^##[[:space:]]/) {
+        sub(/[[:space:]]+#+[[:space:]]*$/, "", scan)
+        print scan
+      }
+    }
+  ' "$1"
+}
+
+review_report_verdict() {  # <report> <template>
+  local report=$1 template=$2 line choices choice matched='' match_len=0 choice_len
+  # The verdict is read from the same `## Veredito` the section contract counts,
+  # so a fenced quote of the template in the preamble can never stand in for the
+  # section a human reads.
+  line=$(LC_ALL=C awk '
+    {
+      if (in_verdict && $0 !~ /^[[:space:]]*$/) { print; exit }
+      scan = $0
+      spaces = 0
+      while (spaces < 3 && substr(scan, 1, 1) == " ") {
+        scan = substr(scan, 2)
+        spaces++
+      }
+      marker = substr(scan, 1, 1)
+      marker_len = 0
+      if (marker == "`" || marker == "~") {
+        while (substr(scan, marker_len + 1, 1) == marker) marker_len++
+      }
+      if (marker_len >= 3) {
+        if (!in_fence) {
+          in_fence = 1
+          fence_marker = marker
+          fence_len = marker_len
+        } else if (marker == fence_marker && marker_len >= fence_len) {
+          rest = substr(scan, marker_len + 1)
+          if (rest ~ /^[[:space:]]*$/) in_fence = 0
+        }
+        next
+      }
+      if (!in_fence && scan ~ /^##[[:space:]]/) {
+        sub(/[[:space:]]+#+[[:space:]]*$/, "", scan)
+        if (scan == "## Veredito") in_verdict = 1
+      }
+    }
+  ' "$report") || return 1
+  line=${line//\*\*/}
+  line=${line#"${line%%[![:space:]]*}"}
+  line=${line%"${line##*[![:space:]]}"}
+  choices=$(LC_ALL=C awk '
+    $0 == "## Veredito" { in_verdict = 1; next }
+    in_verdict && $0 !~ /^[[:space:]]*$/ {
+      value = $0
+      sub(/^\[/, "", value)
+      sub(/,.*$/, "", value)
+      print value
+      exit
+    }
+  ' "$template") || return 1
+  while [ -n "$choices" ]; do
+    case "$choices" in
+      *" / "*) choice=${choices%% / *}; choices=${choices#* / } ;;
+      *) choice=$choices; choices= ;;
+    esac
+    choice=${choice#"${choice%%[![:space:]]*}"}
+    choice=${choice%"${choice##*[![:space:]]}"}
+    [ -n "$choice" ] || continue
+    case "$line" in
+      "$choice"|"$choice "*|"$choice:"*|"$choice."*|"$choice,"*|"$choice;"*)
+        choice_len=${#choice}
+        if [ "$choice_len" -gt "$match_len" ]; then
+          matched=$choice
+          match_len=$choice_len
+        fi
+        ;;
+    esac
+  done
+  [ -n "$matched" ] || return 1
+  printf '%s\n' "$matched"
+}
+
+review_report_empty_section() {  # <report>
+  LC_ALL=C awk '
+    function finish_section() {
+      if (seen && !has_content && !reported) {
+        print section
+        reported = 1
+      }
+    }
+    {
+      scan = $0
+      spaces = 0
+      while (spaces < 3 && substr(scan, 1, 1) == " ") {
+        scan = substr(scan, 2)
+        spaces++
+      }
+      marker = substr(scan, 1, 1)
+      marker_len = 0
+      if (marker == "`" || marker == "~") {
+        while (substr(scan, marker_len + 1, 1) == marker) marker_len++
+      }
+      if (marker_len >= 3) {
+        if (!in_fence) {
+          in_fence = 1
+          fence_marker = marker
+          fence_len = marker_len
+        } else if (marker == fence_marker && marker_len >= fence_len) {
+          rest = substr(scan, marker_len + 1)
+          if (rest ~ /^[[:space:]]*$/) in_fence = 0
+        }
+        next
+      }
+      if (!in_fence && scan ~ /^##[[:space:]]/) {
+        finish_section()
+        if (reported) exit
+        sub(/[[:space:]]+#+[[:space:]]*$/, "", scan)
+        section = scan
+        seen = 1
+        has_content = 0
+        next
+      }
+      if (seen && scan !~ /^[[:space:]]*$/) has_content = 1
+    }
+    END { finish_section() }
+  ' "$1"
+}
+
+validate_final_review_report() {  # <report>
+  local report=$1 template expected_headings actual_headings empty_section verdict status_file status_line latest_status_line review_head current_head
+  template="$FM_ROOT/.agents/skills/reasoning-critique/assets/relatorio.md"
+  [ -f "$template" ] && [ ! -L "$template" ] && [ -r "$template" ] || {
+    echo "REFUSED: cannot read the canonical reasoning-critique report template at $template." >&2
+    return 1
+  }
+  [ -f "$report" ] && [ ! -L "$report" ] && [ -r "$report" ] || {
+    echo "REFUSED: reviewer task $ID has no readable regular report at $report." >&2
+    return 1
+  }
+  expected_headings=$(review_report_headings "$template") || return 1
+  actual_headings=$(review_report_headings "$report") || return 1
+  if [ "$actual_headings" != "$expected_headings" ]; then
+    echo "REFUSED: reviewer task $ID report does not match the canonical reasoning-critique section contract." >&2
+    return 1
+  fi
+  empty_section=$(review_report_empty_section "$report") || return 1
+  if [ -n "$empty_section" ]; then
+    echo "REFUSED: reviewer task $ID report section '$empty_section' has no content." >&2
+    return 1
+  fi
+  if ! verdict=$(review_report_verdict "$report" "$template"); then
+    echo "REFUSED: reviewer task $ID report has no valid reasoning-critique verdict." >&2
+    return 1
+  fi
+  review_head=$(meta_value "$META" review_head)
+  if [ -z "$review_head" ]; then
+    echo "REFUSED: reviewer task $ID has no recorded initial review HEAD." >&2
+    return 1
+  fi
+  if ! current_head=$(git -C "$WT" rev-parse --verify 'HEAD^{commit}' 2>/dev/null); then
+    echo "REFUSED: reviewer task $ID current HEAD cannot be resolved." >&2
+    return 1
+  fi
+  if [ "$current_head" != "$review_head" ]; then
+    echo "REFUSED: reviewer task $ID current HEAD $current_head does not match recorded initial review HEAD $review_head." >&2
+    return 1
+  fi
+  status_file="$STATE/$ID.status"
+  status_line="done: revisão final $verdict report=$report"
+  latest_status_line=
+  if [ -f "$status_file" ]; then
+    latest_status_line=$(LC_ALL=C awk '
+      $0 !~ /^[[:space:]]*$/ { latest = $0 }
+      END { if (latest != "") print latest }
+    ' "$status_file") || return 1
+  fi
+  if [ "$latest_status_line" != "$status_line" ]; then
+    echo "REFUSED: reviewer task $ID status does not match report verdict '$verdict' and path $report." >&2
+    return 1
+  fi
+}
+
+# The completion links this teardown already holds locally. A scout or final
+# reviewer delivers its report, a local-only ship lands on local main, and every
 # other ship carries the PR recorded on its own record.
 BACKLOG_DONE_ARGS=()
 backlog_done_args() {
   local data_relative
   BACKLOG_DONE_ARGS=()
   case "$KIND" in
-    scout)
+    scout|reviewer)
       data_relative=$(fm_backlog_data_relative "$DATA") || return 1
       BACKLOG_DONE_ARGS=(--report "$data_relative/$ID/report.md")
       ;;
@@ -1711,12 +1926,32 @@ teardown_treehouse_return() {
   return 1
 }
 
+validate_final_reviewer_worktree_safety() {
+  local dirty_raw dirty
+  if ! dirty_raw=$(git -C "$WT" status --porcelain 2>/dev/null); then
+    if worktree_safety_blocked_by_lock "uncommitted changes"; then
+      return "$TEARDOWN_WORKTREE_SAFETY_LOCK_BLOCKED"
+    fi
+    echo "REFUSED: cannot inspect reviewer worktree $WT for uncommitted changes." >&2
+    echo "Restore the git index state, or get the captain's explicit OK to discard, then --force." >&2
+    return 1
+  fi
+  dirty=$(printf '%s\n' "$dirty_raw" | head -1 || true)
+  if [ -n "$dirty" ]; then
+    echo "REFUSED: worktree $WT has uncommitted changes." >&2
+    echo "uncommitted changes present" >&2
+    echo "A final reviewer must not alter the reviewed object; restore the reviewed snapshot before cleanup." >&2
+    return 1
+  fi
+}
+
 validate_worktree_teardown_safety() {
   local dirty_raw dirty unpushed_raw unpushed DEFAULT unmerged_raw unmerged branch
   [ -d "$WT" ] || return 0
   [ "$FORCE" != "--force" ] || return 0
   case "$KIND" in
     secondmate|scout) return 0 ;;
+    reviewer) validate_final_reviewer_worktree_safety; return $? ;;
   esac
 
   if ! dirty_raw=$(git -C "$WT" status --porcelain 2>/dev/null); then
@@ -3211,17 +3446,27 @@ if [ "$KIND" = secondmate ] && [ "$FORCE" = "--force" ]; then
   cleanup_firstmate_home_children "$HOME_PATH" || exit $?
 fi
 
-if [ "$KIND" = scout ] && [ "$FORCE" != "--force" ]; then
+# A cleanup_recovery=orca record is the residue of a spawn that failed before any
+# worker ran, so it can hold no report, verdict, or recorded review HEAD; gating
+# it on those would leave releasing the worktree to --force, which also authorizes
+# discarding real work. The reviewer worktree, HEAD, and Orca landing checks below
+# skip it for the same reason.
+if { [ "$KIND" = scout ] || [ "$KIND" = reviewer ]; } \
+  && [ "$FORCE" != "--force" ] \
+  && [ "$CLEANUP_RECOVERY" != orca ]; then
   REPORT="$DATA/$ID/report.md"
   if [ ! -f "$REPORT" ]; then
-    echo "REFUSED: scout task $ID has no report at $REPORT." >&2
-    echo "The report is the work product. Have the crewmate write it, or use --force after explicit discard approval." >&2
+    echo "REFUSED: $KIND task $ID has no report at $REPORT." >&2
+    echo "The report is the work product. Have the worker write it, or use --force after explicit discard approval." >&2
     exit 1
+  fi
+  if [ "$KIND" = reviewer ]; then
+    validate_final_review_report "$REPORT" || exit 1
   fi
   if ! FM_HOME="$FM_HOME" FM_STATE_OVERRIDE="$STATE" FM_DATA_OVERRIDE="$DATA" \
       FM_CONFIG_OVERRIDE="$CONFIG" "$SCRIPT_DIR/fm-captain-hold.sh" verify "$ID" >/dev/null; then
-    echo "REFUSED: scout task $ID has not passed the captain-call completion gate." >&2
-    echo "Inventory its report and any visual review through bin/fm-captain-hold.sh before teardown." >&2
+    echo "REFUSED: $KIND task $ID has not passed the captain-call completion gate." >&2
+    echo "Inventory its report through bin/fm-captain-hold.sh before teardown." >&2
     exit 1
   fi
 fi
@@ -3264,7 +3509,9 @@ if [ -n "$X_REQUEST" ]; then
   echo "warning: task $ID still carries an unreconciled Relay request link ($X_REQUEST) on its task record." >&2
 fi
 
-if [ "$BACKEND" = orca ] && [ "$KIND" != scout ] && [ "$KIND" != secondmate ] && [ "$FORCE" != "--force" ]; then
+if [ "$BACKEND" = orca ] && [ "$KIND" != scout ] && [ "$KIND" != secondmate ] \
+  && [ "$FORCE" != "--force" ] \
+  && { [ "$KIND" != reviewer ] || [ "$CLEANUP_RECOVERY" != orca ]; }; then
   if ! inspectable_git_worktree "$WT"; then
     echo "REFUSED: Orca ship task $ID has no inspectable git worktree at ${WT:-<missing>}." >&2
     echo "Cannot verify dirty or unlanded work; restore the worktree path or get explicit OK to discard, then --force." >&2
@@ -3274,7 +3521,8 @@ if [ "$BACKEND" = orca ] && [ "$KIND" != scout ] && [ "$KIND" != secondmate ] &&
   ORCA_PATH_MATCH_VERIFIED=1
 fi
 
-if teardown_owns_worktree && [ -d "$WT" ] && [ "$FORCE" != "--force" ]; then
+if teardown_owns_worktree && [ -d "$WT" ] && [ "$FORCE" != "--force" ] \
+  && { [ "$KIND" != reviewer ] || [ "$CLEANUP_RECOVERY" != orca ]; }; then
   if validate_worktree_teardown_safety; then
     :
   else
@@ -3611,7 +3859,7 @@ else
 fi
 fm_lock_release "$META_LOCK"
 META_LOCK_HELD=0
-if [ "$KIND" != scout ] && [ "$KIND" != secondmate ] && [ "$MODE" != local-only ]; then
+if [ "$KIND" != scout ] && [ "$KIND" != reviewer ] && [ "$KIND" != secondmate ] && [ "$MODE" != local-only ]; then
   "$FM_ROOT/bin/fm-fleet-sync.sh" "$PROJ" || true
 fi
 # A secondmate retirement may remove the home containing an overridden control

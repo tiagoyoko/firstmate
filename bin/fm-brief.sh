@@ -1,29 +1,33 @@
 #!/usr/bin/env bash
-# Scaffold a crewmate brief or persistent secondmate charter at
-# data/<task-id>/brief.md under the active firstmate home.
+# Scaffold a crewmate brief, final-reviewer brief, or persistent secondmate
+# charter at data/<task-id>/brief.md under the active firstmate home.
 # For ordinary tasks, the standard Setup/Rules/Definition-of-done contract is
-# filled in. Ship and scout `# Task` sections have two subsections Firstmate
-# fills before dispatch: `{TASK}` under `## Captain's intent` (the captain's
-# own ask plus the context needed to read it, including the substance of any
-# report, decision, or PR the ask refers to, without added speaker labels or
-# direct address) and `{FIRSTMATE_SPEC}`
-# under `## Firstmate spec` (build instructions, which are never the captain's
+# filled in. Ship, scout, and final-reviewer `# Task` sections have two
+# subsections Firstmate fills before dispatch: `{TASK}` under
+# `## Captain's intent` (the captain's own ask plus the context needed to read
+# it, including the substance of any report, decision, or PR the ask refers to,
+# without added speaker labels or direct address) and `{FIRSTMATE_SPEC}` under
+# `## Firstmate spec` (build instructions, which are never the captain's
 # intent). bin/fm-dod-lib.sh owns the no-mistakes `--intent` contract those
-# subsections feed; bin/fm-spawn.sh refuses leftover placeholders and a
-# `## Captain's intent` line opening with a Captain label or address. Secondmate
-# charters still use a single `{TASK}` charter fill. Firstmate may adjust other
-# sections when the task genuinely deviates (e.g. working an existing external
-# PR instead of shipping a new one).
+# subsections feed and the final-reviewer definition of done; bin/fm-spawn.sh
+# refuses leftover placeholders and a `## Captain's intent` line opening with a
+# Captain label or address. Secondmate charters still use a single `{TASK}`
+# charter fill. Firstmate may adjust other sections when the task genuinely
+# deviates (e.g. working an existing external PR instead of shipping a new one).
 # Usage: fm-brief.sh <task-id> <repo-name> --mode <no-mistakes|direct-PR|local-only> [--herdr-lab]
 #        fm-brief.sh <task-id> <repo-name> --scout [--herdr-lab]
+#        fm-brief.sh <task-id> <repo-name> --final-reviewer
 #        fm-brief.sh <task-id> --secondmate {<project>...|--no-projects}
 #   --scout writes the scout contract instead: the deliverable is a report at
 #   data/<task-id>/report.md (no branch, no push, no PR) and the worktree is scratch.
 #   It offers the Lavish review loop only when `fm-bootstrap.sh lavish-compatible`
 #   confirms the supported lavish-axi floor; otherwise it asks for a text report.
-#   --secondmate writes a persistent secondmate charter. The project list
-#   is cloned into the secondmate home, while the natural-language scope
-#   tells the main firstmate when to route work there; routine churn stays in its own home;
+#   --final-reviewer writes the read-only final-review contract: it loads the
+#   vendored reasoning-critique skill and delivers its nine-section pt-BR report
+#   at data/<task-id>/report.md without changing the reviewed object.
+#   --secondmate writes a persistent secondmate charter. The project list is
+#   cloned into the secondmate home, while the natural-language scope tells the
+#   main firstmate when to route work there; routine churn stays in its own home;
 #   captain-relevant escalations and marked from-firstmate replies append to this
 #   home's status file.
 #   --no-projects writes a project-less charter for a domain whose subject is the
@@ -52,8 +56,8 @@
 # to launch a ship task whose explicit --mode disagrees, so an adjusted brief and the
 # recorded task metadata cannot drift apart.
 # Ship briefs begin with a worktree-isolation assertion before the branch step.
-# --mode is refused on scout and secondmate scaffolds: a scout's deliverable is a
-# report rather than a merge, and a charter is not a delivery contract.
+# --mode is refused on scout, final-reviewer, and secondmate scaffolds: report
+# tasks have no merge, and a charter is not a delivery contract.
 # There is no --yolo flag here. The worker never owns merge decisions, so yolo is
 # a spawn-time and firstmate-side input only (AGENTS.md section 7).
 # Every scaffold's status protocol distinguishes the configured
@@ -69,8 +73,9 @@
 # over copied detail) and defers self-governance recognition and insertion to
 # fm-ensure-agents-md.sh's contract.
 # Scaffolds carry no role scope: fm-spawn.sh supplies fm_brief_worker_role from
-# fm-dod-lib.sh to every ship/scout launch brief, so this file never becomes a
-# second owner of a contract that must stay current across relaunches.
+# fm-dod-lib.sh to every ship, scout, and final-reviewer launch brief, so this
+# file never becomes a second owner of a contract that must stay current across
+# relaunches.
 # Refuses to overwrite an existing brief.
 set -eu
 
@@ -122,12 +127,25 @@ else
   STATE="$FM_HOME/state"
 fi
 KIND=ship
+KIND_SET=0
+ROLE_FLAG=
 HERDR_LAB=0
 NO_PROJECTS=0
 MODE=
 MODE_SET=0
 POS=()
 want_value=
+set_kind() {  # <kind> <flag>
+  local requested=$1 flag=$2
+  if [ "$KIND_SET" -eq 1 ]; then
+    echo "error: role flags are mutually exclusive; cannot combine $ROLE_FLAG with $flag" >&2
+    exit 1
+  fi
+  KIND=$requested
+  KIND_SET=1
+  ROLE_FLAG=$flag
+}
+
 for a in "$@"; do
   if [ -n "$want_value" ]; then
     case "$a" in
@@ -141,8 +159,9 @@ for a in "$@"; do
     continue
   fi
   case "$a" in
-    --scout) KIND=scout ;;
-    --secondmate) KIND=secondmate ;;
+    --scout) set_kind scout --scout ;;
+    --final-reviewer) set_kind reviewer --final-reviewer ;;
+    --secondmate) set_kind secondmate --secondmate ;;
     --herdr-lab) HERDR_LAB=1 ;;
     --no-projects) NO_PROJECTS=1 ;;
     --mode) want_value=mode ;;
@@ -171,13 +190,13 @@ if [ "$KIND" = ship ]; then
     *) echo "error: --mode must be one of no-mistakes, direct-PR, local-only (got '$MODE')" >&2; exit 1 ;;
   esac
 elif [ "$MODE_SET" -eq 1 ]; then
-  echo "error: --mode applies only to ship briefs; a scout delivers a report and a secondmate charter is not a delivery contract" >&2
+  echo "error: --mode applies only to ship briefs; scouts and final reviewers deliver reports, and a secondmate charter is not a delivery contract" >&2
   exit 1
 fi
 ID=${POS[0]}
 
-if [ "$KIND" = secondmate ] && [ "$HERDR_LAB" -eq 1 ]; then
-  echo "error: --herdr-lab applies only to crewmate ship or scout briefs" >&2
+if { [ "$KIND" = secondmate ] || [ "$KIND" = reviewer ]; } && [ "$HERDR_LAB" -eq 1 ]; then
+  echo "error: --herdr-lab applies only to crewmate ship or scout briefs; a final reviewer is read-only" >&2
   exit 1
 fi
 
@@ -357,6 +376,51 @@ IFS= read -r -d '' TASK_SECTION <<'EOF' || true
 {FIRSTMATE_SPEC}
 EOF
 TASK_SECTION=${TASK_SECTION%$'\n'}
+
+if [ "$KIND" = reviewer ]; then
+REVIEWER_DOD=$(fm_final_reviewer_dod_block "$FM_ROOT" "$DATA" "$ID") || exit 1
+cat > "$BRIEF" <<EOF
+You are a dedicated final-review agent managed by firstmate. Work independently; do not wait for a human.
+
+$TASK_SECTION
+
+# Setup
+You are in a disposable git worktree of $REPO, at a detached HEAD on a clean default branch.
+This is a FINAL REVIEW task: inspect the completed delivery named in the Task and produce an independent report.
+The worktree and every reviewed artifact are read-only inputs.
+
+# Rules
+1. Never alter the reviewed object, create or switch branches, commit, push, open a PR, or respond to any other execution's gate.
+2. Stay inside this worktree; the only files you may write outside it are the report and status file below, plus handled acknowledgements in your instruction inbox.
+3. Use gh-axi for GitHub operations and chrome-devtools-axi for browser operations.
+4. Report status by appending one line:
+   \`echo "{state}: {one short line}" >> $STATUS_FILE\`
+   States: working, needs-decision, blocked, $PAUSED_VERB, done, failed.
+   Each append wakes firstmate, so report sparingly: only phase changes a supervisor
+   would act on and the needs-decision/blocked/paused/done/failed states. No step-by-step
+   FYI progress lines; firstmate reads your pane for that.
+   Whenever you mention a PR anywhere - a status line, your terminal, a summary - write its full
+   https:// URL exactly as the forge printed it, never a bare number such as "PR 108"; firstmate
+   copies that URL from your line rather than assembling one.
+   Use \`$PAUSED_VERB: {why}\` - distinct from \`blocked:\` - ONLY when you are deliberately idling on a
+   known external wait you expect to clear on its own ($CREWMATE_PAUSE_WAIT_EXAMPLES):
+   firstmate then leaves your idle pane alone and rechecks it on a long cadence instead of
+   treating it as a possible wedge. When you know when the wait clears, say so in the line with
+   \`until <YYYY-MM-DDTHH:MMZ>\` (UTC) and firstmate rechecks at that time instead.
+   Use \`blocked:\` when you are stuck and need help.
+5. If you hit the same obstacle twice, append \`blocked: {why}\` and stop; firstmate will help.
+6. If a decision belongs to a human, append \`needs-decision: {summary of options}\` and stop. Firstmate will reply with the decision.
+   A decision or blocker you opened stays open until a \`resolved\` line carrying its exact key lands; a later \`done:\` or \`working:\` line never closes it, even when the answer is what started that work.
+   Firstmate's reply normally writes that closing line at answer time; when a blocker or wait clears WITHOUT a firstmate reply, append \`resolved: {how it cleared}\` yourself (same \`[key=<slug>]\` if you opened it with one) as you resume.
+7. Preserve independence: report defects, risks, missing evidence, and recommendations; never implement a correction yourself.
+
+$INBOX_SECTION
+
+$REVIEWER_DOD
+EOF
+echo "scaffolded: $BRIEF (final reviewer; replace {TASK} and {FIRSTMATE_SPEC})"
+exit 0
+fi
 
 if [ "$KIND" = scout ]; then
 if "$SCRIPT_DIR/fm-bootstrap.sh" lavish-compatible >/dev/null 2>&1; then

@@ -98,7 +98,7 @@
 # from-firstmate carrier owned by bin/fm-operational-input.sh so the secondmate
 # routes its reply via its status file or a status-pointed doc instead of
 # stranding it in chat the main firstmate never reads. On the inbox plane the
-# marker travels verbatim inside the recorded body. A crewmate/scout target,
+# marker travels verbatim inside the recorded body. A worktree-worker target,
 # an explicit backend-target escape-hatch target, and the --key path are never
 # marked - their behavior is unchanged.
 #
@@ -171,7 +171,7 @@
 # the task's record; the worker reading the answer late is covered by the
 # acknowledgement re-ring ladder. On the typed plane it still waits for the
 # confirmed submit. The close is a LOCAL append for every target kind -
-# crewmate, scout, local secondmate, and remote secondmate alike - because the
+# ship, scout, final reviewer, local secondmate, and remote secondmate alike - because the
 # open-decision ledger fm-wake-drain folds lives in this home's own state dir
 # (a remote mate's escalations reach it through the parent-replies ingest);
 # only the answer message crosses the backend or remote transport.
@@ -518,7 +518,7 @@ fi
 # through this home's meta whose authoritative kind is secondmate is marked: the
 # secondmate then routes its reply via the status path (see fm-marker-lib.sh).
 # An explicit backend target (the escape hatch for endpoints outside this home)
-# and any crewmate/scout target are left unmarked, and so is the --key path.
+# and any worktree-worker target are left unmarked, and so is the --key path.
 MARK_FROM_FIRSTMATE=0
 PENDING_REPLY_CORR=
 PENDING_REPLY_CREATED=0

@@ -704,6 +704,383 @@ test_local_only_fork_remote_allows() {
   pass "local-only worktree with HEAD on a fork remote is torn down and the home summary is refreshed"
 }
 
+test_final_reviewer_requires_and_preserves_its_report() {
+  local case_dir out rc review_head
+  case_dir=$(make_case reviewer-report)
+  write_meta "$case_dir" no-mistakes reviewer
+  wt_commit_file "$case_dir" reviewed.txt snapshot "reviewed snapshot"
+  review_head=$(git -C "$case_dir/wt" rev-parse HEAD)
+  printf 'review_head=%s\n' "$review_head" >> "$case_dir/state/task-x1.meta"
+
+  set +e
+  out=$(run_teardown "$case_dir" 2>&1)
+  rc=$?
+  set -e
+  [ "$rc" -ne 0 ] || fail "final-reviewer teardown without a report should refuse"
+  assert_contains "$out" "reviewer task task-x1 has no report" \
+    "final-reviewer teardown did not name its missing deliverable"
+  assert_present "$case_dir/state/task-x1.meta" \
+    "final-reviewer teardown removed task metadata without its report"
+
+  mkdir -p "$case_dir/data/task-x1"
+  printf '%s\n' '# review report' > "$case_dir/data/task-x1/report.md"
+  printf '%s\n' 'decisions_reviewed=1' 'decision_keys=' >> "$case_dir/state/task-x1.meta"
+  printf '%s\n' "done: revisão final Aprovado report=$case_dir/data/task-x1/report.md" \
+    > "$case_dir/state/task-x1.status"
+  set +e
+  out=$(run_teardown "$case_dir" 2>&1)
+  rc=$?
+  set -e
+  [ "$rc" -ne 0 ] || fail "final-reviewer teardown with an invalid report should refuse"
+  assert_contains "$out" "does not match the canonical reasoning-critique section contract" \
+    "final-reviewer teardown did not reject an invalid serialized report"
+  assert_present "$case_dir/state/task-x1.meta" \
+    "final-reviewer teardown removed task metadata after an invalid report"
+
+  cat > "$case_dir/data/task-x1/report.md" <<'EOF'
+## Veredito
+
+Aprovado
+
+## Resultado Esperado
+
+## O Que Foi Entregue
+
+## Apontamentos
+
+## Cobertura de Requisitos
+
+## Riscos
+
+## Validação
+
+## Avaliação Final
+
+## Prevenção
+EOF
+  set +e
+  out=$(run_teardown "$case_dir" 2>&1)
+  rc=$?
+  set -e
+  [ "$rc" -ne 0 ] || fail "final-reviewer teardown with empty report sections should refuse"
+  assert_contains "$out" "report section '## Resultado Esperado' has no content" \
+    "final-reviewer teardown did not reject empty serialized report sections"
+  assert_present "$case_dir/state/task-x1.meta" \
+    "final-reviewer teardown removed task metadata after an empty report section"
+
+  cat > "$case_dir/data/task-x1/report.md" <<'EOF'
+## Veredito
+
+Aprovado
+
+## Resultado Esperado
+
+Resultado esperado.
+
+## O Que Foi Entregue
+
+Entrega observada.
+
+## Apontamentos
+
+Nenhum apontamento material.
+
+## Cobertura de Requisitos
+
+Cobertura conferida.
+
+## Riscos
+
+Nenhum risco material identificado.
+
+## Validação
+
+Validação focada concluída.
+
+## Avaliação Final
+
+Entrega aprovada.
+
+## Prevenção
+
+Nenhuma medida adicional.
+EOF
+  printf '%s\n' "done: revisão final Inconclusivo report=$case_dir/data/task-x1/report.md" \
+    > "$case_dir/state/task-x1.status"
+  set +e
+  out=$(run_teardown "$case_dir" 2>&1)
+  rc=$?
+  set -e
+  [ "$rc" -ne 0 ] || fail "final-reviewer teardown with a mismatched verdict should refuse"
+  assert_contains "$out" "status does not match report verdict 'Aprovado'" \
+    "final-reviewer teardown did not reject a status/report verdict mismatch"
+  assert_present "$case_dir/state/task-x1.meta" \
+    "final-reviewer teardown removed task metadata after a verdict mismatch"
+
+  printf '%s\n' "done: revisão final Aprovado report=$case_dir/data/task-x1/report.md" \
+    > "$case_dir/state/task-x1.status"
+  printf '%s\n' "done: revisão final Inconclusivo report=$case_dir/data/task-x1/report.md" \
+    >> "$case_dir/state/task-x1.status"
+  set +e
+  out=$(run_teardown "$case_dir" 2>&1)
+  rc=$?
+  set -e
+  [ "$rc" -ne 0 ] || fail "final-reviewer teardown with a superseded matching verdict should refuse"
+  assert_contains "$out" "status does not match report verdict 'Aprovado'" \
+    "final-reviewer teardown accepted a historical verdict superseded by the latest declaration"
+  assert_present "$case_dir/state/task-x1.meta" \
+    "final-reviewer teardown removed task metadata after a superseding verdict"
+
+  printf '%s\n' "done: revisão final Aprovado report=$case_dir/data/task-x1/report.md" \
+    >> "$case_dir/state/task-x1.status"
+  printf '%s\n' "working: revisão final reaberta" >> "$case_dir/state/task-x1.status"
+  set +e
+  out=$(run_teardown "$case_dir" 2>&1)
+  rc=$?
+  set -e
+  [ "$rc" -ne 0 ] || fail "final-reviewer teardown with a reopened review should refuse"
+  assert_contains "$out" "status does not match report verdict 'Aprovado'" \
+    "final-reviewer teardown ignored a later event that reopened the review"
+  assert_present "$case_dir/state/task-x1.meta" \
+    "final-reviewer teardown removed task metadata after the review reopened"
+
+  printf '%s\n' "done: revisão final Aprovado report=$case_dir/data/task-x1/report.md" \
+    >> "$case_dir/state/task-x1.status"
+  printf '%s\n' "failed: evidência final invalidada" >> "$case_dir/state/task-x1.status"
+  set +e
+  out=$(run_teardown "$case_dir" 2>&1)
+  rc=$?
+  set -e
+  [ "$rc" -ne 0 ] || fail "final-reviewer teardown after a terminal failure should refuse"
+  assert_contains "$out" "status does not match report verdict 'Aprovado'" \
+    "final-reviewer teardown ignored a later terminal failure"
+  assert_present "$case_dir/state/task-x1.meta" \
+    "final-reviewer teardown removed task metadata after a terminal failure"
+
+  printf '%s\n' "done: revisão final Aprovado report=$case_dir/data/task-x1/report.md" \
+    >> "$case_dir/state/task-x1.status"
+  git -C "$case_dir/wt" reset --hard HEAD~1 >/dev/null
+  set +e
+  out=$(run_teardown "$case_dir" 2>&1)
+  rc=$?
+  set -e
+  [ "$rc" -ne 0 ] || fail "final-reviewer teardown on an older clean snapshot should refuse"
+  assert_contains "$out" "does not match recorded initial review HEAD $review_head" \
+    "final-reviewer teardown accepted a clean HEAD different from its initial snapshot"
+  assert_present "$case_dir/state/task-x1.meta" \
+    "final-reviewer teardown removed task metadata after a snapshot mismatch"
+  git -C "$case_dir/wt" reset --hard "$review_head" >/dev/null
+
+  mkdir -p "$case_dir/wt/.claude"
+  printf '%s\n' '.claude/settings.local.json' \
+    >> "$(git -C "$case_dir/wt" rev-parse --git-path info/exclude)"
+  printf '%s\n' '{"hooks":{}}' > "$case_dir/wt/.claude/settings.local.json"
+  printf '%s\n' 'reviewer note' > "$case_dir/wt/.claude/reviewer-note"
+  set +e
+  out=$(run_teardown "$case_dir" 2>&1)
+  rc=$?
+  set -e
+  [ "$rc" -ne 0 ] || fail "final-reviewer teardown with an extra Claude file should refuse"
+  assert_contains "$out" "worktree $case_dir/wt has uncommitted changes" \
+    "final-reviewer teardown hid an extra file behind the Claude wiring directory"
+  assert_present "$case_dir/state/task-x1.meta" \
+    "final-reviewer teardown removed task metadata for an extra Claude file"
+  rm -rf "$case_dir/wt/.claude"
+
+  printf '%s\n' 'reviewer changed the reviewed copy' > "$case_dir/wt/reviewer-edit.txt"
+  set +e
+  out=$(run_teardown "$case_dir" 2>&1)
+  rc=$?
+  set -e
+  [ "$rc" -ne 0 ] || fail "final-reviewer teardown with a dirty reviewed worktree should refuse"
+  assert_contains "$out" "worktree $case_dir/wt has uncommitted changes" \
+    "final-reviewer teardown did not apply worktree cleanliness checks"
+  assert_present "$case_dir/state/task-x1.meta" \
+    "final-reviewer teardown removed task metadata for a dirty reviewed worktree"
+  rm "$case_dir/wt/reviewer-edit.txt"
+  run_teardown "$case_dir" >/dev/null \
+    || fail "final-reviewer teardown with a completed report should succeed"
+  assert_absent "$case_dir/state/task-x1.meta" \
+    "completed final-reviewer teardown retained task metadata"
+  assert_present "$case_dir/data/task-x1/report.md" \
+    "completed final-reviewer teardown removed its durable report"
+  pass "fm-teardown: final reviewers require and preserve their report deliverable"
+}
+
+# A real reviewer opens the report with a document title and the identification
+# block the Definition of done demands ("identify the reviewed object and
+# version"). The skill contract is about the nine `##` sections, so that preamble
+# must not be read as an extra section and refused at the closing gate.
+test_final_reviewer_report_may_open_with_title_and_identification() {
+  local case_dir out rc review_head report
+  case_dir=$(make_case reviewer-report-preamble)
+  write_meta "$case_dir" no-mistakes reviewer
+  wt_commit_file "$case_dir" reviewed.txt snapshot "reviewed snapshot"
+  review_head=$(git -C "$case_dir/wt" rev-parse HEAD)
+  printf 'review_head=%s\n' "$review_head" >> "$case_dir/state/task-x1.meta"
+  printf '%s\n' 'decisions_reviewed=1' 'decision_keys=' >> "$case_dir/state/task-x1.meta"
+
+  mkdir -p "$case_dir/data/task-x1"
+  report="$case_dir/data/task-x1/report.md"
+  printf '%s\n' "done: revisão final Não aprovado report=$report" \
+    > "$case_dir/state/task-x1.status"
+
+  # Same preamble, but one section title off the contract: still refused.
+  cat > "$report" <<'EOF'
+# Revisão final independente — `preco_final`
+
+**Objeto revisado:** `desconto.py` (função `preco_final`).
+**Versão:** commit `62b11d0`, árvore limpa.
+**Revisor:** agente de revisão final independente (somente leitura).
+
+## Veredito
+
+Não aprovado. O critério de aceite falha na execução.
+
+## Resultado Esperado
+
+`preco_final(200, 10)` deve retornar `180`.
+
+## O Que Foi Entregue
+
+`desconto.py` retorna `-1800` para essa entrada.
+
+## Apontamentos
+
+A1: fórmula aplica o desconto sem dividir por 100.
+
+## Cobertura de Requisitos
+
+R1 não atendido: critério de aceite reproduzido e falho.
+
+## Risco
+
+Nenhum risco adicional além do apontamento A1.
+
+## Validação
+
+Execução direta da função com a entrada do critério de aceite.
+
+## Avaliação Final
+
+Entrega não pode ser aceita nesta versão.
+
+## Prevenção
+
+Teste da convenção de pontos percentuais antes da entrega.
+EOF
+  set +e
+  out=$(run_teardown "$case_dir" 2>&1)
+  rc=$?
+  set -e
+  [ "$rc" -ne 0 ] || fail "final-reviewer teardown with a wrong section title should refuse"
+  assert_contains "$out" "does not match the canonical reasoning-critique section contract" \
+    "final-reviewer teardown accepted a report whose sections leave the contract"
+  assert_present "$case_dir/state/task-x1.meta" \
+    "final-reviewer teardown removed task metadata after a section mismatch"
+
+  # The nine contract sections, still behind the required title and
+  # identification block: this is the report a real reviewer writes.
+  sed 's/^## Risco$/## Riscos/' "$report" > "$report.fixed"
+  mv "$report.fixed" "$report"
+  run_teardown "$case_dir" >/dev/null \
+    || fail "final-reviewer teardown refused a contract report carrying its required identification block"
+  assert_absent "$case_dir/state/task-x1.meta" \
+    "completed final-reviewer teardown retained task metadata"
+  assert_present "$report" \
+    "completed final-reviewer teardown removed its durable report"
+  pass "fm-teardown: a final report may identify the reviewed object above its nine sections"
+}
+
+# A reviewer may quote the canonical template inside a fenced code block, but the
+# verdict a human reads is the one under the real `## Veredito` heading. The
+# closing gate must read that same verdict, so the outcome it records can never
+# diverge from the report, in either direction.
+test_final_reviewer_report_verdict_ignores_fenced_quotes() {
+  local case_dir out rc review_head report
+  case_dir=$(make_case reviewer-report-fence)
+  write_meta "$case_dir" no-mistakes reviewer
+  wt_commit_file "$case_dir" reviewed.txt snapshot "reviewed snapshot"
+  review_head=$(git -C "$case_dir/wt" rev-parse HEAD)
+  printf 'review_head=%s\n' "$review_head" >> "$case_dir/state/task-x1.meta"
+  printf '%s\n' 'decisions_reviewed=1' 'decision_keys=' >> "$case_dir/state/task-x1.meta"
+
+  mkdir -p "$case_dir/data/task-x1"
+  report="$case_dir/data/task-x1/report.md"
+  cat > "$report" <<'EOF'
+# Revisão final independente — `preco_final`
+
+**Objeto revisado:** `desconto.py` (função `preco_final`).
+**Versão:** commit registrado, árvore limpa.
+
+O modelo da skill abre a primeira seção assim:
+
+```markdown
+## Veredito
+
+Aprovado
+```
+
+## Veredito
+
+Não aprovado. O critério de aceite falha na execução.
+
+## Resultado Esperado
+
+`preco_final(200, 10)` deve retornar `180`.
+
+## O Que Foi Entregue
+
+`desconto.py` retorna `-1800` para essa entrada.
+
+## Apontamentos
+
+A1: fórmula aplica o desconto sem dividir por 100.
+
+## Cobertura de Requisitos
+
+R1 não atendido: critério de aceite reproduzido e falho.
+
+## Riscos
+
+Nenhum risco adicional além do apontamento A1.
+
+## Validação
+
+Execução direta da função com a entrada do critério de aceite.
+
+## Avaliação Final
+
+Entrega não pode ser aceita nesta versão.
+
+## Prevenção
+
+Teste da convenção de pontos percentuais antes da entrega.
+EOF
+
+  printf '%s\n' "done: revisão final Aprovado report=$report" \
+    > "$case_dir/state/task-x1.status"
+  set +e
+  out=$(run_teardown "$case_dir" 2>&1)
+  rc=$?
+  set -e
+  [ "$rc" -ne 0 ] || fail "final-reviewer teardown recorded a verdict the report never gives"
+  assert_contains "$out" "status does not match report verdict 'Não aprovado'" \
+    "final-reviewer teardown read its verdict from a fenced quote of the template"
+  assert_present "$case_dir/state/task-x1.meta" \
+    "final-reviewer teardown removed task metadata after a fenced verdict mismatch"
+
+  printf '%s\n' "done: revisão final Não aprovado report=$report" \
+    > "$case_dir/state/task-x1.status"
+  run_teardown "$case_dir" >/dev/null \
+    || fail "final-reviewer teardown refused the verdict its own report declares"
+  assert_absent "$case_dir/state/task-x1.meta" \
+    "completed final-reviewer teardown retained task metadata"
+  assert_present "$report" \
+    "completed final-reviewer teardown removed its durable report"
+  pass "fm-teardown: a fenced quote of the template never stands in for the report verdict"
+}
+
 test_teardown_closes_the_backlog_item_itself() {
   local case_dir out
   case_dir=$(make_case tasks-axi-close)
@@ -3666,6 +4043,9 @@ EOF
   pass "the run abort and the leaked-process reap both complete before the destructive worktree return"
 }
 
+test_final_reviewer_requires_and_preserves_its_report
+test_final_reviewer_report_may_open_with_title_and_identification
+test_final_reviewer_report_verdict_ignores_fenced_quotes
 test_local_only_fork_remote_allows
 test_teardown_closes_the_backlog_item_itself
 test_teardown_manual_backend_leaves_the_backlog_to_the_operator

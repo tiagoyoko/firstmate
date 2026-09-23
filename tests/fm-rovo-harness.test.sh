@@ -347,6 +347,27 @@ test_rovo_secondmate_is_refused() {
   pass "fm-spawn: rovo cannot be launched as a secondmate"
 }
 
+test_rovo_final_reviewer_is_refused() {
+  local id rec out rc
+  id="rovo-reviewer-z8-$$"
+  rec=$(make_spawn_case reviewer-refuse "$id")
+  read_spawn_record "$rec"
+  rc=0
+  out=$(HOME="$HOME_DIR" FM_ROOT_OVERRIDE='' FM_HOME="$HOME_DIR" \
+    FM_STATE_OVERRIDE="$HOME_DIR/state" FM_DATA_OVERRIDE="$HOME_DIR/data" \
+    FM_PROJECTS_OVERRIDE="$HOME_DIR/projects" FM_CONFIG_OVERRIDE="$HOME_DIR/config" \
+    FM_SPAWN_NO_GUARD=1 PATH="$FAKEBIN_DIR:$BASE_PATH" \
+    "$SPAWN" "$id" "$PROJ_DIR" --final-reviewer --harness rovo 2>&1) || rc=$?
+  [ "$rc" -ne 0 ] || fail "a rovo final reviewer spawn should be refused"
+  assert_contains "$out" "cannot load the required reasoning-critique skill" \
+    "rovo reviewer refusal did not explain the missing required capability"
+  assert_contains "$out" "Select another verified harness" \
+    "rovo reviewer refusal did not provide an actionable alternative"
+  [ ! -s "$CASE_DIR/launch.log" ] || fail "rovo reviewer refusal launched an endpoint"
+  assert_absent "$HOME_DIR/state/$id.meta" "rovo reviewer refusal published task metadata"
+  pass "fm-spawn: rovo refuses final reviewers before launch"
+}
+
 test_rovo_detection_precedence_and_ancestry() {
   local dir fakebin cfg out
   dir="$TMP_ROOT/detection"
@@ -413,6 +434,9 @@ test_rovo_control_lib_table() {
   [ "$(fm_control_harness_family rovo-anything)" = rovo ] || fail "rovo harness family prefix match failed"
   fm_control_harness_supports_kind rovo ship || fail "rovo should support ship tasks"
   fm_control_harness_supports_kind rovo scout || fail "rovo should support scout tasks"
+  if fm_control_harness_supports_kind rovo reviewer; then
+    fail "rovo should never support final-reviewer tasks"
+  fi
   if fm_control_harness_supports_kind rovo secondmate; then
     fail "rovo should never support secondmate tasks"
   fi
@@ -468,6 +492,7 @@ test_rovo_readiness_gate_precedes_pointer
 test_rovo_unconfirmed_delivery_fails_loudly
 test_rovo_missing_binary_refuses_before_pane_creation
 test_rovo_secondmate_is_refused
+test_rovo_final_reviewer_is_refused
 test_rovo_detection_precedence_and_ancestry
 test_rovo_control_lib_table
 test_rovo_busy_regex_isolated

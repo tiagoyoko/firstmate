@@ -349,7 +349,7 @@ test_previous_fold_cache_is_refolded_under_current_semantics() {
 
 test_terminal_supersession_reaches_cached_drains() {
   local dir state status cursor out kind terminal expected closing ident size span pass_number
-  for kind in scout ship secondmate; do
+  for kind in scout ship reviewer secondmate; do
     for terminal in 'done' failed; do
       dir=$(make_case "terminal-$kind-$terminal")
       state="$dir/state"; status="$state/task.status"; cursor="$state/.task.open-decisions-cursor"; out="$dir/drain.out"
@@ -364,7 +364,7 @@ test_terminal_supersession_reaches_cached_drains() {
         if [ "$pass_number" = 2 ]; then
           ident=$(sed -n 's/^ident=//p' "$cursor")
           size=$(LC_ALL=C wc -c < "$status" | tr -d '[:space:]')
-          printf 'version=5\noffset=%s\nident=%s\naccess\tblocked\twaiting' "$size" "$ident" > "$cursor"
+          printf 'version=8:%s\noffset=%s\nident=%s\naccess\tblocked\twaiting' "$kind" "$size" "$ident" > "$cursor"
         fi
         FM_STATE_OVERRIDE="$state" "$DRAIN" > "$out" 2> "$dir/drain.err" || fail "$kind terminal drain failed"
         if [ "$kind" = secondmate ]; then
@@ -398,7 +398,7 @@ test_kind_changes_invalidate_folded_decisions() {
   local dir state status kind expected
   dir=$(make_case cursor-kind-change); state="$dir/state"; status="$state/task.status"
   printf 'blocked [key=access]: waiting\ndone: report saved\nnote: cleanup complete\n' > "$status"
-  for kind in unknown ship secondmate scout; do
+  for kind in unknown ship secondmate scout reviewer; do
     [ "$kind" = unknown ] || printf 'kind=%s\n' "$kind" >> "$state/task.meta"
     case "$kind" in unknown|secondmate) expected=$'access\tblocked\twaiting' ;; *) expected='' ;; esac
     bash -c '. "$1"; [ "$(status_open_decisions_incremental "$2")" = "$3" ] && [ "$(status_open_decisions "$2")" = "$3" ]' \

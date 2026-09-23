@@ -41,7 +41,7 @@
 #   ALLOW - exit 0 and no output.
 #   DENY - exit 2, a Claude-shaped deny object on stderr, and a Grok-shaped
 #          deny object on stdout unless --claude was supplied.
-#   INERT - not a genuine primary home (a crewmate/scout task worktree or a
+#   INERT - not a genuine primary home (a worktree-worker task worktree or a
 #           non-firstmate repo): exit 0 with no output, exactly like ALLOW.
 #   ESCAPE - FM_ALLOW_SUBAGENT=1 in the environment allows deliberately.
 #   FAIL OPEN - malformed or empty stdin, or missing jq for stdin transport.
@@ -96,7 +96,7 @@ worktrees inherit it and legitimate crewmates would lose their delegation tools.
 This hook remains as the shipped guard for future delegation-shaped names
 outside any local fixed list.
 Fires only in a genuine firstmate primary home; it is a silent no-op in a
-crewmate/scout task worktree or any non-firstmate repo, where a worker using
+worktree-worker task worktree or any non-firstmate repo, where a worker using
 delegation tools is legitimate.
 Exits 0 to allow and 2 to deny, naming the real crewmate dispatch path instead.
 Set FM_ALLOW_SUBAGENT=1 in the session environment to allow deliberately.
