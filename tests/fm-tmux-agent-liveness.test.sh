@@ -54,11 +54,24 @@ export PATH
 ln -s "$SLEEP_BIN" "$LAB/bin/claude-link"
 ln -s "$SLEEP_BIN" "$LAB/bin/pi"
 ln -s "$SLEEP_BIN" "$LAB/bin/notaharness"
-# omp (Oh My Pi) is a single binary whose live process name is the bare word
+# omp (Oh My Pi) can be a single binary whose live process name is the bare word
 # `omp`; the two decoys are the substrings an unanchored glob would misread.
 ln -s "$SLEEP_BIN" "$LAB/bin/omp"
 ln -s "$SLEEP_BIN" "$LAB/bin/ompd"
 ln -s "$SLEEP_BIN" "$LAB/bin/comp"
+ln -s /bin/bash "$LAB/bin/bun"
+ln -s /bin/bash "$LAB/bin/node"
+mkdir -p "$LAB/interpreters/omp-dir" "$LAB/interpreters/codex"
+for script in \
+  "$LAB/interpreters/omp" \
+  "$LAB/interpreters/omp-dir/build.ts" \
+  "$LAB/interpreters/codex/report.js"; do
+  cat > "$script" <<'SH'
+while :; do
+  sleep 900
+done
+SH
+done
 # muse's installed binary is muse-bin-<version>: the launcher execs it, so the
 # version is the LIVE process name and it changes on every auto-update. Unlike
 # Claude Code's version-named binary there is no `muse` path component to fall
@@ -186,9 +199,9 @@ done
 pass "tmux liveness: unrelated muse-containing command names stay ambiguous"
 
 # --- omp's bare binary name -------------------------------------------------
-# omp (Oh My Pi) runs as a single binary whose live process name is exactly
-# `omp`, with no path component to fall back on, so the anchored name is the
-# only signal and the two decoys prove it never widens into a substring match.
+# The compiled omp distribution has the exact live process name `omp`, with no
+# path component to fall back on, so the anchored name is the only signal and
+# the two decoys prove it never widens into a substring match.
 
 new_window omp "$LAB/bin/omp" 900
 wait_for_state "$SESSION:omp" alive \
@@ -201,6 +214,25 @@ for decoy in ompd comp; do
     || fail "'$decoy' merely contains 'omp' and must not classify as a live agent pane"
 done
 pass "tmux liveness: unrelated omp-containing command names stay ambiguous"
+
+new_window bun-omp "$LAB/bin/bun" "$LAB/interpreters/omp"
+wait_for_state "$SESSION:bun-omp" alive \
+  || fail "a bun-installed omp process must classify alive"
+case "$(fm_backend_tmux_foreground_args "$SESSION:bun-omp")" in
+  *"bun $LAB/interpreters/omp"*) ;;
+  *) fail "the bun-installed omp fixture did not expose its script operand" ;;
+esac
+pass "tmux liveness: a bun-installed omp process classifies alive"
+
+new_window bun-omp-decoy "$LAB/bin/bun" "$LAB/interpreters/omp-dir/build.ts"
+wait_for_state "$SESSION:bun-omp-decoy" ambiguous \
+  || fail "an omp directory component must not classify an unrelated bun process alive"
+pass "tmux liveness: an omp directory component stays ambiguous"
+
+new_window node-codex-decoy "$LAB/bin/node" "$LAB/interpreters/codex/report.js"
+wait_for_state "$SESSION:node-codex-decoy" ambiguous \
+  || fail "a codex directory component must not classify an unrelated node process alive"
+pass "tmux liveness: a codex directory component stays ambiguous"
 
 # --- a version name blinds one source ---------------------------------------
 # Giving a genuine harness-named executable the version-string argv[0] that

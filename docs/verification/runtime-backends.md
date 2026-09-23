@@ -2022,12 +2022,23 @@ Its native App Server peer and watcher-close process are deterministic fixtures;
 
 omp runs crewmate, scout, secondmate, and primary work; [`supervision.md`](supervision.md#omp-oh-my-pi-native-delivery-2026-09-05) owns the primary evidence.
 The evidence below was produced on 2026-09-05 against omp 18.1.11 (`~/.local/bin/omp`, a Bun-compiled single binary) on macOS 26 arm64 through the Herdr backend with the `openai-codex/gpt-6-astra` model, building on the 2026-09-02 adapter investigation against 18.1.2.
+The Bun-script process identity was additionally captured on 2026-09-22 against omp 18.2.6 installed with `bun install -g @oh-my-pi/pi-coding-agent` on macOS.
 
 ### Process identity and markers
 
-`ps -o comm=` reports the bare name `omp` for the agent process, from both its `!` bash path and the model's bash tool, so identity is the anchored name; `ompd` and `comp` never match.
+For the Bun-compiled 18.1.11 distribution, `ps -o comm=` reports the bare name `omp` for the agent process, from both its `!` bash path and the model's bash tool, so identity is the anchored name; `ompd` and `comp` never match.
+For the Bun-script 18.2.6 distribution, `OMP_PID` below named the running agent process and the process table exposed `bun` plus the exact launcher operand:
+
+```sh
+$ ps -o comm= -p "$OMP_PID"
+bun
+$ ps -o args= -p "$OMP_PID"
+bun /Users/<user>/.bun/bin/omp
+```
+
+The portable regression accepts only that second operand when its basename is exactly `omp`; a directory component or later argument named `omp` remains unrelated.
 omp publishes no harness marker: `PI_CODING_AGENT` is absent from the binary, and the default profile sets neither `PI_CODING_AGENT_DIR` nor `OMP_PROFILE` in the process environment.
-`FM_OMP_HARNESS=omp` is Firstmate's own launch marker and wins over an inherited `CLAUDECODE` only under a real omp ancestor; `tests/fm-omp-harness.test.sh` pins both directions with real processes.
+`FM_OMP_HARNESS=omp` is Firstmate's own launch marker and wins over an inherited `CLAUDECODE` only under a real omp ancestor; `tests/fm-omp-harness.test.sh` pins the precedence and leakage directions with bounded process-table fixtures, while `tests/fm-tmux-agent-liveness.test.sh` drives the Bun identity through a real tmux process.
 
 ### Composer
 

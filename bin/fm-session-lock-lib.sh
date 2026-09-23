@@ -57,9 +57,21 @@ fm_harness_path_name() {  # <path>
 #      argv[0] in `ps -o comm=`, while procps on Linux reports the kernel exec
 #      name and ignores argv[0] entirely, so a version-named Claude Code binary
 #      is identified by its install path on macOS and by argv[0] on Linux.
-#   3. a bare interpreter (node, python) running a harness script path.
+#   3. a bare interpreter (node, python) running a harness script path, or Bun
+#      whose script operand has the exact basename `omp`.
 #   4. Cursor's own structural identity, owned by bin/fm-cursor-lib.sh.
 FM_HARNESS_IS_CLAUDE=0
+
+fm_bun_args_are_omp() {  # <args>
+  local args=$1
+  local -a tokens=()
+  read -r -a tokens <<EOF
+$args
+EOF
+  [ "${#tokens[@]}" -ge 2 ] || return 1
+  [ "$(basename -- "${tokens[1]}")" = omp ]
+}
+
 fm_harness_process_matches() {  # <comm> <args>
   local comm=$1 args=$2 base argv0 name
   FM_HARNESS_IS_CLAUDE=0
@@ -73,7 +85,17 @@ fm_harness_process_matches() {  # <comm> <args>
     case "$name" in claude) FM_HARNESS_IS_CLAUDE=1 ;; esac
     return 0
   fi
-  # Bare interpreter (e.g. node): match the harness name in its script path.
+  # Bun belongs here because omp installed with
+  # `bun install -g @oh-my-pi/pi-coding-agent` is a `#!/usr/bin/env bun` script
+  # rather than the compiled single binary, so the process reports comm=bun with
+  # args "bun ~/.bun/bin/omp" (verified, omp 18.2.6, macOS). Without this arm a
+  # bun-installed omp primary can never find itself in its own ancestry, so
+  # every one of its sessions refuses the fleet lock and runs read-only.
+  if [ "$base" = bun ] && fm_bun_args_are_omp "$args"; then
+    return 0
+  fi
+  # Bare interpreter: the harness name is in the script path it was handed, not
+  # in comm.
   case "$comm" in
     *node*|*python*)
       if printf '%s' "$args" | grep -qE "$FM_HARNESS_RE"; then
