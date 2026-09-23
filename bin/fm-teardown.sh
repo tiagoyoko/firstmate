@@ -76,6 +76,11 @@
 # A final reviewer additionally requires the canonical nine report sections,
 # a valid report verdict matching the latest unsuperseded terminal review event,
 # a clean worktree, and a current HEAD equal to its recorded initial review HEAD.
+# A cleanup_recovery=orca record is the exception: it names an Orca worktree whose
+# release failed before any worker launched, so the scout and reviewer report
+# gates and the reviewer worktree, HEAD, and Orca landing checks are all skipped,
+# leaving the recovery's own Orca worktree-identity match as the only one of them
+# that still runs.
 # Before destructive cleanup, teardown validates task check artifacts as
 # ordinary single-link files on the state device. It refuses and preserves
 # task state when that proof fails; otherwise it removes the task's check,
@@ -1452,8 +1457,8 @@ work_is_landed() {
 }
 
 # The reasoning-critique contract names the nine `##` sections, so only those are
-# collected. A document title and the identification block the reviewer's
-# Definition of done demands sit above them and are not sections.
+# collected. A document title, and any identification the reviewer's Definition
+# of done asks for, may sit above them and are not sections.
 review_report_headings() {  # <markdown-file>
   LC_ALL=C awk '
     {
@@ -3441,6 +3446,11 @@ if [ "$KIND" = secondmate ] && [ "$FORCE" = "--force" ]; then
   cleanup_firstmate_home_children "$HOME_PATH" || exit $?
 fi
 
+# A cleanup_recovery=orca record is the residue of a spawn that failed before any
+# worker ran, so it can hold no report, verdict, or recorded review HEAD; gating
+# it on those would leave releasing the worktree to --force, which also authorizes
+# discarding real work. The reviewer worktree, HEAD, and Orca landing checks below
+# skip it for the same reason.
 if { [ "$KIND" = scout ] || [ "$KIND" = reviewer ]; } \
   && [ "$FORCE" != "--force" ] \
   && [ "$CLEANUP_RECOVERY" != orca ]; then

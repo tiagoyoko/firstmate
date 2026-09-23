@@ -808,6 +808,10 @@ _fm_open_decisions_cursor_path() {  # <status-file>
 # 8: a colonless line without a complete "[key=...]" token is no longer a
 # transition at all, so a cursor holding a phantom decision that bare prose
 # opened - which no later line could close - is discarded.
+# 9: kind=reviewer is a recognized kind whose done/failed line closes every open
+# decision like a ship's or a scout's, so a cursor folded while a reviewer read
+# as "unknown" - and therefore kept its decisions open past its own terminal
+# line - is discarded.
 # Version 4 was already spent on the bracketed-tag parser change above, and a
 # cursor persisted under that reading predates this one, so it must still be
 # discarded and rebuilt from byte 0 under the new reading.

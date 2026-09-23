@@ -21,8 +21,9 @@ The target window's harness is recorded as `harness=` in `state/<id>.meta`.
 
 ## Session-start reconciliation for a dead ordinary direct report
 
-This procedure covers ordinary `kind=ship` and `kind=scout` direct reports.
+This procedure covers ordinary `kind=ship`, `kind=scout`, and `kind=reviewer` direct reports.
 Load `secondmate-provisioning` instead for `kind=secondmate` recovery.
+A `kind=reviewer` relaunch carries extra preconditions owned by [`docs/agent-control.md`](../../../docs/agent-control.md), so read them before relaunching one: a reviewer that altered its copy is refused rather than replaced.
 
 For a REMOTE secondmate, `fm-crew-state` and `fm-peek` read the actual remote endpoint over `fm-on.sh`, and `fm-send` reports a delivered-with-pending-confirmation steer as delivered (their headers own the contracts); an `unknown-remote` read or unreachable-host failure means the remote state could not be read, never that the mate is dead or the send failed.
 Recover a genuinely stuck remote mate only through `bin/fm-spawn.sh <id> --secondmate`, never raw herdr pane close/kill surgery, which strands the endpoint binding.
