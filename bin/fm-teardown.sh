@@ -1889,12 +1889,32 @@ teardown_treehouse_return() {
   return 1
 }
 
+validate_final_reviewer_worktree_safety() {
+  local dirty_raw dirty
+  if ! dirty_raw=$(git -C "$WT" status --porcelain 2>/dev/null); then
+    if worktree_safety_blocked_by_lock "uncommitted changes"; then
+      return "$TEARDOWN_WORKTREE_SAFETY_LOCK_BLOCKED"
+    fi
+    echo "REFUSED: cannot inspect reviewer worktree $WT for uncommitted changes." >&2
+    echo "Restore the git index state, or get the captain's explicit OK to discard, then --force." >&2
+    return 1
+  fi
+  dirty=$(printf '%s\n' "$dirty_raw" | grep -vE '^\?\? (\.claude/|\.fm-(grok|kimi)-turnend$)' | head -1 || true)
+  if [ -n "$dirty" ]; then
+    echo "REFUSED: worktree $WT has uncommitted changes." >&2
+    echo "uncommitted changes present" >&2
+    echo "A final reviewer must not alter the reviewed object; restore the reviewed snapshot before cleanup." >&2
+    return 1
+  fi
+}
+
 validate_worktree_teardown_safety() {
   local dirty_raw dirty unpushed_raw unpushed DEFAULT unmerged_raw unmerged branch
   [ -d "$WT" ] || return 0
   [ "$FORCE" != "--force" ] || return 0
   case "$KIND" in
     secondmate|scout) return 0 ;;
+    reviewer) validate_final_reviewer_worktree_safety; return $? ;;
   esac
 
   if ! dirty_raw=$(git -C "$WT" status --porcelain 2>/dev/null); then

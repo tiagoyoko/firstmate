@@ -708,7 +708,7 @@ test_final_reviewer_requires_and_preserves_its_report() {
   local case_dir out rc review_head
   case_dir=$(make_case reviewer-report)
   write_meta "$case_dir" no-mistakes reviewer
-  wt_commit "$case_dir" "reviewed snapshot"
+  wt_commit_file "$case_dir" reviewed.txt snapshot "reviewed snapshot"
   review_head=$(git -C "$case_dir/wt" rev-parse HEAD)
   printf 'review_head=%s\n' "$review_head" >> "$case_dir/state/task-x1.meta"
 
