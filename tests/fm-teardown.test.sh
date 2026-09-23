@@ -907,6 +907,91 @@ EOF
   pass "fm-teardown: final reviewers require and preserve their report deliverable"
 }
 
+# A real reviewer opens the report with a document title and the identification
+# block the Definition of done demands ("identify the reviewed object and
+# version"). The skill contract is about the nine `##` sections, so that preamble
+# must not be read as an extra section and refused at the closing gate.
+test_final_reviewer_report_may_open_with_title_and_identification() {
+  local case_dir out rc review_head report
+  case_dir=$(make_case reviewer-report-preamble)
+  write_meta "$case_dir" no-mistakes reviewer
+  wt_commit_file "$case_dir" reviewed.txt snapshot "reviewed snapshot"
+  review_head=$(git -C "$case_dir/wt" rev-parse HEAD)
+  printf 'review_head=%s\n' "$review_head" >> "$case_dir/state/task-x1.meta"
+  printf '%s\n' 'decisions_reviewed=1' 'decision_keys=' >> "$case_dir/state/task-x1.meta"
+
+  mkdir -p "$case_dir/data/task-x1"
+  report="$case_dir/data/task-x1/report.md"
+  printf '%s\n' "done: revisão final Não aprovado report=$report" \
+    > "$case_dir/state/task-x1.status"
+
+  # Same preamble, but one section title off the contract: still refused.
+  cat > "$report" <<'EOF'
+# Revisão final independente — `preco_final`
+
+**Objeto revisado:** `desconto.py` (função `preco_final`).
+**Versão:** commit `62b11d0`, árvore limpa.
+**Revisor:** agente de revisão final independente (somente leitura).
+
+## Veredito
+
+Não aprovado. O critério de aceite falha na execução.
+
+## Resultado Esperado
+
+`preco_final(200, 10)` deve retornar `180`.
+
+## O Que Foi Entregue
+
+`desconto.py` retorna `-1800` para essa entrada.
+
+## Apontamentos
+
+A1: fórmula aplica o desconto sem dividir por 100.
+
+## Cobertura de Requisitos
+
+R1 não atendido: critério de aceite reproduzido e falho.
+
+## Risco
+
+Nenhum risco adicional além do apontamento A1.
+
+## Validação
+
+Execução direta da função com a entrada do critério de aceite.
+
+## Avaliação Final
+
+Entrega não pode ser aceita nesta versão.
+
+## Prevenção
+
+Teste da convenção de pontos percentuais antes da entrega.
+EOF
+  set +e
+  out=$(run_teardown "$case_dir" 2>&1)
+  rc=$?
+  set -e
+  [ "$rc" -ne 0 ] || fail "final-reviewer teardown with a wrong section title should refuse"
+  assert_contains "$out" "does not match the canonical reasoning-critique section contract" \
+    "final-reviewer teardown accepted a report whose sections leave the contract"
+  assert_present "$case_dir/state/task-x1.meta" \
+    "final-reviewer teardown removed task metadata after a section mismatch"
+
+  # The nine contract sections, still behind the required title and
+  # identification block: this is the report a real reviewer writes.
+  sed 's/^## Risco$/## Riscos/' "$report" > "$report.fixed"
+  mv "$report.fixed" "$report"
+  run_teardown "$case_dir" >/dev/null \
+    || fail "final-reviewer teardown refused a contract report carrying its required identification block"
+  assert_absent "$case_dir/state/task-x1.meta" \
+    "completed final-reviewer teardown retained task metadata"
+  assert_present "$report" \
+    "completed final-reviewer teardown removed its durable report"
+  pass "fm-teardown: a final report may identify the reviewed object above its nine sections"
+}
+
 test_teardown_closes_the_backlog_item_itself() {
   local case_dir out
   case_dir=$(make_case tasks-axi-close)
@@ -3870,6 +3955,7 @@ EOF
 }
 
 test_final_reviewer_requires_and_preserves_its_report
+test_final_reviewer_report_may_open_with_title_and_identification
 test_local_only_fork_remote_allows
 test_teardown_closes_the_backlog_item_itself
 test_teardown_manual_backend_leaves_the_backlog_to_the_operator

@@ -1451,6 +1451,9 @@ work_is_landed() {
   content_in_default
 }
 
+# The reasoning-critique contract names the nine `##` sections, so only those are
+# collected. A document title and the identification block the reviewer's
+# Definition of done demands sit above them and are not sections.
 review_report_headings() {  # <markdown-file>
   LC_ALL=C awk '
     {
@@ -1476,7 +1479,7 @@ review_report_headings() {  # <markdown-file>
         }
         next
       }
-      if (!in_fence && scan ~ /^#{1,6}[[:space:]]/) {
+      if (!in_fence && scan ~ /^##[[:space:]]/) {
         sub(/[[:space:]]+#+[[:space:]]*$/, "", scan)
         print scan
       }

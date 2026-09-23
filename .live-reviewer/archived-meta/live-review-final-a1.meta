@@ -1,0 +1,11 @@
+window=firstmate:fm-live-review-final-a1
+endpoint_task_id=live-review-final-a1
+worktree=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M37PH0JFX9W0K1F6VQ5X902G/.live-reviewer/project/.treehouse/project-16856c/1/project
+project=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M37PH0JFX9W0K1F6VQ5X902G/.live-reviewer/project
+harness=codex
+kind=reviewer
+review_head=9575e12e0314283a51c1872552a5eac5af0918d2
+tasktmp=/tmp/fm-live-review-final-a1
+model=default
+effort=default
+spawn_gen=s1790188421.54019.6551
