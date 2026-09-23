@@ -103,6 +103,16 @@ fm_agent_process_classify() {  # <name> <argv0> <args> [pid] -> agent|shell|othe
     printf 'agent'
     return 0
   fi
+  # A harness that ships as an interpreter script is named by its script path
+  # and by nothing else: a bun-installed omp reports name and argv[0] `bun`
+  # with args "bun ~/.bun/bin/omp" (verified, omp 18.2.6, macOS). The
+  # session-lock library owns that interpreter rule, so ask it rather than
+  # growing a second copy here; without this a bun-installed omp worker reads
+  # as `other` and its pane is reported ambiguous instead of alive.
+  if [ -n "$args" ] && fm_harness_process_matches "$name" "$args"; then
+    printf 'agent'
+    return 0
+  fi
   if [ "$by_name" = shell ] && [ "$by_argv0" = shell ]; then
     printf 'shell'
   else

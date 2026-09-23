@@ -63,17 +63,52 @@ make_named_shells() {  # <dir> -> echoes <bindir>
 
 # --- 1. Detection --------------------------------------------------------------
 
+# A deterministic process table whose single ancestor is <comm>/<args>, so the
+# ancestry walk terminates inside the fixture. Every NEGATIVE detection case
+# uses this rather than a real named shell, because this suite can itself run
+# under a real omp primary whose ancestor would answer the question instead of
+# the fixture and turn a decoy assertion into a false failure.
+ancestry_fakebin() {  # <dir> <comm> <args> -> echoes <fakebin>
+  local dir=$1 comm=$2 args=$3 fakebin
+  fakebin=$(fm_fakebin "$dir")
+  cat > "$fakebin/ps" <<SH
+#!/usr/bin/env bash
+set -u
+field= pid=
+while [ "\$#" -gt 0 ]; do
+  case "\$1" in
+    -o) field=\$2; shift 2 ;;
+    -p) pid=\$2; shift 2 ;;
+    *) shift ;;
+  esac
+done
+case "\$pid:\$field" in
+  900:comm=) printf '%s\n' '$comm' ;;
+  900:args=) printf '%s\n' '$args' ;;
+  900:ppid=) printf '%s\n' 1 ;;
+  1:comm=) printf '%s\n' launchd ;;
+  1:args=) printf '%s\n' launchd ;;
+  1:ppid=) printf '%s\n' 1 ;;
+  *:comm=) printf '%s\n' bash ;;
+  *:args=) printf '%s\n' bash ;;
+  *:ppid=) printf '%s\n' 900 ;;
+esac
+SH
+  chmod +x "$fakebin/ps"
+  printf '%s' "$fakebin"
+}
+
 test_detection_anchored_name_and_marker_precedence() {
-  local bin out
+  local bin out decoy fakebin
   bin=$(make_named_shells "$TMP_ROOT/named")
   # shellcheck disable=SC2016 # the quoted body expands inside the named shell
   out=$(env -u CLAUDECODE -u FM_OMP_HARNESS -u PI_CODING_AGENT -u CURSOR_AGENT -u CURSOR_INVOKED_AS \
     "$bin/omp" -c '"$1"; :' _ "$HARNESS")
   [ "$out" = omp ] || fail "a process named omp must detect as omp, got '$out'"
   for decoy in ompd comp; do
-    # shellcheck disable=SC2016 # the quoted body expands inside the named shell
-    out=$(env -u CLAUDECODE -u FM_OMP_HARNESS -u PI_CODING_AGENT -u CURSOR_AGENT -u CURSOR_INVOKED_AS \
-      "$bin/$decoy" -c '"$1"; :' _ "$HARNESS")
+    fakebin=$(ancestry_fakebin "$TMP_ROOT/decoy-$decoy" "$decoy" "$decoy")
+    out=$(PATH="$fakebin:$PATH" env -u CLAUDECODE -u FM_OMP_HARNESS -u PI_CODING_AGENT \
+      -u CURSOR_AGENT -u CURSOR_INVOKED_AS "$HARNESS")
     [ "$out" != omp ] || fail "'$decoy' merely contains omp and must not detect as omp"
   done
   # The marker beats an inherited CLAUDECODE only under a real omp ancestor.
@@ -82,11 +117,35 @@ test_detection_anchored_name_and_marker_precedence() {
     "$bin/omp" -c '"$1"; :' _ "$HARNESS")
   [ "$out" = omp ] || fail "FM_OMP_HARNESS under an omp ancestor must outrank an inherited CLAUDECODE, got '$out'"
   # ...and is inert when it leaks into a worker with no omp ancestor.
-  # shellcheck disable=SC2016 # the quoted body expands inside the named shell
-  out=$(env -u PI_CODING_AGENT -u CURSOR_AGENT -u CURSOR_INVOKED_AS CLAUDECODE=1 FM_OMP_HARNESS=omp \
-    bash -c '"$1"; :' _ "$HARNESS")
+  fakebin=$(ancestry_fakebin "$TMP_ROOT/leaked-marker" bash bash)
+  out=$(PATH="$fakebin:$PATH" env -u PI_CODING_AGENT -u CURSOR_AGENT -u CURSOR_INVOKED_AS \
+    CLAUDECODE=1 FM_OMP_HARNESS=omp "$HARNESS")
   [ "$out" = claude ] || fail "a leaked FM_OMP_HARNESS without an omp ancestor must not relabel a claude worker, got '$out'"
   pass "fm-harness: omp detects by its anchored name; the marker is a precedence override that needs real omp ancestry"
+}
+
+# omp also ships as a bun script: `bun install -g @oh-my-pi/pi-coding-agent`
+# installs a `#!/usr/bin/env bun` launcher, so the live process is named bun and
+# only the script path names the harness (verified, omp 18.2.6 on macOS:
+# comm=bun, args="bun /Users/<user>/.bun/bin/omp").
+test_detection_bun_installed_script() {
+  local real decoy out
+  real=$(ancestry_fakebin "$TMP_ROOT/bun-omp" bun 'bun /Users/u/.bun/bin/omp --cwd /x')
+  decoy=$(ancestry_fakebin "$TMP_ROOT/bun-ompd" bun 'bun /Users/u/.bun/bin/ompd --cwd /x')
+  out=$(PATH="$real:$PATH" env -u CLAUDECODE -u FM_OMP_HARNESS -u PI_CODING_AGENT \
+    -u CURSOR_AGENT -u CURSOR_INVOKED_AS "$HARNESS" ancestry)
+  [ "$out" = "args omp" ] || fail "a bun-installed omp script must identify as omp, got '$out'"
+  out=$(PATH="$decoy:$PATH" env -u CLAUDECODE -u FM_OMP_HARNESS -u PI_CODING_AGENT \
+    -u CURSOR_AGENT -u CURSOR_INVOKED_AS "$HARNESS" ancestry)
+  [ -z "$out" ] || fail "a bun script named ompd merely contains omp and must not identify, got '$out'"
+  # The same evidence is what lets FM_OMP_HARNESS outrank an inherited CLAUDECODE.
+  out=$(PATH="$real:$PATH" env -u PI_CODING_AGENT -u CURSOR_AGENT -u CURSOR_INVOKED_AS \
+    CLAUDECODE=1 FM_OMP_HARNESS=omp "$HARNESS")
+  [ "$out" = omp ] || fail "FM_OMP_HARNESS under a bun-installed omp must outrank CLAUDECODE, got '$out'"
+  out=$(PATH="$decoy:$PATH" env -u PI_CODING_AGENT -u CURSOR_AGENT -u CURSOR_INVOKED_AS \
+    CLAUDECODE=1 FM_OMP_HARNESS=omp "$HARNESS")
+  [ "$out" = claude ] || fail "a leaked FM_OMP_HARNESS with no omp script in the ancestry must not relabel claude, got '$out'"
+  pass "fm-harness: a bun-installed omp identifies by its script path, and ompd stays out"
 }
 
 test_lock_identity_and_liveness_classification() {
@@ -94,6 +153,18 @@ test_lock_identity_and_liveness_classification() {
   fm_harness_process_matches /usr/local/bin/omp 'omp --cwd /x' || fail "session-lock identity must accept an omp path"
   ! fm_harness_process_matches ompd '' || fail "session-lock identity must not accept ompd"
   ! fm_harness_process_matches comp '' || fail "session-lock identity must not accept comp"
+  # A `bun install -g @oh-my-pi/pi-coding-agent` omp is a `#!/usr/bin/env bun`
+  # script, so the process names bun and only the script path names the harness.
+  # Without this the primary cannot find itself in its own ancestry and every
+  # session refuses the fleet lock.
+  fm_harness_process_matches bun 'bun /Users/u/.bun/bin/omp' \
+    || fail "session-lock identity must accept a bun-installed omp script"
+  fm_harness_process_matches /Users/u/.bun/bin/bun '/Users/u/.bun/bin/bun /Users/u/.bun/bin/omp --cwd /x' \
+    || fail "session-lock identity must accept a bun-installed omp launched by path"
+  ! fm_harness_process_matches bun 'bun /Users/u/.bun/bin/ompd' \
+    || fail "a bun script named ompd merely contains omp and must not identify"
+  ! fm_harness_process_matches bun 'bun /Users/u/src/build.ts' \
+    || fail "an ordinary bun command must not identify as a harness"
   # shellcheck source=bin/fm-backend.sh
   . "$ROOT/bin/fm-backend.sh"
   fm_backend_source tmux || fail "fm_backend_source tmux failed"
@@ -101,6 +172,10 @@ test_lock_identity_and_liveness_classification() {
   [ "$(fm_agent_process_classify_name /opt/omp/bin/omp)" = agent ] || fail "tmux liveness must classify an omp path as an agent"
   [ "$(fm_agent_process_classify_name ompd)" != agent ] || fail "tmux liveness must not classify ompd as an agent"
   [ "$(fm_agent_process_classify_name comp)" != agent ] || fail "tmux liveness must not classify comp as an agent"
+  [ "$(fm_agent_process_classify bun bun 'bun /Users/u/.bun/bin/omp')" = agent ] \
+    || fail "liveness must classify a bun-installed omp worker as an agent"
+  [ "$(fm_agent_process_classify bun bun 'bun /Users/u/src/build.ts')" != agent ] \
+    || fail "liveness must not classify an ordinary bun command as an agent"
   pass "session lock and tmux liveness: omp is anchored, decoys stay out"
 }
 
@@ -575,6 +650,7 @@ EOF
 }
 
 test_detection_anchored_name_and_marker_precedence
+test_detection_bun_installed_script
 test_lock_identity_and_liveness_classification
 test_spawn_launch_line_and_worker_wiring
 test_spawn_model_validation_scoped_to_listed_providers

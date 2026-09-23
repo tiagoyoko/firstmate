@@ -29,7 +29,11 @@ set -u
 
 # This suite states the markers it means to test in every case. Drop the ambient
 # ones so a verdict never depends on which harness launched the suite.
-unset CLAUDECODE PI_CODING_AGENT FM_PI_HARNESS GROK_AGENT CURSOR_AGENT CURSOR_INVOKED_AS
+# FM_OMP_HARNESS belongs in that list: it is Firstmate's own launch marker, so a
+# suite run from an omp primary inherits it, and it claims omp for real whenever
+# an omp ancestor is genuinely there - which is exactly what sits above every
+# fixture process this suite builds.
+unset CLAUDECODE PI_CODING_AGENT FM_PI_HARNESS GROK_AGENT CURSOR_AGENT CURSOR_INVOKED_AS FM_OMP_HARNESS
 
 HARNESS="$ROOT/bin/fm-harness.sh"
 RENDER="$ROOT/bin/fm-supervision-instructions.sh"
@@ -44,7 +48,7 @@ under_process() {  # <named-executable> [VAR=VAL ...]
   local bin=$1
   shift
   env -u CLAUDECODE -u PI_CODING_AGENT -u FM_PI_HARNESS -u GROK_AGENT \
-    -u CURSOR_AGENT -u CURSOR_INVOKED_AS "$@" \
+    -u CURSOR_AGENT -u CURSOR_INVOKED_AS -u FM_OMP_HARNESS "$@" \
     "$bin" -c "r=\$(\"$HARNESS\"); printf '%s' \"\$r\""
 }
 
@@ -115,7 +119,7 @@ with_blind_ancestry() {  # <fakebin> [VAR=VAL ...]
   local fakebin=$1
   shift
   env -u CLAUDECODE -u PI_CODING_AGENT -u FM_PI_HARNESS -u GROK_AGENT \
-    -u CURSOR_AGENT -u CURSOR_INVOKED_AS "$@" \
+    -u CURSOR_AGENT -u CURSOR_INVOKED_AS -u FM_OMP_HARNESS "$@" \
     PATH="$fakebin:$BASE_PATH" "$HARNESS"
 }
 

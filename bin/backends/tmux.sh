@@ -389,6 +389,18 @@ EOF
       printf 'alive'
       return 0
     fi
+    # A harness shipped as an interpreter script is named only by its script
+    # path: a bun-installed omp reports comm and argv[0] `bun`, so the
+    # name-only classification above reads `other` and this window's live
+    # agent is reported ambiguous. The shared classifier already decides this
+    # correctly once it is given the arguments, so ask it with the first token
+    # as the name rather than growing a second copy of the rule here.
+    # Positive evidence only, like the rest of this block: a bare interpreter
+    # still falls through to the negative verdicts below.
+    if [ "$(fm_agent_process_classify "${name%% *}" "${name%% *}" "$name")" = agent ]; then
+      printf 'alive'
+      return 0
+    fi
   done <<EOF
 $(fm_backend_tmux_foreground_args "$target")
 EOF
