@@ -39,15 +39,14 @@ The registry records the project's standing posture, which is the captain's defa
 Choose that posture when adding or creating the project:
 
 - `no-mistakes` runs the full validation pipeline before a PR.
-- `direct-PR` pushes and opens a PR without the no-mistakes pipeline.
+- `direct-PR` permits the direct PR fast path only when `AGENTS.md` section 7's universal intake classification finds an eligible internal fleet record.
 - `local-only` has no required remote or PR and lands only through the approved local fast-forward path.
-- `no-mistakes-prod-only` is a conditional policy rather than one flat mode; apply `AGENTS.md` section 7's intake classification.
-  Only work that changes exclusively an internal fleet record is eligible for `direct-PR`; code and material someone outside the fleet reads to work always ships `no-mistakes`.
+- `no-mistakes-prod-only` is a conditional policy that permits the same classified internal-record fast path.
 
 `no-mistakes-prod-only` is the default for a newly added or created remote-backed project when the captain specifies nothing, and a project with no remote defaults to `local-only`.
 State that resolved default while confirming the source, local name, and posture instead of asking the captain to choose from scratch, and record a flat mode instead whenever they ask for one.
-Existing registry entries keep the meaning they already have and are never migrated or reinterpreted, so a legacy entry with no bracket stays `no-mistakes`.
-Registering a conditional policy is a one-time choice; apply its classification at each task's intake and never infer eligibility from file location or project name.
+Existing registry labels are never migrated, and a legacy entry with no bracket stays `no-mistakes`.
+Registration is a one-time posture choice; apply `AGENTS.md` section 7's universal classification at each task's intake.
 
 The optional `+yolo` posture changes merge authority only and does not change the delivery mode.
 Default it off for every project and every posture, and enable it only on the captain's explicit instruction.
@@ -57,8 +56,7 @@ Default it off for every project and every posture, and enable it only on the ca
 
 Confirm the source URL, local project name, delivery posture, and autonomy posture, stating the resolved default for each rather than asking the captain to invent one.
 Clone into `projects/<name>` and add the registry entry only after the destination is known to be unused.
-A `no-mistakes` or `no-mistakes-prod-only` project must have an `origin` remote and must complete the initialization procedure below, because every code or outside-reader deliverable runs the pipeline while only internal fleet records may take the direct PR.
-A `direct-PR` project needs an `origin` remote but skips no-mistakes initialization.
+A remote-backed project under any PR posture must have an `origin` remote and complete the initialization procedure below because its code and outside-reader deliverables run the pipeline regardless of posture.
 A `local-only` project may have no remote and skips no-mistakes initialization.
 
 ## Create a project
@@ -73,7 +71,7 @@ The captain's request to create that local project authorizes this local initial
 
 ## Initialize
 
-Run no-mistakes initialization only for `no-mistakes` and `no-mistakes-prod-only` projects:
+Run no-mistakes initialization for every remote-backed project:
 
 ```sh
 cd projects/<name> && no-mistakes init && no-mistakes doctor

@@ -310,9 +310,10 @@ Load `diagnostic-reasoning` before scoping a reported bug and before acting on a
 
 Resolve every ship task's concrete delivery mode and `yolo` merge posture at intake.
 Pass the mode explicitly to the brief, and pass both values explicitly to the spawn and any scout promotion; each command refuses to guess the values it consumes.
-A current explicit captain instruction wins; otherwise the project's registry entry is the captain's standing posture, and dropping below its rigor needs a reason you can state.
-On a `no-mistakes-prod-only` project, every task that changes code or material read by someone outside the fleet to do their work - including training, manuals, procedures, and client documents - ships `no-mistakes`.
-Only a task that changes exclusively an internal fleet record - a ticket annotation, planning record, captured evidence, or internal tool configuration - may ship `direct-PR`; the intake decision must name the applicable record category.
+Classify every ship task independently of its registered posture; a `local-only` project remains `local-only`.
+For every PR-based task, work that changes code or material read by someone outside the fleet to do their work - including training, manuals, procedures, and client documents - ships `no-mistakes`.
+Only a task that changes exclusively an internal fleet record - a ticket annotation, planning record, or captured evidence - is eligible for `direct-PR`; the intake decision must name the applicable record category.
+Among those eligible internal-record tasks, a current explicit captain instruction wins; otherwise a `no-mistakes` posture remains `no-mistakes`, while `direct-PR` and `no-mistakes-prod-only` permit the fast path.
 When uncertain, use `no-mistakes`; never infer the classification from file location or project name.
 An unregistered project or absent registry resolves to `no-mistakes` with yolo off, and the registration gap goes to the captain.
 Record the resulting mode, `yolo` merge posture, and the one-line reason for any deviation in the backlog item note.
