@@ -35,13 +35,13 @@ Do not overwrite or repurpose an existing path.
 
 ## Delivery posture
 
-The registry records the project's standing posture, which is the captain's default for the work rather than any task's answer; `AGENTS.md` section 7 owns how each task's concrete mode and yolo are resolved at intake and passed explicitly to the brief, the spawn, and any promotion.
+The registry records the project's standing posture, not a concrete task mode; task intake resolves exactly `no-mistakes`, `direct-PR`, or `local-only` under `AGENTS.md` section 7 before passing that result explicitly to the brief, the spawn, and any promotion.
 Choose that posture when adding or creating the project:
 
 - `no-mistakes` runs the full validation pipeline before a PR.
-- `direct-PR` permits the direct PR fast path only when `AGENTS.md` section 7's universal intake classification finds an eligible internal fleet record.
+- `direct-PR` permits the direct PR fast path only when `AGENTS.md` section 7 finds a task containing exclusively a ticket annotation, planning record, or captured evidence; code, operational configuration, and outside-reader material still resolve to `no-mistakes`.
 - `local-only` has no required remote or PR and lands only through the approved local fast-forward path.
-- `no-mistakes-prod-only` is a conditional policy that permits the same classified internal-record fast path.
+- `no-mistakes-prod-only` is a conditional posture that permits the same classified internal-record fast path and is never passed as a concrete task mode.
 
 `no-mistakes-prod-only` is the default for a newly added or created remote-backed project when the captain specifies nothing, and a project with no remote defaults to `local-only`.
 State that resolved default while confirming the source, local name, and posture instead of asking the captain to choose from scratch, and record a flat mode instead whenever they ask for one.
