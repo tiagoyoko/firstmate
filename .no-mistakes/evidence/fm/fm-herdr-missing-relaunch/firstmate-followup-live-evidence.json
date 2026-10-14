@@ -1,0 +1,18 @@
+{
+  "scenario": "missing presentation workspace recovery and recovered Pi continuation",
+  "herdr_session": "fm-lab-fm-herdr-missing-68179-21268",
+  "short_absolute_runtime_root": "/private/tmp/fm-herdr-live.o62vCK",
+  "old_endpoint": "fm-lab-fm-herdr-missing-68179-21268:w2:p2",
+  "removed_presentation_workspace": "w2",
+  "old_endpoint_state": "missing",
+  "replacement_endpoint": "fm-lab-fm-herdr-missing-68179-21268:w1:p2",
+  "replacement_workspace": "w1",
+  "progress_note_nonce": "recovery-note-1791972849-68133",
+  "recovered_pi_report": "NOTE_PROCESSED_AND_WORK_CONTINUED recovery-note-1791972849-68133",
+  "uncommitted_work_sha256_before_and_after": "89c65b7af042e8d4b091d6af9a97472a413a5855ba6494d2dfa6f9a0d7ab8c60",
+  "durable_metadata_preserved": true,
+  "original_brief_and_progress_note_preserved": true,
+  "default_session_tripwire": "passed by guarded teardown",
+  "pi_profile_reference": "/Users/tiagoyoko/.pi/agent",
+  "credentials_read_copied_exported_or_printed": false
+}

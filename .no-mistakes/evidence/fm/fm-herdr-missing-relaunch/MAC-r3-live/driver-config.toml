@@ -1,0 +1,9 @@
+[update]
+version_check = false
+manifest_check = false
+[terminal]
+default_shell = "/bin/bash"
+shell_mode = "non_login"
+new_cwd = "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase"
+[session]
+resume_agents_on_restore = false

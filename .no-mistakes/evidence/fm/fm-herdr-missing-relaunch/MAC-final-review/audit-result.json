@@ -1,0 +1,50 @@
+{
+  "title": "MAC auditoria final dos contratos de estado e protocolo",
+  "audited_at": "2026-10-14T11:06:17.072058+00:00",
+  "run_id": "01M4WR85EFRRBS83H0J31Q5KXX",
+  "tested_head_sha": "64befcb503c6ee1eb07426e5c7ee802d5077cb30",
+  "live_execution_already_completed_in_this_run": true,
+  "new_live_execution_in_this_audit": false,
+  "verified_hash_inventories": {
+    "hashes.json": 126,
+    "MAC-final-hashes.json": 128,
+    "originais": 25
+  },
+  "old_endpoint": "fm-lab-r3:w2:p2",
+  "new_endpoint": "fm-lab-r3:w1:p2",
+  "single_workspace_removal_at": "2026-10-14T10:50:59.763279+00:00",
+  "nonce_introduced_at": "2026-10-14T10:51:00.170404+00:00",
+  "pi_note_received_at": "2026-10-14T10:53:15.965Z",
+  "pi_tool_calls": [
+    {
+      "timestamp": "2026-10-14T10:53:19.020Z",
+      "tool": "read",
+      "path": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt/continuar.json"
+    },
+    {
+      "timestamp": "2026-10-14T10:53:22.186Z",
+      "tool": "write",
+      "path": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt/resultado.json"
+    }
+  ],
+  "result": {
+    "nonce": "MAC_NOTE_68111daea2714bcdb83f51254c7c38c3",
+    "sum": 68,
+    "count": 3
+  },
+  "output_sha256": "15bda8396ac88e05492782d2dc1c94b7de172b80fd04b36e635c91dca8642108",
+  "preserved_sha256": {
+    "continuar.json": "da8821de71553805640ae826bcb2abbb58c123e30328c76ec14d46565d9b3288",
+    "continuar.txt": "d6796000b4e9772c346d0c9b07916ab03f4f94ea2a9b0b60024e4bf795881b3e",
+    "projected.herdr-presentation": "2b7f5680cc5f9d5ec186d114a27d6a14930e8ed8d86da431fc8bbc5c9a00f3e7"
+  },
+  "fixture_head": "f09106dc17a2a9accd02ae1a712c9f34008f71bc",
+  "missing_state_checks": 2,
+  "limits": [
+    "A primeira chamada recusou fixture sem # Task. Houve teardown e reprovision da mesma sessao antes da retomada bem-sucedida.",
+    "Comprova recuperacao do estado persistido em apresentacao flat; nao restaura o workspace aninhado nem comprova continuidade do processo Herdr original.",
+    "O manifesto firstmate-followup-live-evidence.json nao foi usado como prova isolada de sucesso."
+  ],
+  "worktree_status": "",
+  "transient_fixture_absent": true
+}

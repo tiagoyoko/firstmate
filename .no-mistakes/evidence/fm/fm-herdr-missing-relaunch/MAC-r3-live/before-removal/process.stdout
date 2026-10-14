@@ -1,0 +1,1 @@
+{"id":"cli:pane:process_info","result":{"process_info":{"foreground_process_group_id":34100,"foreground_processes":[{"argv0":"pi","cwd":"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt","name":"node","pid":34100}],"pane_id":"w2:p2","shell_pid":32560},"type":"pane_process_info"}}

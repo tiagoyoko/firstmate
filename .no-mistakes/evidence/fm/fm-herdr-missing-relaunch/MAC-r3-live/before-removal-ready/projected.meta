@@ -1,0 +1,16 @@
+window=fm-lab-r3:w2:p2
+endpoint_task_id=projected
+worktree=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt
+project=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/proj
+harness=pi
+kind=ship
+mode=no-mistakes
+yolo=off
+model=default
+effort=default
+backend=herdr
+herdr_session=fm-lab-r3
+herdr_workspace_id=w2
+herdr_tab_id=w2:t2
+herdr_pane_id=w2:p2
+durable_probe=MAC_KEEP_R3

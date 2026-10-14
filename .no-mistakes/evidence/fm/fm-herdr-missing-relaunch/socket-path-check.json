@@ -1,0 +1,6 @@
+{
+  "path": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.h/herdr/sessions/fm-lab-a/herdr.sock",
+  "length_bytes": 117,
+  "bound": false,
+  "error": "AF_UNIX path too long"
+}

@@ -1,0 +1,322 @@
+[
+  {
+    "command": "git -C /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt rev-parse HEAD",
+    "exit_code": 0,
+    "output": "37297aa92f8fcda8703bdd941eec6f557c7e657f\n"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live/lab run fm-lab-a pane close w1:p2",
+    "exit_code": 0,
+    "output": "{\"id\":\"cli:pane:close\",\"result\":{\"type\":\"ok\"}}\n"
+  },
+  {
+    "command": "bash -c . bin/fm-backend.sh; fm_backend_source herdr; fm_backend_agent_state herdr \"$TARGET\"",
+    "exit_code": 0,
+    "output": "missing"
+  },
+  {
+    "assertion": "Terminal original removido pelo Herdr real",
+    "target": "fm-lab-a:w1:p2",
+    "dirty_sha256": "a5be04ec0685176eaa54ef1d590585ffe3863395e5648db1efcad75bc022b0aa",
+    "head": "37297aa92f8fcda8703bdd941eec6f557c7e657f"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/base/bin/fm-control.sh live exit",
+    "exit_code": 1,
+    "output": "error: task live's recorded endpoint is gone, so there is no agent to stop; reconcile the task before any further control action\n"
+  },
+  {
+    "assertion": "Regressão reproduzida antes da correção",
+    "baseline_exit_refused": true
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/bin/fm-control.sh live exit",
+    "exit_code": 0,
+    "output": "already-stopped live harness=pi backend=herdr endpoint=fm-lab-a:w1:p2 worktree=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\n"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/bin/fm-control.sh live exit",
+    "exit_code": 0,
+    "output": "already-stopped live harness=pi backend=herdr endpoint=fm-lab-a:w1:p2 worktree=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\n"
+  },
+  {
+    "assertion": "Exit ausente idempotente e sem perda de dados",
+    "repeats": 2,
+    "metadata_sha256": "2cb2b03ae8a923279dab471c8884df97ac7689e6539fe70c45bce4831004b4b5",
+    "brief_sha256": "e18a21e70c831f44c55f9a5081b96c41098c0f65105337f40fdb303c9fd8fea9",
+    "dirty_sha256": "a5be04ec0685176eaa54ef1d590585ffe3863395e5648db1efcad75bc022b0aa"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/bin/fm-control.sh live relaunch --harness pi --note MAC_MISSING_RECOVERY: continuar do mesmo trabalho; não usar ferramentas; manter continuar.txt.",
+    "exit_code": 0,
+    "output": "warning: /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/home/data/live/launch-brief.md records no delivery contract line (scaffolded before ship briefs recorded one); launching on the explicit --mode no-mistakes - confirm its definition of done matches\nrelaunched live harness=pi from=pi model=default effort=default backend=herdr endpoint=fm-lab-a:w1:p3 worktree=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\n"
+  },
+  {
+    "command": "bash -c . bin/fm-backend.sh; fm_backend_source herdr; fm_backend_agent_state herdr \"$TARGET\"",
+    "exit_code": 0,
+    "output": "alive"
+  },
+  {
+    "command": "git -C /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt rev-parse HEAD",
+    "exit_code": 0,
+    "output": "37297aa92f8fcda8703bdd941eec6f557c7e657f\n"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live/lab run fm-lab-a pane process-info --pane w1:p3",
+    "exit_code": 0,
+    "output": "{\"id\":\"cli:pane:process_info\",\"result\":{\"process_info\":{\"foreground_process_group_id\":36140,\"foreground_processes\":[{\"argv0\":\"pi\",\"cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\",\"name\":\"node\",\"pid\":36140}],\"pane_id\":\"w1:p3\",\"shell_pid\":34869},\"type\":\"pane_process_info\"}}\n"
+  },
+  {
+    "assertion": "Endpoint ausente reconstruído na sessão gravada e Pi real em execução",
+    "old": "fm-lab-a:w1:p2",
+    "new": "fm-lab-a:w1:p3",
+    "ambient_session": "fm-lab-other",
+    "preserved_fields": {
+      "worktree": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt",
+      "project": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/proj",
+      "endpoint_task_id": "live",
+      "kind": "ship",
+      "mode": "no-mistakes",
+      "yolo": "off",
+      "durable_probe": "MAC_KEEP"
+    },
+    "dirty_sha256": "a5be04ec0685176eaa54ef1d590585ffe3863395e5648db1efcad75bc022b0aa",
+    "inbox_sha256": "11fcbe4ed61a1ee899b7bfa9e3d5f5329dbf6933d77de8b9f25c11f89d2dc930",
+    "process": {
+      "foreground_process_group_id": 36140,
+      "foreground_processes": [
+        {
+          "argv0": "pi",
+          "cwd": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt",
+          "name": "node",
+          "pid": 36140
+        }
+      ],
+      "pane_id": "w1:p3",
+      "shell_pid": 34869
+    }
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live/lab run fm-lab-a pane read w1:p3 --source visible --format ansi",
+    "exit_code": 0,
+    "output": "\n\u001b[0m\u001b[38;2;205;154;34m[Extensions]\u001b[0m                                                                                                           \n\u001b[0m\u001b[38;2;126;136;142m  live.pi-ext.ts\u001b[0m                                                                                                       \n\n\u001b[0m\u001b[38;2;205;154;34m[Skill conflicts]\u001b[0m                                                                                                      \n\u001b[0m\u001b[38;2;205;154;34m  \"projecao-de-fluxo-de-caixa\" collision:\u001b[0m                                                                              \n\u001b[0m\u001b[38;2;126;136;142m    \u001b[0m\u001b[38;2;104;183;141m✓\u001b[0m auto (user) ~/.agents/skills/projecao-de-fluxo-de-caixa/SKILL.md                                                 \n\u001b[0m\u001b[38;2;126;136;142m    \u001b[0m\u001b[38;2;205;154;34m✗\u001b[0m                                                                                                                  \n~/.agents/skills/synced/7cba47c4-79ac-4255-9012-338ea418ba74_72a4e593-fda7-47a4-b190-a4e63492a3ef/projecao-de-fluxo-de-\ncaixa/SKILL.md (skipped)                                                                                               \n\u001b[0m\u001b[38;2;205;154;34m  \"reasoning-critique\" collision:\u001b[0m                                                                                      \n\u001b[0m\u001b[38;2;126;136;142m    \u001b[0m\u001b[38;2;104;183;141m✓\u001b[0m auto (user) ~/.agents/skills/reasoning-critique/SKILL.md                                                         \n\u001b[0m\u001b[38;2;126;136;142m    \u001b[0m\u001b[38;2;205;154;34m✗\u001b[0m                                                                                                                  \n~/.agents/skills/synced/7cba47c4-79ac-4255-9012-338ea418ba74_72a4e593-fda7-47a4-b190-a4e63492a3ef/reasoning-critique/SK\nILL.md (skipped)                                                                                                       \n\u001b[0m\u001b[38;2;205;154;34m  ~/.agents/skills/revisao-adversarial/SKILL.md\u001b[0m                                                                        \n\u001b[0m\u001b[38;2;205;154;34m    Nested mappings are not allowed in compact mappings at line 2, column 14:                                          \u001b[0m\n\u001b[0m\u001b[38;2;205;154;34m                                                                                                                       \u001b[0m\n\u001b[0m\u001b[38;2;205;154;34mdescription: Revisa qualquer artefato pelo princípio adversarial — tenta provar…                                       \u001b[0m\n\u001b[0m\u001b[38;2;205;154;34m             ^                                                                                                         \u001b[0m\n                                                                                                                       \n\n\n \u001b[0m\u001b[38;2;205;154;34mWarning: fd not found. Offline mode enabled, skipping download.\u001b[0m                                                       \n\n \u001b[0m\u001b[38;2;205;154;34mWarning: No models available. Use /login to log into a provider via OAuth or API key. See:                            \u001b[0m\n \u001b[0m\u001b[38;2;205;154;34m  /opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/docs/providers.md                                    \u001b[0m\n \u001b[0m\u001b[38;2;205;154;34m  /opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/docs/models.md\u001b[0m                                       \n\n \u001b[0m\u001b[38;2;234;127;129mError: No API key found for the selected model.                                                                       \u001b[0m\n \u001b[0m\u001b[38;2;234;127;129m                                                                                                                      \u001b[0m\n \u001b[0m\u001b[38;2;234;127;129mUse /login to log into a provider via OAuth or API key. See:                                                          \u001b[0m\n \u001b[0m\u001b[38;2;234;127;129m  /opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/docs/providers.md                                    \u001b[0m\n \u001b[0m\u001b[38;2;234;127;129m  /opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/docs/models.md\u001b[0m                                       \n\n\u001b[0m\u001b[38;2;108;118;123m───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────\u001b[0m\n\u001b[0m\u001b[7m \u001b[0m                                                                                                                      \n\u001b[0m\u001b[38;2;108;118;123m───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────\u001b[0m\n\u001b[0m\u001b[38;2;126;136;142m~/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt (live)\u001b[0m\n\u001b[0m\u001b[38;2;126;136;142m0.0%/0 (auto)                                                                                                   unknown\u001b[0m"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live/lab run fm-lab-a pane read w1:p3 --source recent --lines 55",
+    "exit_code": 0,
+    "output": "[Skills]\n  algorithmic-art, animate, animate-expo, animation-vocabulary, apple-design, ask-sonner, automate, autopilot,\nbrand-guidelines, brief-diario-clickup, canvas, canvas-design, coda-crud, composio, configurar-agente-codex-trinity,\nconfigurar-multica-converte-f360, configurar-rules-codex, context-management, create-hook, create-rule, create-skill,\ncreate-subagent, criar-proposta-vibe-code, design-taste-frontend, doc-coauthoring, docs, docx, emil-design-eng,\nescrita-natural-pt-br, executar-fechamento-caixa, extrair-alertas-nfe, extrair-relatorio-vendas-verocard,\nfind-animation-opportunities, goal, google-workspace, graphify, high-end-visual-design, hindsight-coding-agent,\nhoncho-integration, honcho-memory, hyperagent, image-to-code, impeccable, import-memory, improve-animations,\ninternal-comms, learn, loop, mcp-builder, migrate-to-skills, mobile-native, morning, new-repo, no-mistakes, onboard,\norca-cli, orca-per-workspace-env, orca-test, orch, orchestration, origin, pdf, pick-ui-library, pptx,\npreencher-fluxo-caixa-mei-mei, process-doc, projecao-de-fluxo-de-caixa, prototype, reasoning-critique,\nremover-ncm-cfop, rename-chat, reticle, reverse-engineer-anything, review, review-animations, review-bugbot,\nreview-security, revisar-pendencias-clickup, sdk, share, shell, sincronizar-spec-clickup, skill-creator,\nskill-discovery, skybridge, split-to-prs, statusline, superdesign, taste-design, theme-factory, ui-ux-pro-max,\nupdate-cli-config, update-cursor-settings, visualize, web-artifacts-builder, write-swift, xlsx\n\n[Extensions]\n  live.pi-ext.ts\n\n[Skill conflicts]\n  \"projecao-de-fluxo-de-caixa\" collision:\n    ✓ auto (user) ~/.agents/skills/projecao-de-fluxo-de-caixa/SKILL.md\n    ✗\n~/.agents/skills/synced/7cba47c4-79ac-4255-9012-338ea418ba74_72a4e593-fda7-47a4-b190-a4e63492a3ef/projecao-de-fluxo-de-\ncaixa/SKILL.md (skipped)\n  \"reasoning-critique\" collision:\n    ✓ auto (user) ~/.agents/skills/reasoning-critique/SKILL.md\n    ✗\n~/.agents/skills/synced/7cba47c4-79ac-4255-9012-338ea418ba74_72a4e593-fda7-47a4-b190-a4e63492a3ef/reasoning-critique/SK\nILL.md (skipped)\n  ~/.agents/skills/revisao-adversarial/SKILL.md\n    Nested mappings are not allowed in compact mappings at line 2, column 14:\n\ndescription: Revisa qualquer artefato pelo princípio adversarial — tenta provar…\n             ^\n\n\n\n Warning: fd not found. Offline mode enabled, skipping download.\n\n Warning: No models available. Use /login to log into a provider via OAuth or API key. See:\n   /opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/docs/providers.md\n   /opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/docs/models.md\n\n Error: No API key found for the selected model.\n\n Use /login to log into a provider via OAuth or API key. See:\n   /opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/docs/providers.md\n   /opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/docs/models.md\n\n───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────\n\n───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────\n~/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt (live)\n0.0%/0 (auto)                                                                                                   unknown\n"
+  },
+  {
+    "assertion": "Pi real recebeu o pedido mas não dispõe de credencial no perfil isolado",
+    "model_response_available": false,
+    "credential_error": true
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live/lab run fm-lab-a pane list",
+    "exit_code": 0,
+    "output": "{\"id\":\"cli:pane:list\",\"result\":{\"panes\":[{\"agent_status\":\"unknown\",\"cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live\",\"focused\":true,\"foreground_cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live\",\"pane_id\":\"w1:p1\",\"revision\":0,\"scroll\":{\"max_offset_from_bottom\":0,\"offset_from_bottom\":0,\"viewport_rows\":40},\"tab_id\":\"w1:t1\",\"terminal_id\":\"term_65dc8e44c8b0c1\",\"workspace_id\":\"w1\"},{\"agent\":\"pi\",\"agent_status\":\"idle\",\"cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\",\"focused\":false,\"foreground_cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\",\"pane_id\":\"w1:p3\",\"revision\":1,\"scroll\":{\"max_offset_from_bottom\":33,\"offset_from_bottom\":0,\"viewport_rows\":40},\"tab_id\":\"w1:t3\",\"terminal_id\":\"term_65dc8f68624003\",\"terminal_title\":\"π - wt\",\"terminal_title_stripped\":\"π - wt\",\"workspace_id\":\"w1\"}],\"type\":\"pane_list\"}}\n"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/bin/fm-spawn.sh live --relaunch --harness pi",
+    "exit_code": 1,
+    "output": "error: task live's endpoint reads 'alive'; a relaunch requires a positively agent-free endpoint (stop the agent first with bin/fm-control.sh live exit)\n"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live/lab run fm-lab-a pane process-info --pane w1:p3",
+    "exit_code": 0,
+    "output": "{\"id\":\"cli:pane:process_info\",\"result\":{\"process_info\":{\"foreground_process_group_id\":36140,\"foreground_processes\":[{\"argv0\":\"pi\",\"cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\",\"name\":\"node\",\"pid\":36140}],\"pane_id\":\"w1:p3\",\"shell_pid\":34869},\"type\":\"pane_process_info\"}}\n"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live/lab run fm-lab-a pane list",
+    "exit_code": 0,
+    "output": "{\"id\":\"cli:pane:list\",\"result\":{\"panes\":[{\"agent_status\":\"unknown\",\"cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live\",\"focused\":true,\"foreground_cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live\",\"pane_id\":\"w1:p1\",\"revision\":0,\"scroll\":{\"max_offset_from_bottom\":0,\"offset_from_bottom\":0,\"viewport_rows\":40},\"tab_id\":\"w1:t1\",\"terminal_id\":\"term_65dc8e44c8b0c1\",\"workspace_id\":\"w1\"},{\"agent\":\"pi\",\"agent_status\":\"idle\",\"cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\",\"focused\":false,\"foreground_cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\",\"pane_id\":\"w1:p3\",\"revision\":1,\"scroll\":{\"max_offset_from_bottom\":33,\"offset_from_bottom\":0,\"viewport_rows\":40},\"tab_id\":\"w1:t3\",\"terminal_id\":\"term_65dc8f68624003\",\"terminal_title\":\"π - wt\",\"terminal_title_stripped\":\"π - wt\",\"workspace_id\":\"w1\"}],\"type\":\"pane_list\"}}\n"
+  },
+  {
+    "assertion": "Segundo lançamento recusado enquanto Pi real está ativo",
+    "pid_before": 36140,
+    "pid_after": 36140,
+    "metadata_unchanged": true,
+    "brief_unchanged": true,
+    "endpoint_count_unchanged": true
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/bin/fm-control.sh live exit",
+    "exit_code": 0,
+    "output": "stopped live harness=pi backend=herdr endpoint=fm-lab-a:w1:p3 worktree=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\n"
+  },
+  {
+    "command": "bash -c . bin/fm-backend.sh; fm_backend_source herdr; fm_backend_agent_state herdr \"$TARGET\"",
+    "exit_code": 0,
+    "output": "dead"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live/lab run fm-lab-a pane get w1:p3",
+    "exit_code": 0,
+    "output": "{\"id\":\"cli:pane:get\",\"result\":{\"pane\":{\"agent_status\":\"unknown\",\"cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\",\"focused\":false,\"foreground_cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\",\"pane_id\":\"w1:p3\",\"revision\":1,\"scroll\":{\"max_offset_from_bottom\":35,\"offset_from_bottom\":0,\"viewport_rows\":40},\"tab_id\":\"w1:t3\",\"terminal_id\":\"term_65dc8f68624003\",\"terminal_title\":\"π - wt\",\"terminal_title_stripped\":\"π - wt\",\"workspace_id\":\"w1\"},\"type\":\"pane_info\"}}\n"
+  },
+  {
+    "assertion": "Exit para Pi real encerrou o agente e preservou seu terminal",
+    "target": "fm-lab-a:w1:p3",
+    "agent_state": "dead",
+    "dirty_sha256": "a5be04ec0685176eaa54ef1d590585ffe3863395e5648db1efcad75bc022b0aa"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live/lab run fm-lab-a pane close w1:p3",
+    "exit_code": 0,
+    "output": "{\"id\":\"cli:pane:close\",\"result\":{\"type\":\"ok\"}}\n"
+  },
+  {
+    "command": "bash -c . bin/fm-backend.sh; fm_backend_source herdr; fm_backend_agent_state herdr \"$TARGET\"",
+    "exit_code": 0,
+    "output": "missing"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live/lab run fm-lab-a workspace create --cwd /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt --label firstmate --no-focus",
+    "exit_code": 0,
+    "output": "{\"id\":\"cli:workspace:create\",\"result\":{\"root_pane\":{\"agent_status\":\"unknown\",\"cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\",\"focused\":false,\"foreground_cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\",\"pane_id\":\"w2:p1\",\"revision\":0,\"scroll\":{\"max_offset_from_bottom\":0,\"offset_from_bottom\":0,\"viewport_rows\":40},\"tab_id\":\"w2:t1\",\"terminal_id\":\"term_65dc8f72ce5144\",\"workspace_id\":\"w2\"},\"tab\":{\"agent_status\":\"unknown\",\"focused\":false,\"label\":\"1\",\"number\":1,\"pane_count\":1,\"tab_id\":\"w2:t1\",\"workspace_id\":\"w2\"},\"type\":\"workspace_created\",\"workspace\":{\"active_tab_id\":\"w2:t1\",\"agent_status\":\"unknown\",\"focused\":false,\"label\":\"firstmate\",\"number\":2,\"pane_count\":1,\"tab_count\":1,\"workspace_id\":\"w2\"}}}\n"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live/lab run fm-lab-a pane list",
+    "exit_code": 0,
+    "output": "{\"id\":\"cli:pane:list\",\"result\":{\"panes\":[{\"agent_status\":\"unknown\",\"cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live\",\"focused\":true,\"foreground_cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live\",\"pane_id\":\"w1:p1\",\"revision\":0,\"scroll\":{\"max_offset_from_bottom\":0,\"offset_from_bottom\":0,\"viewport_rows\":40},\"tab_id\":\"w1:t1\",\"terminal_id\":\"term_65dc8e44c8b0c1\",\"workspace_id\":\"w1\"},{\"agent_status\":\"unknown\",\"cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\",\"focused\":false,\"foreground_cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\",\"pane_id\":\"w2:p1\",\"revision\":0,\"scroll\":{\"max_offset_from_bottom\":0,\"offset_from_bottom\":0,\"viewport_rows\":40},\"tab_id\":\"w2:t1\",\"terminal_id\":\"term_65dc8f72ce5144\",\"workspace_id\":\"w2\"}],\"type\":\"pane_list\"}}\n"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/bin/fm-control.sh live relaunch --harness pi --note MAC_AMBIGUITY: preservar trabalho e recusar escolha arbitrária.",
+    "exit_code": 1,
+    "output": "warning: /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/home/data/live/launch-brief.md records no delivery contract line (scaffolded before ship briefs recorded one); launching on the explicit --mode no-mistakes - confirm its definition of done matches\nerror: 2 herdr workspaces in session 'fm-lab-a' are labeled 'firstmate' (w1 w2) and this spawn has no herdr parent pane to identify which one is its own; rename or close the extras, or run firstmate inside the workspace its workers belong in\nerror: the replacement agent for live could not be launched on pi\nerror: live's agent was stopped but the replacement did not launch; no agent is running, and its work plus the recorded progress note are preserved at /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\n"
+  },
+  {
+    "assertion": "Verificador ajustado à mensagem pública real; a primeira recusa foi válida",
+    "previous_assertion_issue": "Esperava a palavra ambiguous, mas o produto explicitou 2 workspaces com mesmo rótulo."
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live/lab run fm-lab-a pane list",
+    "exit_code": 0,
+    "output": "{\"id\":\"cli:pane:list\",\"result\":{\"panes\":[{\"agent_status\":\"unknown\",\"cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live\",\"focused\":true,\"foreground_cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live\",\"pane_id\":\"w1:p1\",\"revision\":0,\"scroll\":{\"max_offset_from_bottom\":0,\"offset_from_bottom\":0,\"viewport_rows\":40},\"tab_id\":\"w1:t1\",\"terminal_id\":\"term_65dc8e44c8b0c1\",\"workspace_id\":\"w1\"},{\"agent_status\":\"unknown\",\"cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\",\"focused\":false,\"foreground_cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\",\"pane_id\":\"w2:p1\",\"revision\":0,\"scroll\":{\"max_offset_from_bottom\":0,\"offset_from_bottom\":0,\"viewport_rows\":40},\"tab_id\":\"w2:t1\",\"terminal_id\":\"term_65dc8f72ce5144\",\"workspace_id\":\"w2\"}],\"type\":\"pane_list\"}}\n"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/bin/fm-control.sh live relaunch --harness pi --note MAC_AMBIGUITY_RECHECK: preservar trabalho e recusar escolha arbitrária.",
+    "exit_code": 1,
+    "output": "warning: /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/home/data/live/launch-brief.md records no delivery contract line (scaffolded before ship briefs recorded one); launching on the explicit --mode no-mistakes - confirm its definition of done matches\nerror: 2 herdr workspaces in session 'fm-lab-a' are labeled 'firstmate' (w1 w2) and this spawn has no herdr parent pane to identify which one is its own; rename or close the extras, or run firstmate inside the workspace its workers belong in\nerror: the replacement agent for live could not be launched on pi\nerror: live's agent was stopped but the replacement did not launch; no agent is running, and its work plus the recorded progress note are preserved at /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\n"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live/lab run fm-lab-a pane list",
+    "exit_code": 0,
+    "output": "{\"id\":\"cli:pane:list\",\"result\":{\"panes\":[{\"agent_status\":\"unknown\",\"cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live\",\"focused\":true,\"foreground_cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live\",\"pane_id\":\"w1:p1\",\"revision\":0,\"scroll\":{\"max_offset_from_bottom\":0,\"offset_from_bottom\":0,\"viewport_rows\":40},\"tab_id\":\"w1:t1\",\"terminal_id\":\"term_65dc8e44c8b0c1\",\"workspace_id\":\"w1\"},{\"agent_status\":\"unknown\",\"cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\",\"focused\":false,\"foreground_cwd\":\"/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\",\"pane_id\":\"w2:p1\",\"revision\":0,\"scroll\":{\"max_offset_from_bottom\":0,\"offset_from_bottom\":0,\"viewport_rows\":40},\"tab_id\":\"w2:t1\",\"terminal_id\":\"term_65dc8f72ce5144\",\"workspace_id\":\"w2\"}],\"type\":\"pane_list\"}}\n"
+  },
+  {
+    "command": "cat /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/home/state/live.control-relaunch",
+    "exit_code": 0,
+    "output": "v1\ntask=live\nphase=failed:launching\nts=2026-10-14T08:48:03Z\nbackend=herdr\nendpoint=fm-lab-a:w1:p3\nworktree=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\nkind=ship\nfrom_harness=pi\nfrom_model=default\nfrom_effort=default\nto_harness=pi\nto_model=default\nto_effort=default\nrollback=prior-record-kept\n"
+  },
+  {
+    "assertion": "Rótulo duplicado recusou recuperação sem criar endpoint órfão",
+    "metadata_sha256_before": "2e5107b7e96d7cf7cda612d197f9beb57a5d712a924cac1d77dd77c8d1818542",
+    "metadata_sha256_after": "2e5107b7e96d7cf7cda612d197f9beb57a5d712a924cac1d77dd77c8d1818542",
+    "dirty_sha256": "a5be04ec0685176eaa54ef1d590585ffe3863395e5648db1efcad75bc022b0aa",
+    "endpoint_count_unchanged": true,
+    "note_retained": true
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live/lab run fm-lab-a pane close w2:p1",
+    "exit_code": 0,
+    "output": "{\"id\":\"cli:pane:close\",\"result\":{\"type\":\"ok\"}}\n"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/bin/fm-control.sh live relaunch --harness pi --note MAC_AFTER_AMBIGUITY: continuar apenas inspeção local.",
+    "exit_code": 0,
+    "output": "warning: /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/home/data/live/launch-brief.md records no delivery contract line (scaffolded before ship briefs recorded one); launching on the explicit --mode no-mistakes - confirm its definition of done matches\nrelaunched live harness=pi from=pi model=default effort=default backend=herdr endpoint=fm-lab-a:w1:p4 worktree=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\n"
+  },
+  {
+    "command": "bash -c . bin/fm-backend.sh; fm_backend_source herdr; fm_backend_agent_state herdr \"$TARGET\"",
+    "exit_code": 0,
+    "output": "alive"
+  },
+  {
+    "assertion": "Recuperação disponível após remover somente o conflito criado pelo teste",
+    "target": "fm-lab-a:w1:p4",
+    "dirty_sha256": "a5be04ec0685176eaa54ef1d590585ffe3863395e5648db1efcad75bc022b0aa"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live/lab viewer start fm-lab-a",
+    "exit_code": 0,
+    "output": "viewer attached to fm-lab-a (pid 74012)\n"
+  },
+  {
+    "assertion": "Viewer Herdr real anexado em PTY de 40 linhas e 120 colunas, com master drenado pelo helper"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live/lab viewer stop fm-lab-a",
+    "exit_code": 0,
+    "output": ""
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/bin/fm-control.sh live exit",
+    "exit_code": 0,
+    "output": "stopped live harness=pi backend=herdr endpoint=fm-lab-a:w1:p4 worktree=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\n"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live/lab stop fm-lab-a",
+    "exit_code": 0,
+    "output": "{\"session\":{\"default\":false,\"name\":\"fm-lab-a\",\"running\":false,\"session_dir\":\".h/herdr/sessions/fm-lab-a\",\"socket_path\":\".h/herdr/sessions/fm-lab-a/herdr.sock\"},\"stopped\":true}\n"
+  },
+  {
+    "command": "bash -c . bin/fm-backend.sh; fm_backend_source herdr; fm_backend_agent_state herdr \"$TARGET\"",
+    "exit_code": 0,
+    "output": "missing"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/bin/fm-control.sh live exit",
+    "exit_code": 0,
+    "output": "already-stopped live harness=pi backend=herdr endpoint=fm-lab-a:w1:p4 worktree=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\n"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/bin/fm-control.sh live relaunch --harness pi --note MAC_SESSION_RESTART: recuperar sessão gravada parada; somente inspeção.",
+    "exit_code": 0,
+    "output": "warning: /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/home/data/live/launch-brief.md records no delivery contract line (scaffolded before ship briefs recorded one); launching on the explicit --mode no-mistakes - confirm its definition of done matches\nrelaunched live harness=pi from=pi model=default effort=default backend=herdr endpoint=fm-lab-a:w1:p5 worktree=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\n"
+  },
+  {
+    "command": "bash -c . bin/fm-backend.sh; fm_backend_source herdr; fm_backend_agent_state herdr \"$TARGET\"",
+    "exit_code": 0,
+    "output": "alive"
+  },
+  {
+    "assertion": "Sessão Herdr parada foi reconstruída pelo próprio relaunch na sessão registrada",
+    "old": "fm-lab-a:w1:p4",
+    "new": "fm-lab-a:w1:p5",
+    "dirty_sha256": "a5be04ec0685176eaa54ef1d590585ffe3863395e5648db1efcad75bc022b0aa",
+    "ambient_session": "fm-lab-other"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/bin/fm-control.sh live exit",
+    "exit_code": 0,
+    "output": "stopped live harness=pi backend=herdr endpoint=fm-lab-a:w1:p5 worktree=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\n"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/bin/fm-control.sh tmuxmissing relaunch --harness pi --note MAC_UNSUPPORTED: não reconstruir terminal de outro runtime.",
+    "exit_code": 1,
+    "output": "error: task tmuxmissing's tmux endpoint is authoritatively missing, but that backend has no verified endpoint-rebuild path; refusing before recording progress\n"
+  },
+  {
+    "assertion": "Endpoint tmux ausente recusado antes de gravar nota ou diário",
+    "metadata_sha256_before": "290275ad52f5fdf6159a3b7ee30673d227f92b3eca5cf035646b2775d377b115",
+    "metadata_sha256_after": "290275ad52f5fdf6159a3b7ee30673d227f92b3eca5cf035646b2775d377b115",
+    "brief_sha256_before": "7da36b4873cc212d4edde7af3acbc40d23ab6bb7479962cf69cdd058d839fcca",
+    "brief_sha256_after": "7da36b4873cc212d4edde7af3acbc40d23ab6bb7479962cf69cdd058d839fcca"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/live/lab run fm-lab-a pane close w2:p2",
+    "exit_code": 0,
+    "output": "{\"id\":\"cli:pane:close\",\"result\":{\"type\":\"ok\"}}\n"
+  },
+  {
+    "command": "bash -c . bin/fm-backend.sh; fm_backend_source herdr; fm_backend_agent_state herdr \"$TARGET\"",
+    "exit_code": 0,
+    "output": "missing"
+  },
+  {
+    "command": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/bin/fm-control.sh projected relaunch --harness pi --note MAC_PROJECTED_RECOVERY: sessão e cópia existentes; não usar ferramentas.",
+    "exit_code": 1,
+    "output": "warning: /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/home/data/projected/launch-brief.md records no delivery contract line (scaffolded before ship briefs recorded one); launching on the explicit --mode no-mistakes - confirm its definition of done matches\nerror: herdr presentation recovery could not acquire its session lock; refusing a concurrent resume\nerror: the replacement agent for projected could not be launched on pi\nerror: projected's agent was stopped but the replacement did not launch; no agent is running, and its work plus the recorded progress note are preserved at /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\n"
+  }
+]

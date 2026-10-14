@@ -1,0 +1,66 @@
+{
+  "title": "MAC comprovação focada da recuperação Herdr/Pi",
+  "timestamp": "2026-10-14T10:58:01.898858+00:00",
+  "tested_head_sha": "64befcb503c6ee1eb07426e5c7ee802d5077cb30",
+  "verdict": "pass",
+  "scope": "Somente os dois cenários pendentes; sete resultados anteriores preservados sem nova execução.",
+  "source_changes": [],
+  "root_cause": "A comprovação anterior era incompleta por socket relativo e perfil Pi sem autenticação. A preparação atual reutilizou OAuth válido somente em memória e runtime temporário nativo. A primeira chamada recusou a fixture manual sem # Task; somente o cabeçalho da fixture foi corrigido.",
+  "scenarios": [
+    {
+      "name": "Retomar tarefa com workspace de apresentação removido preserva sua recuperação.",
+      "result": "pass",
+      "live": true,
+      "evidence": [
+        "herdr-raw.jsonl",
+        "before-removal-ready/",
+        "after-removal/",
+        "after-fixed-relaunch/",
+        "after-work/"
+      ],
+      "old_endpoint": "fm-lab-r3:w2:p2",
+      "new_endpoint": "fm-lab-r3:w1:p2",
+      "journal_preserved": true,
+      "work_and_head_preserved": true
+    },
+    {
+      "name": "O agente recuperado processa a nota e continua o trabalho.",
+      "result": "pass",
+      "live": true,
+      "evidence": [
+        "pi-events.jsonl",
+        "pi-sessions/2026-10-14T10-53-15-679Z_01a13a0b-841e-753b-aa0b-5b7e28d62e09.jsonl",
+        "after-work/resultado.json"
+      ],
+      "output": {
+        "nonce": "MAC_NOTE_68111daea2714bcdb83f51254c7c38c3",
+        "sum": 68,
+        "count": 3
+      },
+      "output_sha256": "15bda8396ac88e05492782d2dc1c94b7de172b80fd04b36e635c91dca8642108"
+    }
+  ],
+  "execution_limits": [
+    "Uma única remoção real de workspace; duas chamadas de relaunch, sendo a primeira recusada pela fixture inválida.",
+    "Entre as chamadas houve teardown guardado e recriação da sessão e do parent; a evidência comprova retomada do estado persistido, não uma recuperação ininterrupta no processo Herdr original.",
+    "Runtime Herdr gerado temporariamente em ~/.config/herdr/sessions/fm-lab-r3, removido pelo helper guardado; configuração deliberada, fixture e perfil Pi ficaram no worktree.",
+    "Comparação executada das credenciais globais registrou igualdade em ambas as limpezas; o par histórico de hashes não foi preservado para auditoria independente. Não houve login nem renovação pelo teste."
+  ],
+  "verification": {
+    "native_pi_tools": [
+      "read",
+      "write"
+    ],
+    "corroborated_artifact_hashes": 126,
+    "original_artifacts_preserved": 26,
+    "complete_suite_run": false,
+    "linters_run": false,
+    "pipeline_pr_ci_actions": false,
+    "worktree_clean": true,
+    "transient_test_artifacts_removed": true
+  },
+  "independent_reviews": [
+    "Auditor de evidências confirmou resultados, hashes e limites.",
+    "Advisor confirmou pass funcional e ressalva da recriação intermediária."
+  ]
+}

@@ -1,0 +1,1 @@
+{"id":"cli:workspace:list","result":{"type":"workspace_list","workspaces":[{"active_tab_id":"w1:t1","agent_status":"working","focused":true,"label":"firstmate","number":1,"pane_count":2,"tab_count":2,"workspace_id":"w1"}]}}

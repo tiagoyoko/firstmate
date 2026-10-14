@@ -1,0 +1,55 @@
+[Skills]
+  algorithmic-art, animate, animate-expo, animation-vocabulary, apple-design, ask-sonner, automate, autopilot,
+brand-guidelines, brief-diario-clickup, canvas, canvas-design, coda-crud, composio, configurar-agente-codex-trinity,
+configurar-multica-converte-f360, configurar-rules-codex, context-management, create-hook, create-rule, create-skill,
+create-subagent, criar-proposta-vibe-code, design-taste-frontend, doc-coauthoring, docs, docx, emil-design-eng,
+escrita-natural-pt-br, executar-fechamento-caixa, extrair-alertas-nfe, extrair-relatorio-vendas-verocard,
+find-animation-opportunities, goal, google-workspace, graphify, high-end-visual-design, hindsight-coding-agent,
+honcho-integration, honcho-memory, hyperagent, image-to-code, impeccable, import-memory, improve-animations,
+internal-comms, learn, loop, mcp-builder, migrate-to-skills, mobile-native, morning, new-repo, no-mistakes, onboard,
+orca-cli, orca-per-workspace-env, orca-test, orch, orchestration, origin, pdf, pick-ui-library, pptx,
+preencher-fluxo-caixa-mei-mei, process-doc, projecao-de-fluxo-de-caixa, prototype, reasoning-critique,
+remover-ncm-cfop, rename-chat, reticle, reverse-engineer-anything, review, review-animations, review-bugbot,
+review-security, revisar-pendencias-clickup, sdk, share, shell, sincronizar-spec-clickup, skill-creator,
+skill-discovery, skybridge, split-to-prs, statusline, superdesign, taste-design, theme-factory, ui-ux-pro-max,
+update-cli-config, update-cursor-settings, visualize, web-artifacts-builder, write-swift, xlsx
+
+[Extensions]
+  live.pi-ext.ts
+
+[Skill conflicts]
+  "projecao-de-fluxo-de-caixa" collision:
+    ✓ auto (user) ~/.agents/skills/projecao-de-fluxo-de-caixa/SKILL.md
+    ✗
+~/.agents/skills/synced/7cba47c4-79ac-4255-9012-338ea418ba74_72a4e593-fda7-47a4-b190-a4e63492a3ef/projecao-de-fluxo-de-
+caixa/SKILL.md (skipped)
+  "reasoning-critique" collision:
+    ✓ auto (user) ~/.agents/skills/reasoning-critique/SKILL.md
+    ✗
+~/.agents/skills/synced/7cba47c4-79ac-4255-9012-338ea418ba74_72a4e593-fda7-47a4-b190-a4e63492a3ef/reasoning-critique/SK
+ILL.md (skipped)
+  ~/.agents/skills/revisao-adversarial/SKILL.md
+    Nested mappings are not allowed in compact mappings at line 2, column 14:
+
+description: Revisa qualquer artefato pelo princípio adversarial — tenta provar…
+             ^
+
+
+
+ Warning: fd not found. Offline mode enabled, skipping download.
+
+ Warning: No models available. Use /login to log into a provider via OAuth or API key. See:
+   /opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/docs/providers.md
+   /opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/docs/models.md
+
+ Error: No API key found for the selected model.
+
+ Use /login to log into a provider via OAuth or API key. See:
+   /opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/docs/providers.md
+   /opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/docs/models.md
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+~/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt (live)
+0.0%/0 (auto)                                                                                                   unknown

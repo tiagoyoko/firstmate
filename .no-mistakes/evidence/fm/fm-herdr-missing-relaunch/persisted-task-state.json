@@ -1,0 +1,30 @@
+{
+  "live.meta": {
+    "sha256": "4ca2d952380daf5575c25fadd5c35584694157f05f8297a851a62e522d9ada9c",
+    "content": "window=fm-lab-a:w1:p5\nendpoint_task_id=live\nworktree=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\nproject=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/proj\nharness=pi\nkind=ship\nmode=no-mistakes\nyolo=off\ntasktmp=/tmp/fm-live\nmodel=default\neffort=default\nbusy_gen=g1791967751.91210.22745\nspawn_gen=s1791967751.90791.31133\nbackend=herdr\nherdr_session=fm-lab-a\nherdr_workspace_id=w1\nherdr_tab_id=w1:t5\nherdr_pane_id=w1:p5\ndurable_probe=MAC_KEEP\ncontrol_relaunch_tx=90583.20261014T084910Z.10037\n"
+  },
+  "live.control-relaunch": {
+    "sha256": "d1aa57a80bc49ab6212866dc52b88e5d22f43297465da15b0559e498e4f254e1",
+    "content": "v1\ntask=live\nphase=complete\nts=2026-10-14T08:49:16Z\nbackend=herdr\nendpoint=fm-lab-a:w1:p5\nworktree=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\nkind=ship\nfrom_harness=pi\nfrom_model=default\nfrom_effort=default\nto_harness=pi\nto_model=default\nto_effort=default\nworktree_head=37297aa92f8fcda8703bdd941eec6f557c7e657f\nworktree_dirty=yes\nnote_file=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/home/state/live.control-relaunch.note\nexit_result=already-stopped\n"
+  },
+  "projected.meta": {
+    "sha256": "126216ef7ea2c9465ecefc662732cf5e58ded181371e504d5b4b097fa09ad0d2",
+    "content": "window=fm-lab-a:w2:p2\nendpoint_task_id=projected\nworktree=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\nproject=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/proj\nharness=pi\nkind=ship\nmode=no-mistakes\nyolo=off\nmodel=default\neffort=default\nbackend=herdr\nherdr_session=fm-lab-a\nherdr_workspace_id=w2\nherdr_tab_id=w2:t2\nherdr_pane_id=w2:p2\ndurable_probe=MAC_KEEP_PROJECTION\n"
+  },
+  "projected.control-relaunch": {
+    "sha256": "cb3ce81819f058c418d26a91c30baaaaa906aae4847843a325d21d0ece02484c",
+    "content": "v1\ntask=projected\nphase=failed:launching\nts=2026-10-14T08:51:27Z\nbackend=herdr\nendpoint=fm-lab-a:w2:p2\nworktree=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\nkind=ship\nfrom_harness=pi\nfrom_model=default\nfrom_effort=default\nto_harness=pi\nto_model=default\nto_effort=default\nrollback=prior-record-kept\n"
+  },
+  "projected.herdr-presentation": {
+    "sha256": "ba3b9ea15c05a6b9cc1eb6b5c8b0476e19490cbce28769c05022f6e84b7c317c",
+    "content": "version=2\ntask_id=projected\nprojection_id=zQB9-11yria3mVhOLqI6eQ\nhome=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/home\nsession=fm-lab-a\nworkspace_id=w2\ntab_id=w2:t2\npane_id=w2:p2\nparent_workspace_id=w1\nparent_label=firstmate\nworkspace_label=└ projected · p:zQB9-11yria3mVhOLqI6eQ\ntask_label=fm-projected\n"
+  },
+  "tmuxmissing.meta": {
+    "sha256": "290275ad52f5fdf6159a3b7ee30673d227f92b3eca5cf035646b2775d377b115",
+    "content": "window=fm-nomistakes-missing:fm-tmuxmissing\nendpoint_task_id=tmuxmissing\nworktree=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt\nproject=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/proj\nharness=pi\nkind=ship\nmode=no-mistakes\nyolo=off\nbackend=tmux\nmodel=default\neffort=default\n"
+  },
+  "uncommitted-work": {
+    "sha256": "a5be04ec0685176eaa54ef1d590585ffe3863395e5648db1efcad75bc022b0aa",
+    "content": "trabalho ainda não commitado, preservar\n"
+  }
+}

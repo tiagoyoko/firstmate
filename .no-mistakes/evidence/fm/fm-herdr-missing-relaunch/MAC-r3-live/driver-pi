@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+exec /opt/homebrew/bin/pi --offline --no-approve --no-context-files --no-skills --no-extensions --no-mcp --no-prompt-templates --no-themes --tools read,write -e /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/pi-auth.ts --system-prompt 'Você participa de um teste isolado. Siga apenas as instruções específicas da nota de recuperação. Use somente read/write em arquivos no cwd. Não controle Firstmate, gates, pipeline, PR ou CI. Não leia credenciais.' "$@"

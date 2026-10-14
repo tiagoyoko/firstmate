@@ -1,0 +1,59 @@
+{
+  "titulo": "MAC auditoria da evidencia complementar Firstmate",
+  "run_id": "01M4WR85EFRRBS83H0J31Q5KXX",
+  "target_commit_do_worktree": "64befcb503c6ee1eb07426e5c7ee802d5077cb30",
+  "verificado_em_utc": "2026-10-14T10:31:15.175939+00:00",
+  "escopo": "Ingestao e verificacao documental dos artefatos existentes; nenhuma nova execucao do produto, acesso a runtime externo ou autenticacao.",
+  "manifesto": "/Users/tiagoyoko/.no-mistakes/evidence/01M4WR85EFRRBS83H0J31Q5KXX/firstmate-followup-live-evidence.json",
+  "manifesto_sha256": "59bb2c9c254cd03d61ed018b35d20cde02747ce538a79ef73b8725e29b6ccb71",
+  "verificacoes_de_consistencia_do_registro": {
+    "endpoints_na_mesma_sessao_declarada": true,
+    "workspace_antigo_corresponde_ao_removido": true,
+    "workspace_novo_corresponde_ao_substituto": true,
+    "endpoint_declarado_foi_alterado": true,
+    "estado_anterior_declarado_missing": true,
+    "relato_declarado_do_pi_corresponde_ao_nonce": true,
+    "digest_declarado_tem_formato_sha256": true
+  },
+  "outros_artefatos_com_sessao_ou_nonce_complementar": [],
+  "vinculo_explicito_ao_commit_no_manifesto": false,
+  "limites": [
+    "O manifesto declara sucesso nos dois cenarios, mas nao inclui comandos ou respostas capturadas do produto.",
+    "A resposta atribuida ao Pi aparece somente no manifesto; nao ha captura complementar disponivel.",
+    "O digest unico registra preservacao declarada; nao fornece duas leituras independentes para comparacao.",
+    "Os logs e capturas existentes pertencem a sessao fm-lab-a da rodada inicial, sem corroborar nem contradizer a execucao complementar.",
+    "Os dois resultados complementares permanecem untested, live=false. Os sete resultados anteriores sao preservados."
+  ],
+  "capturas_visuais_conferidas": [
+    "pi-present.png",
+    "pi-recovered.png"
+  ],
+  "hashes_dos_artefatos_originais_preservados": {
+    "live-driver-projection.log": "05cc998d133851f0dfaab0857d867b73b6a373d23a0b0d2c73f05eb6e274e073",
+    "pi-recovered-screen.txt": "9d160564a25b2a239e936ea7d9a8091537bfb76cb7e8ee2af0b1a343674d6c22",
+    "firstmate-followup-live-evidence.json": "59bb2c9c254cd03d61ed018b35d20cde02747ce538a79ef73b8725e29b6ccb71",
+    "pi-present.png": "8afb50a460f1512ca683e9c191263a9927239a2f7e9fbaa8b88c5caab423cc83",
+    "pi-present.html": "d5aa536b24e2c83ff389ae709420edf023b94068fee33ede3d4dfdb21d63fb46",
+    "pi-recovered.png": "8f761da4b5687d5c7fa9048d9cbe5b8e6920395620df82a345f05ade2c82e4ae",
+    "pi-present.ansi": "9d86f250e2deef7319349e3fce0236e283cce56015f5443d7df765c6f6631224",
+    "live-projection-setup.log": "700203f7892e2439abf964a2026e30453509761fbdbe8171ea003ba14a3cc0a6",
+    "live-pi-exit.log": "4590e5dee4dd8370bd9fcef74941fec949001ccd00735474ade67639d297373d",
+    "persisted-task-state.json": "99d869fd1233ed175eeed19023219503030a0c4e06c578cc408997a98c772a8d",
+    "live-driver-continue.log": "e584edecf643d5102929ddb81bb77fd8fdb9de67a3b09a667ef8bc03372d1c94",
+    "live-active-refusal.log": "ebaac93e1716513e0c8c9c81f9d37deb08fea84cd29513c9a6e19f603e506596",
+    "targeted-fm-control-relaunch.log": "90b79e40f5e65cf8e75a58cbb23a11c0077db6245abf9aad802e6ce74e3e5ccb",
+    "cleanup-status.json": "e838fc6078c7718b90fd12df357aaf52131c248b65f55b32d18751ee9c654b08",
+    "live-driver-session.log": "e7256a6bbdcb7e2f95ad818ce0a195024c282076b73c384deddc6d6663a3a9b7",
+    "lab-cleanup.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "targeted-fm-control.log": "2bd6c25a483a930bb11c1e24ef026d8e29db51ba93c9ba11804f9746bac122a1",
+    "socket-path-check.json": "c6c52580b6d80081b7dbc0f2835ada852f640eb85155c8fbb346a5748e397e50",
+    "live-present-relaunch.log": "8361a4b97f816fd27fa66e4e6ead17bb576b99a6d98aa0ca8872db6d4b3d34fe",
+    "MAC-manual-checks.md": "2037efcc21a0ad182afa37006e6ffe46fe7c918ef395aa408016a9511dbbe79b",
+    "pi-recovered.ansi": "b558d95e73e02994cef4fb0695cd7bde1e0e48ba40c8511914ec2bd4953f1371",
+    "pi-recovered.html": "c9879e4cd501e70fa4245002fc0f5cea5e324105d4fbcca0610e967ff086dc05",
+    "targeted-fm-control-relaunch-rerun.log": "a755ee34ad9144c42c2b96925809bb1028199fc78f2e3ae0f353d79d6a0ba028",
+    "live-driver.log": "2beaf1f6c79390be156d6f2fbcb0a19098d1e8e94567fe94eec594c01eee14ca",
+    "live-product-transcript.json": "1fdf24f8d909bc2b1a9f74de6df9031b3daf257c8fdd7b01c179674fc05107d8"
+  },
+  "artefatos_originais_inalterados": true
+}

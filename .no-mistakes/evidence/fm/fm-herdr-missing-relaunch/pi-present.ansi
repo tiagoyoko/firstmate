@@ -1,0 +1,40 @@
+
+[0m[38;2;205;154;34m[Extensions][0m                                                                                                           
+[0m[38;2;126;136;142m  live.pi-ext.ts[0m                                                                                                       
+
+[0m[38;2;205;154;34m[Skill conflicts][0m                                                                                                      
+[0m[38;2;205;154;34m  "projecao-de-fluxo-de-caixa" collision:[0m                                                                              
+[0m[38;2;126;136;142m    [0m[38;2;104;183;141m✓[0m auto (user) ~/.agents/skills/projecao-de-fluxo-de-caixa/SKILL.md                                                 
+[0m[38;2;126;136;142m    [0m[38;2;205;154;34m✗[0m                                                                                                                  
+~/.agents/skills/synced/7cba47c4-79ac-4255-9012-338ea418ba74_72a4e593-fda7-47a4-b190-a4e63492a3ef/projecao-de-fluxo-de-
+caixa/SKILL.md (skipped)                                                                                               
+[0m[38;2;205;154;34m  "reasoning-critique" collision:[0m                                                                                      
+[0m[38;2;126;136;142m    [0m[38;2;104;183;141m✓[0m auto (user) ~/.agents/skills/reasoning-critique/SKILL.md                                                         
+[0m[38;2;126;136;142m    [0m[38;2;205;154;34m✗[0m                                                                                                                  
+~/.agents/skills/synced/7cba47c4-79ac-4255-9012-338ea418ba74_72a4e593-fda7-47a4-b190-a4e63492a3ef/reasoning-critique/SK
+ILL.md (skipped)                                                                                                       
+[0m[38;2;205;154;34m  ~/.agents/skills/revisao-adversarial/SKILL.md[0m                                                                        
+[0m[38;2;205;154;34m    Nested mappings are not allowed in compact mappings at line 2, column 14:                                          [0m
+[0m[38;2;205;154;34m                                                                                                                       [0m
+[0m[38;2;205;154;34mdescription: Revisa qualquer artefato pelo princípio adversarial — tenta provar…                                       [0m
+[0m[38;2;205;154;34m             ^                                                                                                         [0m
+                                                                                                                       
+
+
+ [0m[38;2;205;154;34mWarning: fd not found. Offline mode enabled, skipping download.[0m                                                       
+
+ [0m[38;2;205;154;34mWarning: No models available. Use /login to log into a provider via OAuth or API key. See:                            [0m
+ [0m[38;2;205;154;34m  /opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/docs/providers.md                                    [0m
+ [0m[38;2;205;154;34m  /opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/docs/models.md[0m                                       
+
+ [0m[38;2;234;127;129mError: No API key found for the selected model.                                                                       [0m
+ [0m[38;2;234;127;129m                                                                                                                      [0m
+ [0m[38;2;234;127;129mUse /login to log into a provider via OAuth or API key. See:                                                          [0m
+ [0m[38;2;234;127;129m  /opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/docs/providers.md                                    [0m
+ [0m[38;2;234;127;129m  /opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/docs/models.md[0m                                       
+
+[0m[38;2;108;118;123m───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[0m[7m [0m                                                                                                                      
+[0m[38;2;108;118;123m───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[0m[38;2;126;136;142m~/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt (live)[0m
+[0m[38;2;126;136;142m0.0%/0 (auto)                                                                                                   unknown[0m

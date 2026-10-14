@@ -1,0 +1,3 @@
+error: /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/home/data/projected/brief.md must contain nonempty ## Captain's intent and ## Firstmate spec subsections (or a nonempty legacy # Task body) before spawn
+error: the replacement agent for projected could not be launched on pi
+error: projected's agent was stopped but the replacement did not launch; no agent is running, and its work plus the recorded progress note are preserved at /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M4WR85EFRRBS83H0J31Q5KXX/.test-phase/wt
