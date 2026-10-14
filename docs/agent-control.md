@@ -31,8 +31,8 @@ A recorded `harness=` is not always an exact adapter name: a task launched from 
 | Verb | Effect | Postcondition |
 | --- | --- | --- |
 | `interrupt` | Deliver the harness's verified interrupt sequence while leaving the agent running. | Delivery succeeds while the endpoint still exists and the agent is still alive where the backend can classify that; cancellation is confirmed only from an adapter-owned acknowledgement and otherwise reports `cancel=unconfirmed`. |
-| `exit` | Stop the agent, preserving the endpoint, the worktree, and every uncommitted change. | The backend's recovery-grade classifier reports the agent gone. Already-stopped is idempotent success. |
-| `relaunch` | Replace the running agent with a new one in the same endpoint and worktree, on the exact recorded adapter or an explicitly chosen harness, model, and effort. | The new agent is alive on the recorded endpoint, and the durable record names the harness that is actually running. |
+| `exit` | Stop the agent, preserving the endpoint when present, the worktree, and every uncommitted change. | The recovery-grade classifier reports the agent gone. A present agent-free or authoritatively missing endpoint is idempotent `already-stopped` success. |
+| `relaunch` | Replace the agent in the same worktree, on the exact recorded adapter or an explicitly chosen harness, model, and effort. | A present endpoint is reused; a positively missing Herdr endpoint is rebuilt in its recorded named session. The new agent is alive on the exact endpoint published in the durable record. |
 
 An exit that delivers lifecycle input but cannot prove the agent stopped fails with `exit=unconfirmed`, reports the observed agent state and any interrupt cancellation claim, and never claims that nothing changed.
 Interrupt never rewrites busy state as proof of its own success.
@@ -72,8 +72,12 @@ It is not deterministic across the verified adapters: codex, grok, and gemini re
    A ship, scout, or final-reviewer relaunch requires `--note`, because the replacement inherits the local copy but none of the conversation; the note is appended to the instructions it reads.
    A secondmate relaunch does not require one and never rewrites its standing charter.
 4. **Stop the old agent** through the `exit` verb, with its postcondition.
+   An authoritatively missing endpoint already satisfies that postcondition without receiving lifecycle input.
    If a completed final review is being relaunched, the control plane appends a review-reopened status after the old agent stops so its earlier terminal verdict cannot remain current.
-5. **Launch the replacement** through its single owner, `bin/fm-spawn.sh --relaunch`, which adopts the recorded endpoint and worktree instead of creating either, clears the previous harness's per-task wiring, and arms a fresh busy generation.
+5. **Launch the replacement** through its single owner, `bin/fm-spawn.sh --relaunch`.
+   A present agent-free endpoint is adopted.
+   A positively missing Herdr endpoint is recreated in the exact recorded named session, then the published record is revalidated before liveness is checked.
+   Both paths reuse the recorded worktree, clear the previous harness's per-task wiring, and arm a fresh busy generation.
 
 Switching harness is therefore one ordinary relaunch rather than a separate mechanism.
 
@@ -103,11 +107,13 @@ Switching harness is therefore one ordinary relaunch rather than a separate mech
   Orca's terminal API exposes only an interrupt and an Enter, so it can deliver neither Escape nor Ctrl+U.
 - `exit` and `relaunch` require a backend with a recovery-grade agent-state classifier - tmux and herdr - because without one the "the agent stopped" postcondition cannot be proven.
   zellij, orca, and cmux are refused rather than reported as successful blind.
-- An ambiguous or unreadable endpoint state refuses.
-  Only a positively classified state acts.
-- `exit`'s composer-empty check, above, is itself a fail-closed boundary that `relaunch` inherits by stopping the old agent through `exit`.
-- `fm-spawn --relaunch` independently refuses unless the recorded endpoint is positively agent-free, so a replacement can never join a live agent.
-  It also requires the shell to be in the recorded worktree: tmux refuses immediately when it is not, while Herdr sends one `cd` to the recorded path and refuses unless a subsequent path read confirms the move.
+- `missing` is actionable only from that recovery-grade classifier.
+  An absent, ambiguous, duplicated, contradictory, or unknown identity refuses, as does an ambiguous, unreadable, unverified, or unknown state.
+- `exit`'s composer-empty check, above, is itself a fail-closed boundary that `relaunch` inherits by stopping a live old agent through `exit`.
+- `fm-spawn --relaunch` independently rechecks the endpoint before launch, so a replacement can never join a live agent.
+  A `dead` endpoint is reused.
+  A `missing` endpoint is rebuilt only on Herdr, whose verified path can create a replacement in the exact recorded named session; another backend's missing endpoint refuses rather than inventing an identity.
+  A reused shell must be in the recorded worktree: tmux refuses immediately when it is not, while Herdr sends one `cd` to the recorded path and refuses unless a subsequent path read confirms the move.
 
 ## Capability matrix
 
@@ -126,6 +132,6 @@ The empirical basis for each adapter's value is the `harness-adapters` skill's v
 
 ## Verification
 
-- `tests/fm-control.test.sh` - the adapter contract for its verified-harness lane (adapters outside the lane pin their control mechanics in their own harness suites), the backend capability matrix, exact-id scoping, the closed verb list, the busy, idle, dead, and idempotent lifecycle cases, and marker non-regression, all against a stubbed session provider.
+- `tests/fm-control.test.sh` - the adapter contract for its verified-harness lane (adapters outside the lane pin their control mechanics in their own harness suites), the backend capability matrix, exact-id scoping, the closed verb list, the busy, idle, dead, missing, unreadable, and idempotent lifecycle cases, and marker non-regression, all against a stubbed session provider.
 - `tests/fm-control-relaunch.test.sh` - the relaunch transaction: identity preservation, harness switching, the progress note, checkpoint refusals, and rollback after a failed launch.
-- `tests/fm-control-herdr-smoke.test.sh` - the second state-verified backend against the real herdr binary, on an isolated throwaway lab session.
+- `tests/fm-control-herdr-smoke.test.sh` - the second state-verified backend against the real herdr binary, including replacement of a structurally missing endpoint while preserving work and durable task data, on a helper-provisioned isolated lab session.

@@ -26,16 +26,18 @@
 #              classify that. Cancellation is confirmed only from an adapter-
 #              owned acknowledgement and otherwise reported unconfirmed. Busy
 #              state is never rewritten as proof of the action.
-#   exit       Stop the agent, preserving its terminal endpoint, worktree, and
-#              every uncommitted change. Interrupts first when the task reads
-#              busy, then submits the harness's exit command. Postcondition:
-#              the backend's recovery-grade classifier reports the agent gone.
-#              Already-stopped is success (idempotent).
-#   relaunch   Transactionally replace the running agent with a new one, in the
-#              SAME endpoint and SAME worktree, on the same or a newly chosen
-#              harness/model/effort - so switching harness is one ordinary use
-#              of this verb. An explicit `default` model or effort clears that
-#              axis for the replacement. With no explicit axis, a secondmate
+#   exit       Stop the agent, preserving its terminal endpoint when present,
+#              worktree, and every uncommitted change. Interrupts first when
+#              the task reads busy, then submits the harness's exit command.
+#              Postcondition: the backend's recovery-grade classifier reports
+#              the agent gone. A present agent-free or authoritatively missing
+#              endpoint is success (idempotent).
+#   relaunch   Transactionally replace the agent in the SAME worktree, on the
+#              same or a newly chosen harness/model/effort. A present endpoint
+#              is reused; a positively missing Herdr endpoint is rebuilt in its
+#              recorded named session. An explicit `default` model or effort
+#              clears that axis for the replacement.
+#              With no explicit axis, a secondmate
 #              re-resolves its durable config/secondmate-harness pin (harness
 #              plus its optional model and effort tokens) exactly as any other
 #              respawn does, while a ship, scout, or reviewer keeps the exact adapter
@@ -90,8 +92,8 @@
 # Environment knobs (all bounded waits, seconds):
 #   FM_CONTROL_POLL              poll interval for postcondition waits (0.5)
 #   FM_CONTROL_SETTLE_WAIT       adapter acknowledgement wait after interrupt (5)
-#   FM_CONTROL_EXIT_WAIT         alive->dead wait after the exit command (30)
-#   FM_CONTROL_LAUNCH_WAIT       dead->alive wait after a relaunch (90)
+#   FM_CONTROL_EXIT_WAIT         alive->gone wait after the exit command (30)
+#   FM_CONTROL_LAUNCH_WAIT       gone->alive wait after a relaunch (90)
 #   FM_CONTROL_EXIT_RETRIES      Enter retries for the exit command (3)
 set -eu
 
@@ -446,19 +448,19 @@ retire_busy_incarnation() {
   fi
 }
 
-# do_exit: stop the running agent, preserving endpoint and worktree. Prints
-# `already-stopped` or `stopped`.
+# do_exit: stop the running agent, preserving endpoint and worktree. A
+# recovery-grade `missing` is positive absence, so it is the same idempotent
+# success as an agent-free endpoint. Prints `already-stopped` or `stopped`.
 do_exit() {
   local state cmd verdict composer_state cancel interrupt_result=not-needed
   require_state_verified_backend exit
   state=$(agent_state)
   case "$state" in
-    dead)
+    dead|missing)
       printf 'already-stopped'
       return 0
       ;;
     alive) ;;
-    missing) die "task $ID's recorded endpoint is gone, so there is no agent to stop; reconcile the task before any further control action" ;;
     *) die "task $ID's endpoint reads '$state' rather than a positively classified state; refusing to send a lifecycle command into an unattributed endpoint" ;;
   esac
   # A busy agent is interrupted first before the exit command is submitted.
@@ -467,13 +469,12 @@ do_exit() {
       cancel=$(deliver_interrupt) || return $?
       state=$(agent_state)
       case "$state" in
-        dead)
+        dead|missing)
           retire_busy_incarnation
           printf 'stopped'
           return 0
           ;;
         alive) interrupt_result="delivered verified=agent-alive cancel=$cancel" ;;
-        missing) die "task $ID's recorded endpoint disappeared after interrupt delivery, so exit cannot prove whether the agent stopped" ;;
         *) die "task $ID's endpoint reads '$state' after interrupt delivery rather than a positively classified state; exit cannot prove whether the agent stopped" ;;
       esac
       ;;
@@ -500,7 +501,7 @@ do_exit() {
     || die "the exit command could not be sent to task $ID on $BACKEND"
   [ "$verdict" != send-failed ] \
     || die "the exit command could not be sent to task $ID on $BACKEND"
-  state=$(wait_agent_state "$EXIT_WAIT" dead) || {
+  state=$(wait_agent_state "$EXIT_WAIT" dead missing) || {
     die "exit-delivered $ID interrupt=$interrupt_result exit-command=delivered agent-state=$state exit=unconfirmed; the agent did not stop within ${EXIT_WAIT}s"
   }
   # The incarnation is over: retire its busy wiring so no stale record or
@@ -851,6 +852,22 @@ do_relaunch() {
       ;;
   esac
 
+  # Reject a state that cannot enter the launch owner's safe path before the
+  # progress note or transaction journal changes. The launch owner rechecks
+  # this state under its own lock; this first read keeps known-impossible
+  # recovery byte-identical.
+  state=$(agent_state)
+  case "$state" in
+    alive|dead) ;;
+    missing)
+      [ "$BACKEND" = herdr ] \
+        || die "task $ID's $BACKEND endpoint is authoritatively missing, but that backend has no verified endpoint-rebuild path; refusing before recording progress"
+      ;;
+    *)
+      die "task $ID's endpoint reads '$state' rather than a positively classified recoverable state; refusing to relaunch into an unattributed endpoint"
+      ;;
+  esac
+
   if [ -n "$NOTE" ]; then
     note_line="note_file=$NOTE_FILE"
   else
@@ -884,6 +901,15 @@ do_relaunch() {
       || RELAUNCH_META_PUBLISHED=1
     die "the replacement agent for $ID could not be launched on $TARGET_HARNESS"
   fi
+  # A missing Herdr endpoint is recreated rather than adopted, so the task's
+  # exact endpoint may change at publication. Revalidate the authoritative
+  # record before checking replacement liveness; never infer the new identity
+  # from labels or from the launch response.
+  fm_backend_validate_task_endpoint "$META" "$ID" \
+    || die "the replacement task record for $ID does not carry a valid exact endpoint"
+  [ "$FM_BACKEND_VALIDATED_BACKEND" = "$BACKEND" ] \
+    || die "the replacement task record for $ID changed backend from $BACKEND to $FM_BACKEND_VALIDATED_BACKEND"
+  T=$FM_BACKEND_VALIDATED_TARGET
 
   state=$(wait_agent_state "$LAUNCH_WAIT" alive) || {
     die "the replacement agent for $ID did not come up within ${LAUNCH_WAIT}s (endpoint reads '$state')"

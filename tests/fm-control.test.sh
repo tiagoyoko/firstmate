@@ -130,6 +130,7 @@ case "${1:-}" in
     if [ -f "$D/pane" ]; then cat "$D/pane"; else printf '╭────╮\n│    │\n╰────╯\n'; fi
     exit 0 ;;
   list-windows)
+    [ -z "${FM_FAKE_LIST_WINDOWS_FAIL:-}" ] || exit 1
     if [ -f "$D/windows" ]; then cat "$D/windows"; fi
     exit 0 ;;
 esac
@@ -199,6 +200,7 @@ run_control() {
     FM_FAKE_MUSE_LOG="${FM_FAKE_MUSE_LOG:-}" \
     FM_FAKE_MUSE_DISAPPEAR_BEFORE_ACK="${FM_FAKE_MUSE_DISAPPEAR_BEFORE_ACK:-}" \
     FM_FAKE_INTERRUPT_STOPS_AGENT="${FM_FAKE_INTERRUPT_STOPS_AGENT:-}" \
+    FM_FAKE_LIST_WINDOWS_FAIL="${FM_FAKE_LIST_WINDOWS_FAIL:-}" \
     "$CONTROL" "$@" 2>&1
 }
 
@@ -635,15 +637,57 @@ test_already_stopped_exit_is_idempotent() {
   pass "fm-control exit: an already-stopped agent is idempotent success with no bytes sent"
 }
 
-test_missing_endpoint_refuses() {
+test_missing_endpoint_is_idempotent() {
   local dir out rc
   dir=$(new_case gone)
   add_task "$dir" t1 claude
   : > "$dir/fake/windows"
   out=$(run_control "$dir" t1 exit); rc=$?
-  expect_code 1 "$rc" "a missing endpoint should refuse"
-  assert_contains "$out" "recorded endpoint is gone" "the refusal should name the missing endpoint"
-  pass "fm-control exit: a vanished endpoint refuses instead of silently succeeding"
+  expect_code 0 "$rc" "exiting an authoritatively missing endpoint should succeed"
+  assert_contains "$out" "already-stopped t1" "the outcome should report the absent agent as already stopped"
+  [ -z "$(literals "$dir")" ] || fail "an absent endpoint must not receive an exit command"
+  pass "fm-control exit: an authoritatively missing endpoint is idempotent success with no bytes sent"
+}
+
+test_unreadable_endpoint_refuses() {
+  local dir out rc
+  dir=$(new_case unreadable)
+  add_task "$dir" t1 claude
+  out=$(FM_FAKE_LIST_WINDOWS_FAIL=1 run_control "$dir" t1 exit); rc=$?
+  expect_code 1 "$rc" "an unreadable endpoint inventory should refuse"
+  assert_contains "$out" "reads 'unreadable'" "the refusal should retain the classifier's unreadable verdict"
+  [ -z "$(literals "$dir")" ] || fail "an unreadable endpoint must receive no lifecycle bytes"
+  pass "fm-control exit: unreadable endpoint state refuses instead of being widened to absence"
+}
+
+test_missing_ambiguous_and_unknown_identity_refuse() {
+  local dir meta out rc
+
+  dir=$(new_case missing-identity)
+  add_task "$dir" t1 claude ship herdr "fm-lab-test:w1:p2"
+  meta="$dir/home/state/t1.meta"
+  printf 'herdr_session=fm-lab-test\nherdr_workspace_id=w1\nherdr_tab_id=w1:t1\nherdr_pane_id=w1:p2\n' >> "$meta"
+  grep -v '^endpoint_task_id=' "$meta" > "$meta.tmp"
+  mv "$meta.tmp" "$meta"
+  out=$(run_control "$dir" t1 exit); rc=$?
+  expect_code 1 "$rc" "a Herdr endpoint without a task binding should refuse"
+  assert_contains "$out" "lacks an exact task binding" "the refusal should name the absent identity"
+
+  dir=$(new_case ambiguous-identity)
+  add_task "$dir" t1 claude ship herdr "fm-lab-test:w1:p2"
+  meta="$dir/home/state/t1.meta"
+  printf 'endpoint_task_id=t1\nherdr_session=fm-lab-test\nherdr_workspace_id=w1\nherdr_tab_id=w1:t1\nherdr_pane_id=w1:p2\n' >> "$meta"
+  out=$(run_control "$dir" t1 exit); rc=$?
+  expect_code 1 "$rc" "a duplicate endpoint task binding should refuse"
+  assert_contains "$out" "ambiguous endpoint task binding" "the refusal should name the ambiguous identity"
+
+  dir=$(new_case unknown-backend)
+  add_task "$dir" t1 claude
+  printf 'backend=not-a-backend\n' >> "$dir/home/state/t1.meta"
+  out=$(run_control "$dir" t1 exit); rc=$?
+  expect_code 1 "$rc" "an unknown backend identity should refuse"
+  assert_contains "$out" "unknown backend identity" "the refusal should name the unknown identity"
+  pass "fm-control: absent, ambiguous, and unknown endpoint identities still refuse before recovery"
 }
 
 test_interrupt_refuses_when_no_agent_runs() {
@@ -901,9 +945,11 @@ test_verb_allowlist_is_closed
 test_resume_is_refused_with_its_reason
 test_relaunch_only_flags_are_rejected_on_other_verbs
 test_already_stopped_exit_is_idempotent
-test_missing_endpoint_refuses
+test_missing_endpoint_is_idempotent
 test_interrupt_refuses_when_no_agent_runs
 test_ambiguous_endpoint_refuses
+test_unreadable_endpoint_refuses
+test_missing_ambiguous_and_unknown_identity_refuse
 test_busy_agent_is_interrupted_before_the_exit_command
 test_idle_agent_is_not_interrupted
 test_interrupt_without_acknowledgement_preserves_busy_state
