@@ -31,7 +31,7 @@ A recorded `harness=` is not always an exact adapter name: a task launched from 
 | Verb | Effect | Postcondition |
 | --- | --- | --- |
 | `interrupt` | Deliver the harness's verified interrupt sequence while leaving the agent running. | Delivery succeeds while the endpoint still exists and the agent is still alive where the backend can classify that; cancellation is confirmed only from an adapter-owned acknowledgement and otherwise reports `cancel=unconfirmed`. |
-| `exit` | Stop the agent, preserving the endpoint, the worktree, and every uncommitted change. | The recovery-grade classifier reports the agent gone. A present agent-free or authoritatively missing endpoint is idempotent `already-stopped` success. |
+| `exit` | Stop the agent, preserving the endpoint when present, the worktree, and every uncommitted change. | The recovery-grade classifier reports the agent gone. A present agent-free or authoritatively missing endpoint is idempotent `already-stopped` success. |
 | `relaunch` | Replace the agent in the same worktree, on the exact recorded adapter or an explicitly chosen harness, model, and effort. | A present endpoint is reused; a positively missing Herdr endpoint is rebuilt in its recorded named session. The new agent is alive on the exact endpoint published in the durable record. |
 
 An exit that delivers lifecycle input but cannot prove the agent stopped fails with `exit=unconfirmed`, reports the observed agent state and any interrupt cancellation claim, and never claims that nothing changed.
@@ -108,7 +108,7 @@ Switching harness is therefore one ordinary relaunch rather than a separate mech
 - `exit` and `relaunch` require a backend with a recovery-grade agent-state classifier - tmux and herdr - because without one the "the agent stopped" postcondition cannot be proven.
   zellij, orca, and cmux are refused rather than reported as successful blind.
 - `missing` is actionable only from that recovery-grade classifier.
-  An ambiguous, unreadable, unverified, absent, duplicated, contradictory, or unknown identity or state refuses.
+  An absent, ambiguous, duplicated, contradictory, or unknown identity refuses, as does an ambiguous, unreadable, unverified, or unknown state.
 - `exit`'s composer-empty check, above, is itself a fail-closed boundary that `relaunch` inherits by stopping a live old agent through `exit`.
 - `fm-spawn --relaunch` independently rechecks the endpoint before launch, so a replacement can never join a live agent.
   A `dead` endpoint is reused.

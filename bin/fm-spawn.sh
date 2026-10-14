@@ -43,8 +43,8 @@
 #   endpoint - comes from the task's validated state/<id>.meta, so --backend,
 #   --scout, --final-reviewer, --secondmate, a project positional, and batch
 #   pairs are all refused alongside it; only harness, model, and effort may
-#   change. A harness switch is therefore one ordinary relaunch. Relaunch
-#   refuses unless the recorded endpoint is
+#   be overridden. A harness switch is therefore one ordinary relaunch.
+#   Relaunch refuses unless the recorded endpoint is
 #   positively agent-free on a backend with a recovery-grade agent-state
 #   classifier (tmux or herdr). A present agent-free endpoint is reused.
 #   A positively missing Herdr endpoint is rebuilt in the recorded named

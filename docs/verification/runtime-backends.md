@@ -1388,7 +1388,7 @@ ok - pane get agent_status lag cannot keep an exited occupant classified alive
 
 ### Endpoint recovery classification
 
-Measured 2026-10-14 on macOS aarch64 against Herdr 0.9.4 protocol 22 in a helper-provisioned isolated `fm-lab-` session.
+Measured 2026-09-10 on macOS aarch64 against Herdr 0.9.0 (protocol 22) in an isolated `fm-lab-` session.
 
 An endpoint recorded in a session whose server is not running cannot be read by any operational call, and `status` is the one command that answers with a body instead of refusing:
 
@@ -1412,24 +1412,8 @@ endpoint in a session with no server missing
 malformed target                     unreadable
 ```
 
-The same run drove both Herdr relaunch shapes.
-A real pane whose shell had moved outside its recorded worktree was returned once and reused.
-A structurally missing task workspace was rebuilt in the recorded named session, and the replacement preserved the existing worktree, uncommitted file, brief, appended progress note, and unrelated durable metadata.
-
 Herdr 0.8.x is not installed on this host, so protocol-20 coverage is structural plus the adapter fixture exercising both response shapes; it is not a live result.
-Refresh the live half, which fails naming the installed version, with:
-
-```sh
-bin/fm-test-run.sh tests/fm-control-herdr-smoke.test.sh
-```
-
-Observed 2026-10-14:
-
-```text
-ok - real herdr 0.9.4: a gone session reads recoverable while a live pane and a malformed target do not
-ok - real herdr: a drifted agent-free shell returns to its worktree and reuses the same endpoint
-ok - real herdr: a positively missing endpoint relaunches without losing work, instructions, progress, or durable metadata
-```
+The refresh command and observed output for drift reuse and missing-endpoint replacement are recorded under [Agent lifecycle control](#agent-lifecycle-control).
 
 `tests/fm-backend-herdr.test.sh` pins the logic portably by driving the signals apart: the same failed pane read yields `missing` under a stopped server and `unreadable` under a running one, while an unknown process view stays `unknown` internally and `unreadable` at the recovery boundary.
 It also asserts that the husk classifier still refuses those unknown and unreadable reads.
