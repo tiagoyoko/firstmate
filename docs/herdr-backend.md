@@ -75,7 +75,7 @@ Recovery and list-live still scan the first workspace matching the home label, b
 
 Existing task operations use recorded endpoint ids and do not move a live task when labels change.
 The per-home workspace is reused while it has task tabs.
-Closing its last tab can remove the workspace, and the next spawn recreates it.
+Closing its last tab can remove the workspace, and the next fresh spawn recreates it; [`agent-control.md`](agent-control.md) owns relaunch of a preserved task whose recorded endpoint is missing.
 
 ## Presentation spaces
 

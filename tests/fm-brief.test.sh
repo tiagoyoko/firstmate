@@ -908,7 +908,7 @@ ROWS
 }
 
 test_final_reviewer_scaffold() {
-  local home brief heading
+  local home brief
   home="$TMP_ROOT/final-reviewer-home"
   mkdir -p "$home/data"
   FM_HOME="$home" FM_ROOT_OVERRIDE="$ROOT" \

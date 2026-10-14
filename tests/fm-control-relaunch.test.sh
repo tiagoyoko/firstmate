@@ -1234,6 +1234,27 @@ test_missing_instructions_refuse_before_stopping_anything() {
   pass "fm-control relaunch: a worker with nothing to work from is never launched"
 }
 
+test_missing_tmux_endpoint_refuses_before_recording_progress() {
+  local dir out rc before_brief before_meta
+  dir=$(new_case missing-tmux rl45)
+  add_ship_task "$dir" rl45 claude
+  : > "$dir/fake/windows"
+  before_brief=$(cat "$dir/home/data/rl45/brief.md")
+  before_meta=$(cat "$dir/home/state/rl45.meta")
+
+  out=$(run_control "$dir" rl45 relaunch --note "must not land"); rc=$?
+  expect_code 1 "$rc" "a missing tmux endpoint has no verified rebuild path and should refuse"
+  assert_contains "$out" "no verified endpoint-rebuild path" \
+    "the refusal should distinguish authoritative absence from a rebuild capability"
+  [ "$(cat "$dir/home/data/rl45/brief.md")" = "$before_brief" ] \
+    || fail "a known-impossible rebuild must refuse before appending its progress note"
+  [ "$(cat "$dir/home/state/rl45.meta")" = "$before_meta" ] \
+    || fail "a known-impossible rebuild must preserve task metadata"
+  [ -z "$(cat "$dir/fake/literal")" ] \
+    || fail "a missing endpoint must receive no lifecycle or launch bytes"
+  pass "fm-control relaunch: a missing endpoint is actionable only where a verified rebuild path exists"
+}
+
 test_checkpoint_refusal_leaves_the_record_byte_identical() {
   local dir before after
   dir=$(new_case bytes rl12)
@@ -1364,7 +1385,7 @@ test_stop_transport_failure_reconciles_a_dead_agent() {
 }
 
 test_complete_journal_failure_rolls_back_from_durable_phase() {
-  local dir out rc real_mv
+  local dir out rc real_mv phase rollback
   dir=$(new_case completejournal rl27)
   add_ship_task "$dir" rl27 claude
   printf 'codex' > "$dir/fake/becomes"
@@ -1373,10 +1394,12 @@ test_complete_journal_failure_rolls_back_from_durable_phase() {
   out=$(FM_REAL_MV="$real_mv" FM_FAKE_COMPLETE_JOURNAL_MV_FAIL=1 \
     run_control "$dir" rl27 relaunch --harness codex --note "keep durable phase honest"); rc=$?
   expect_code 1 "$rc" "a failed complete journal replacement should fail closed"$'\n'"$out"
-  [ "$(journal_field "$dir" rl27 phase)" = failed:launching ] \
-    || fail "rollback should start from the last durable launching phase"
-  [ "$(journal_field "$dir" rl27 rollback)" = none-new-agent-confirmed ] \
-    || fail "rollback should retain the confirmed-running replacement"
+  phase=$(journal_field "$dir" rl27 phase)
+  [ "$phase" = failed:launching ] \
+    || fail "rollback should start from the last durable launching phase, got '$phase': $out"
+  rollback=$(journal_field "$dir" rl27 rollback)
+  [ "$rollback" = none-new-agent-confirmed ] \
+    || fail "rollback should retain the confirmed-running replacement, got '$rollback': $out"
   [ "$(meta_field "$dir" rl27 harness)" = codex ] \
     || fail "journal failure must not rewrite the published replacement record"
   assert_contains "$out" "replacement is running" \
@@ -1829,6 +1852,7 @@ test_muse_session_binding_is_retired_on_a_harness_switch
 test_cursor_session_binding_is_retired_on_a_harness_switch
 test_missing_worktree_refuses_before_stopping_anything
 test_missing_instructions_refuse_before_stopping_anything
+test_missing_tmux_endpoint_refuses_before_recording_progress
 test_checkpoint_refusal_leaves_the_record_byte_identical
 test_checkpoint_refuses_uninspectable_head_and_status
 test_launch_failure_keeps_the_prior_record_and_reports_it

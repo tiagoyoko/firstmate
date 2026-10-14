@@ -1342,28 +1342,31 @@ Polling remained active and is covered as the fallback for capability, connect, 
 
 ### Agent lifecycle control
 
-Herdr is one of the two backends whose recovery-grade agent-state classifier the control plane may trust ([agent-control.md](../agent-control.md)), so its lifecycle gating is measured against the real binary; reverified 2026-08-08 on Herdr 0.8.0, and first measured 2026-08-02 on Herdr 0.7.5 with identical results:
+Herdr is one of the two backends whose recovery-grade agent-state classifier the control plane may trust ([agent-control.md](../agent-control.md)), so its lifecycle gating is measured against the real binary.
+The current run used Herdr 0.9.4 protocol 22 on macOS aarch64 in a helper-provisioned isolated session:
 
 ```sh
-tests/fm-control-herdr-smoke.test.sh
+bin/fm-test-run.sh tests/fm-control-herdr-smoke.test.sh
 ```
 
-Observed output, refreshed 2026-09-10 on Herdr 0.9.0 after the stale-registration fix (the two stale-registration lines are recorded under "Stale agent registration" below):
+Observed output, refreshed 2026-10-14:
 
 ```text
 ok - real herdr: exit on a pane with no registered agent is idempotent success
-ok - real herdr 0.9.0: a gone session reads recoverable while a live pane and a malformed target do not
+ok - real herdr 0.9.4: a gone session reads recoverable while a live pane and a malformed target do not
 ok - real herdr: a drifted agent-free shell returns to its worktree and reuses the same endpoint
 ok - real herdr: interrupt refuses when herdr's own agent registry reports no agent
 ok - real herdr: interrupt delivers the harness's key and proves the agent survived it
 ok - real herdr: no control verb removed the endpoint or the task's local copy
-ok - real herdr 0.9.0: a registration Herdr keeps after its agent exits reads stale-agent and recovers as dead
+ok - real herdr 0.9.4: a registration Herdr keeps after its agent exits reads stale-agent and recovers as dead
 ok - real herdr: exit on a pane with a stale registration is idempotent success
 ok - real herdr: a stale registration no longer blocks relaunch, and the endpoint and local copy survive
-ok - real herdr: an agent that does not stop fails closed instead of being reported as stopped
+ok - real herdr: an agent behind an unproven composer fails closed instead of typing an exit command into it
+ok - real herdr: a positively missing endpoint relaunches without losing work, instructions, progress, or durable metadata
 ```
 
-The registry read through `herdr pane report-agent` is the same source `fm_backend_herdr_agent_state` classifies, and since 2026-09-10 that registration counts as an agent only while `pane process-info` shows a harness process behind it, so the guard backs the registration with a real process named like a harness (a symlink to `sleep`) and then stops that process, with no real harness launched.
+The registry read through `herdr pane report-agent` is the same source `fm_backend_herdr_agent_state` classifies.
+The guard backs the registration with a real process named like a harness and then stops that process, with no real harness launched.
 That command is the guard that refreshes this record; run it after every Herdr upgrade rather than trusting the version above.
 
 For Pi on Herdr 0.9.0, `herdr agent get` reflects whether the agent process remains live; its registration does not persist merely because the pane and parent shell do.
@@ -1385,7 +1388,7 @@ ok - pane get agent_status lag cannot keep an exited occupant classified alive
 
 ### Endpoint recovery classification
 
-Measured 2026-09-10 on macOS aarch64 against Herdr 0.9.0 (protocol 22) in an isolated `fm-lab-` session.
+Measured 2026-10-14 on macOS aarch64 against Herdr 0.9.4 protocol 22 in a helper-provisioned isolated `fm-lab-` session.
 
 An endpoint recorded in a session whose server is not running cannot be read by any operational call, and `status` is the one command that answers with a body instead of refusing:
 
@@ -1409,26 +1412,29 @@ endpoint in a session with no server missing
 malformed target                     unreadable
 ```
 
-The same run drove `bin/fm-spawn.sh --relaunch` against a real Herdr pane whose shell had been moved outside its recorded worktree: the shell was told once to return, ended in the recorded worktree, and the replacement was launched into the SAME pane, leaving one task tab.
+The same run drove both Herdr relaunch shapes.
+A real pane whose shell had moved outside its recorded worktree was returned once and reused.
+A structurally missing task workspace was rebuilt in the recorded named session, and the replacement preserved the existing worktree, uncommitted file, brief, appended progress note, and unrelated durable metadata.
 
 Herdr 0.8.x is not installed on this host, so protocol-20 coverage is structural plus the adapter fixture exercising both response shapes; it is not a live result.
 Refresh the live half, which fails naming the installed version, with:
 
 ```sh
-tests/fm-control-herdr-smoke.test.sh
+bin/fm-test-run.sh tests/fm-control-herdr-smoke.test.sh
 ```
 
-Observed 2026-09-10:
+Observed 2026-10-14:
 
 ```text
-ok - real herdr 0.9.0: a gone session reads recoverable while a live pane and a malformed target do not
+ok - real herdr 0.9.4: a gone session reads recoverable while a live pane and a malformed target do not
 ok - real herdr: a drifted agent-free shell returns to its worktree and reuses the same endpoint
+ok - real herdr: a positively missing endpoint relaunches without losing work, instructions, progress, or durable metadata
 ```
 
-`tests/fm-backend-herdr.test.sh` pins the logic portably by driving the two signals apart - the same failed pane read yields `missing` under a stopped server and `unreadable` under a running one - and asserts that the husk classifier still refuses on that identical read.
-`tests/fm-control-herdr-smoke.test.sh` proves the Herdr-only drift recovery against a real binary in an isolated lab session.
-`tests/fm-control-relaunch.test.sh` drives a tmux stub and proves that tmux retains its prior refusal without sending `cd` or any other input to the pane.
-The Herdr refusal when a shell accepts the command but does not move is not exercised in this change.
+`tests/fm-backend-herdr.test.sh` pins the logic portably by driving the signals apart: the same failed pane read yields `missing` under a stopped server and `unreadable` under a running one, while an unknown process view stays `unknown` internally and `unreadable` at the recovery boundary.
+It also asserts that the husk classifier still refuses those unknown and unreadable reads.
+`tests/fm-control-herdr-smoke.test.sh` proves drift reuse and missing-endpoint replacement against a real binary in a helper-provisioned isolated lab session.
+`tests/fm-control-relaunch.test.sh` drives a tmux stub and proves that a missing backend with no verified endpoint-rebuild path refuses before recording progress or sending input.
 
 ### Stale agent registration
 
