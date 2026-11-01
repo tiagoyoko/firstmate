@@ -672,7 +672,7 @@ test_primary_subagent_lifecycle() {
   local repo home
   repo="$TMP_ROOT/primary-lifecycle/repo"; home="$TMP_ROOT/primary-lifecycle/home"
   install_omp_extension_fixture "$repo"
-  mkdir -p "$home/state"
+  mkdir -p "$home"
   cat > "$repo/bin/fm-watch-arm.sh" <<'SH'
 #!/usr/bin/env bash
 if [ "${1:-}" = --handling-delivered ]; then exit 0; fi

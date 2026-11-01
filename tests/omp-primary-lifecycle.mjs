@@ -6,12 +6,15 @@ import { pathToFileURL } from "node:url";
 
 const repo = process.env.FM_ROOT_OVERRIDE;
 const home = process.env.FM_HOME;
-const paths = ["fm-primary-omp-watch.ts", "fm-primary-turnend-guard.ts"].map(name => `${repo}/.omp/extensions/${name}`);
+const paths = ["fm-primary-turnend-guard.ts", "fm-primary-omp-watch.ts"].map(name => `${repo}/.omp/extensions/${name}`);
+const markerNames = [".omp-turnend-extension-loaded", ".omp-watch-extension-loaded"];
 const native = process.env.FM_OMP_NATIVE_PACKAGE;
 const modules = native ? await import(`${native}/src/extensibility/extensions/loader.ts`) : null;
 const Runner = native ? (await import(`${native}/src/extensibility/extensions/runner.ts`)).ExtensionRunner : null;
+assert.equal(existsSync(`${home}/state`), false, "the primary must start without a state directory");
 const prepared = modules ? await modules.loadExtensions(paths, repo) : await Promise.all(paths.map(path => import(pathToFileURL(path).href)));
 if (modules) assert.deepEqual(prepared.errors, []);
+assert.equal(existsSync(`${home}/state`), false, "loading extensions cannot create primary state");
 let first = true;
 async function bind(kind, id, source = prepared) {
   const ctx = { agent: { kind, id, name: kind, depth: 0, ...(kind === "sub" ? { parentId: "main" } : {}) }, sessionManager: { getCwd: () => repo, getSessionId: () => id } };
@@ -56,12 +59,28 @@ async function until(predicate, label) {
   throw new Error(`timed out: ${label}`);
 }
 const rows = () => existsSync(`${home}/state/arms`) ? readFileSync(`${home}/state/arms`, "utf8").trim().split("\n") : [];
-writeFileSync(`${home}/state/.lock`, `${process.pid}\n`);
+const earlyChild = await bind("sub", "early-depth-zero-child");
+await earlyChild.emit({ type: "session_start" });
+await earlyChild.emit({ type: "session_compact" });
+assert.equal(await earlyChild.emit({ type: "before_agent_start", prompt: "early child" }), undefined);
+assert.equal(await earlyChild.emit({ type: "session_stop", stop_hook_active: false }), undefined);
+assert.equal((await earlyChild.arm()).details.ok, false, "a subagent cannot initialize primary supervision");
+await earlyChild.emit({ type: "session_shutdown" });
+assert.equal(existsSync(`${home}/state`), false, "subagent binding and lifecycle cannot create primary state");
 const dormant = await bind("main", "dormant-primary");
 const main = await bind("main", "main");
-assert.equal(existsSync(`${home}/state/.omp-watch-extension-loaded`), false, "factory bind cannot publish primary ownership");
+assert.equal(existsSync(`${home}/state`), false, "factory bind cannot create primary state or publish ownership");
 await main.emit({ type: "session_start" });
+for (const name of markerNames) {
+  const marker = readFileSync(`${home}/state/${name}`, "utf8").trim().split("\n");
+  assert.match(marker[0], /^sha256:[a-f0-9]{64}$/, `${name} must publish the loaded extension version`);
+  assert.equal(marker[1], String(process.pid), `${name} must publish the primary pid`);
+}
+assert.equal(rows().length, 0, "marker publication cannot arm without the primary lock");
+writeFileSync(`${home}/state/.lock`, `${process.pid}\n`);
+assert.equal((await main.arm()).details.ok, true, "the activated primary can arm after acquiring its lock");
 await until(() => rows().length === 1, "primary arm");
+console.log("ok - fresh primary publishes both markers in TURNEND-before-WATCH order without factory or subagent state");
 assert.equal((await dormant.arm()).details.ok, false, "a dormant prior factory cannot claim a newer primary from a late tool");
 await dormant.emit({ type: "session_shutdown" });
 assert.equal((await main.arm()).details.ok, true, "a dormant prior factory shutdown cannot retire the active primary");
@@ -122,6 +141,17 @@ assert.deepEqual(other.errors, []);
 console.log("ok - separate homes preserve independent ownership, delivery and shutdown");
 await replacement.emit({ type: "session_shutdown" });
 assert.equal((await replacement.arm()).details.ok, false);
+const foreignMarkers = markerNames.map(name => `foreign-owner-${name}\n1\n`);
+markerNames.forEach((name, index) => writeFileSync(`${home}/state/${name}`, foreignMarkers[index]));
+writeFileSync(`${home}/state/.lock`, "1\n");
+const foreign = await bind("main", "foreign-lock-primary");
+await foreign.emit({ type: "session_start" });
+assert.equal((await foreign.arm()).details.ok, false, "a primary cannot arm under a foreign lock");
+assert.deepEqual(markerNames.map(name => readFileSync(`${home}/state/${name}`, "utf8")), foreignMarkers, "a foreign lock must prevent either marker from being replaced");
+assert.equal(readFileSync(`${home}/state/.lock`, "utf8"), "1\n");
+await foreign.emit({ type: "session_shutdown" });
+assert.deepEqual(foreign.errors, []);
+assert.deepEqual(earlyChild.errors, []);
 assert.deepEqual(main.errors, []);
 assert.deepEqual(dormant.errors, []);
 assert.deepEqual(child.errors, []);
