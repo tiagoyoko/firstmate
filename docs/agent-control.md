@@ -100,7 +100,7 @@ Switching harness is therefore one ordinary relaunch rather than a separate mech
 - A final-reviewer relaunch refuses a dirty worktree or any HEAD different from its recorded initial review snapshot before stopping the current agent.
 - Rovo is refused for final reviewers because it cannot load the required `reasoning-critique` skill outside the reviewed worktree.
 - A backend that cannot deliver the harness's interrupt key, or the composer clear that key needs, is refused rather than sent a different key.
-  Orca's terminal API exposes only an interrupt and an Enter, so it can deliver neither Escape nor Ctrl+U.
+  [`orca-backend.md`](orca-backend.md) owns Orca's capability-checked Escape path and remaining composer-clear limitation.
 - `exit` and `relaunch` require a backend with a recovery-grade agent-state classifier - tmux and herdr - because without one the "the agent stopped" postcondition cannot be proven.
   zellij, orca, and cmux are refused rather than reported as successful blind.
 - An ambiguous or unreadable endpoint state refuses.

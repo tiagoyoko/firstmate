@@ -668,6 +668,56 @@ EOF
   pass ".omp watch extension: fm_watch_arm_omp arms once, repeats as a no-op, and delivers an actionable close as one follow-up"
 }
 
+test_primary_subagent_lifecycle() {
+  local repo home
+  repo="$TMP_ROOT/primary-lifecycle/repo"; home="$TMP_ROOT/primary-lifecycle/home"
+  install_omp_extension_fixture "$repo"
+  mkdir -p "$home/state"
+  cat > "$repo/bin/fm-watch-arm.sh" <<'SH'
+#!/usr/bin/env bash
+if [ "${1:-}" = --handling-delivered ]; then exit 0; fi
+printf '%s\n' "$$" >> "$FM_HOME/state/arms"
+printf 'watcher: started pid=%s (beacon fresh) recovery-generation=lifecycle\n' "$$"
+trap 'exit 0' TERM INT
+for ((i=0; i<600; i++)); do
+  if [ -f "$FM_HOME/state/trigger" ]; then
+    cat "$FM_HOME/state/trigger"
+    rm "$FM_HOME/state/trigger"
+    exit 0
+  fi
+  sleep 0.02
+done
+SH
+  cat > "$repo/bin/fm-sessionstart-run.sh" <<'SH'
+#!/usr/bin/env bash
+printf '%s\n' "$2" >> "$FM_HOME/state/startups"
+printf 'OMP DIGEST source=%s\n' "$2"
+SH
+  cat > "$repo/bin/fm-turnend-guard.sh" <<'SH'
+#!/usr/bin/env bash
+cat >> "$FM_HOME/state/guards"
+exit 2
+SH
+  chmod +x "$repo/bin/"*.sh
+  install_omp_extension_fixture "$repo-other"
+  cp "$repo/bin/"*.sh "$repo-other/bin/"
+  mkdir -p "$home-other/state"
+  if [ -n "${FM_OMP_NATIVE_PACKAGE:-}" ]; then
+    FM_HOME="$home" FM_ROOT_OVERRIDE="$repo" bun "$ROOT/tests/omp-primary-lifecycle.mjs" \
+      || fail "native omp primary/subagent lifecycle"
+  else
+    FM_HOME="$home" FM_ROOT_OVERRIDE="$repo" node "$ROOT/tests/omp-primary-lifecycle.mjs" \
+      || fail "portable omp primary/subagent lifecycle"
+  fi
+}
+
+# The installed native loader/runner reuses these exact fixtures and assertions,
+# but skips unrelated fake-harness spawn cases in the credential-free live mode.
+if [ -n "${FM_OMP_NATIVE_PACKAGE:-}" ]; then
+  test_primary_subagent_lifecycle
+  exit
+fi
+
 test_detection_anchored_name_and_marker_precedence
 test_detection_bun_installed_script
 test_lock_identity_and_liveness_classification
@@ -680,3 +730,4 @@ test_control_composer_and_model_tables
 test_ownership_proof_is_omp_keyed
 test_turnend_guard_extension_compels_one_continuation
 test_watch_extension_arms_and_delivers
+test_primary_subagent_lifecycle

@@ -191,9 +191,9 @@ fm_control_exit_command() {  # <harness>
 }
 
 # Which named keys a backend adapter can deliver. Every session provider
-# normalizes Enter, Ctrl+C, and the Ctrl+U composer clear; Orca's terminal API
-# exposes only an interrupt and an Enter, so it can deliver neither Escape nor
-# Ctrl+U (bin/backends/orca.sh's fm_backend_orca_send_key).
+# normalizes Enter and Ctrl+C. Orca additionally delivers Escape through its
+# documented text-only control-byte input; its adapter refuses an older CLI
+# that does not advertise that contract. Ctrl+U remains unverified on Orca.
 fm_control_backend_supports_key() {  # <backend> <key>
   local backend=${1-} key=${2-}
   case "$backend" in
@@ -201,7 +201,7 @@ fm_control_backend_supports_key() {  # <backend> <key>
       case "$key" in Escape|Enter|C-c|C-u) return 0 ;; esac
       ;;
     orca)
-      case "$key" in Enter|C-c) return 0 ;; esac
+      case "$key" in Escape|Enter|C-c) return 0 ;; esac
       ;;
   esac
   return 1

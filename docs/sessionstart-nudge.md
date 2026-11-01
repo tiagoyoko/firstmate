@@ -46,8 +46,12 @@ Tool version probes, the backlog listing, and the per-task endpoint reads remain
 The per-item backlog row reads inside bootstrap's reconcile and close-replay sweeps are the exception: each is bounded by `FM_BACKLOG_ROW_TIMEOUT_SECS` (default 10s) through `bin/fm-backlog-transition-lib.sh`, and the first bound hit latches the sweep so later reads return immediately while still naming their own item.
 The shared timeout owner falls back to a pure-Bash process-group watchdog when timeout, gtimeout, and perl are unavailable, so no supported host runs the digest unbounded.
 Because the child streams into the native transport as it runs, everything emitted before the bound was hit is retained for delivery; the parent then prints a `STARTUP TRUNCATED` banner naming the stage that did not finish and the stages that were therefore never emitted, and still exits 0.
-The registered hook timeouts sit above that budget so the harness never preempts the banner.
+The registered Claude, Codex exec, and Cursor hook timeouts sit above that budget so those harnesses do not preempt the banner.
 The deferred startup stage deliberately runs in its own process group under its own deadline, so a truncated digest neither kills the network checks and inactive-outcome scan it was not waiting for nor orphans unbounded network work.
+
+omp's current native compatibility limit is different: omp 18.12.6 caps `before_agent_start` handlers at 30 seconds and exposes no supported per-handler deadline.
+A digest that exceeds that cap can be omitted from model context even though Firstmate's own bounded child later finishes.
+Do not report the native omp startup integration ready in that condition; [`verification/supervision.md`](verification/supervision.md#omp-native-ownership-2026-11-01) records the failing guard and the supported API prerequisite.
 
 ## Shared wrapper and safety
 

@@ -45,6 +45,7 @@ The captain's own `~/.omp/agent/config.yml` is never written; the tracked `.omp/
 omp auto-discovers `<cwd>/.omp/extensions/*.ts` (top level only, cwd only, no ancestor walk, no trust dialog) and the active profile's `agent/extensions/`; `.pi/extensions/` is not a discovery root.
 A file that is both auto-discovered and named with `-e` loads twice, so the per-task worker extension lives in `state/` and a secondmate launch names no `-e` at all.
 There is no `agent_settled` event; `agent_end` plus `willContinue` replaces it.
+Native factories are also rebound to subagent sessions on newer omp versions; the primary-only ownership boundary and its depth-zero identity rule live in `.omp/extensions/fm-primary-omp-watch.ts` and `.omp/extensions/fm-primary-turnend-guard.ts`.
 
 ## Primary integration
 
@@ -54,4 +55,5 @@ omp has no asynchronous Stop-hook equivalent, so the Claude auto-arm model does 
 The Pi supervision branch is out of scope for omp; every actionable wake is delivered to main.
 Launch a primary with plain `omp` inside the home (`FM_OMP_HARNESS=omp omp` when starting from a Claude pane); `../../../bin/fm-session-start.sh` prints `OMP_WATCH_EXTENSION: not loaded` when the running session has not loaded both tracked extensions.
 `FM_OMP_LIVE_E2E=1 ../../../tests/fm-omp-primary-live-e2e.test.sh` is the opt-in live guard; `../../../tests/fm-omp-harness.test.sh` is the portable regression.
+The credential-free native-loader lifecycle mode and its installed-package invocation are recorded in `../../../docs/verification/supervision.md`.
 A secondmate registered with `remote=1` in `data/secondmates.md`, spawned through the ordinary `../../../bin/fm-spawn.sh <id> <home> --secondmate` path, is refused on omp until a remote host verifies it, as is `../../../bin/fm-remote-secondmate-control.sh launch`; there is no `--remote` flag.

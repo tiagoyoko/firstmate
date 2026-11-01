@@ -359,7 +359,7 @@ test_backend_key_capability_matrix() {
     done
   done
   fm_control_backend_supports_key orca Escape \
-    && fail "orca's terminal API has no Escape and must not claim it"
+    || fail "orca should attempt Escape through its capability-checked raw input path"
   fm_control_backend_supports_key orca C-u \
     && fail "orca's terminal API has no composer clear and must not claim one"
   fm_control_backend_supports_key orca C-c || fail "orca should deliver C-c"
@@ -402,10 +402,18 @@ test_orca_refuses_an_escape_harness_interrupt() {
     echo "orca_worktree_id=wt-1::/orca/wt-1"
   } > "$dir/home/state/t1.meta.new"
   sed 's|^window=.*|window=fm-t1|' "$dir/home/state/t1.meta.new" > "$dir/home/state/t1.meta"
+  cat > "$dir/fakebin/orca" <<'SH'
+#!/usr/bin/env bash
+if [ "$*" = "terminal send --help" ]; then printf 'Legacy Orca send help\n'; exit 0; fi
+printf 'unexpected input\n' >> "$FM_FAKE_DIR/orca-input"
+exit 1
+SH
+  chmod +x "$dir/fakebin/orca"
   out=$(run_control "$dir" t1 interrupt); rc=$?
-  expect_code 1 "$rc" "an Escape harness on orca should refuse"
-  assert_contains "$out" "cannot deliver" "refusal should name the undeliverable key"
-  pass "fm-control interrupt: a backend that cannot deliver the harness's key refuses instead of sending another"
+  expect_code 1 "$rc" "an older Orca CLI must refuse Escape"
+  assert_contains "$out" "refusing Escape" "refusal should name the unverified raw input"
+  [ ! -e "$dir/fake/orca-input" ] || fail "unsupported raw Escape must send no terminal input"
+  pass "fm-control interrupt: an Orca CLI without a documented raw input path receives no key"
 }
 
 test_unverified_state_backends_refuse_stop_verbs() {

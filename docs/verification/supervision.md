@@ -55,6 +55,36 @@ Both tracked `.omp/extensions/*.ts` files loaded by auto-discovery alone (no `-e
 omp's `session_start` payload carries no reason field, so the adapter derives the source: the first start of the process is `startup` (or `resume` from a `--continue`/`--resume` launch line) and a later in-process start is `clear`; `tests/fm-omp-harness.test.sh` pins that mapping over a fake omp API.
 A file named both by `-e` and by auto-discovery loads twice (two factory calls, doubled `session_stop` continuations), which is why the secondmate launch names no `-e` and the per-task worker extension lives in `state/`.
 
+### omp native ownership, 2026-11-01
+
+The primary-only ownership boundary was verified with installed omp 18.12.6 and Bun 1.3.14 through its real `loadExtensions`, prepared-factory rebinding, identity-bearing `ExtensionRunner`, and native event dispatch.
+The portable and installed-native modes execute the same behavioral probe:
+
+```sh
+bin/fm-test-run.sh tests/fm-omp-harness.test.sh tests/fm-pi-watch-extension.test.sh
+FM_OMP_NATIVE_LIFECYCLE=1 FM_OMP_NATIVE_PACKAGE="<installed @oh-my-pi/pi-coding-agent directory>" \
+  bash tests/fm-omp-primary-live-e2e.test.sh
+```
+
+```text
+ok - primary ownership and startup survive depth-zero subagent bind/start/compact/stop/shutdown
+ok - separate homes preserve independent ownership, delivery and shutdown
+ok - wake delivery, successor continuity, primary replacement and stale-shutdown rejection
+ok - installed omp 18.12.6 native loader/runner lifecycle passed without provider calls
+```
+
+The native ownership mode uses a short startup fixture; it is not evidence that the complete real startup digest finishes within the vendor's handler budget.
+The separate full RPC guard was exercised with `FM_OMP_LIVE_E2E=1 FM_OMP_LIVE_MODEL=openai-codex/gpt-6.1-sol bash tests/fm-omp-primary-live-e2e.test.sh` and did not pass:
+
+```text
+event=before_agent_start error=handler timed out after 30000ms
+```
+
+The installed public `on(event, handler)` API has no handler-specific deadline; Firstmate's existing startup budget remains 120 seconds.
+Full native startup readiness therefore requires a supported pre-provider prerequisite or handler budget that can cover that existing bound, not a test-only vendor setter or omitted digest sections.
+Pi and pi-signed retain their own extension lifecycle; OpenCode uses a primary-scoped plugin coordinator, Claude and Cursor use external hooks, and Codex and Grok use their separate checkpoint or background-process protocols.
+None uses omp's shared-module native subagent factory binding, so this repair changes only the two omp primary extensions.
+
 ### Run-tier source vocabulary and context-reset injection
 
 The run tier depends on three facts only the vendor can supply: the session-open source it reports, whether hook stdout reaches model context on a context-RESET open rather than only a cold one, and whether a worker the hook detaches survives the hook returning.

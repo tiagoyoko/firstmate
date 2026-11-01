@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # bin/backends/orca.sh - the Orca terminal session-provider adapter.
 #
-# Orca owns both the task worktree and the terminal endpoint. Escape key support
-# remains unsupported until Orca exposes a terminal-send primitive for it.
+# Orca owns both the task worktree and terminal endpoint. Escape uses verbatim
+# text-only input only when the installed CLI documents that control-byte path.
 #
 # Target string shape: the Orca terminal id accepted by `orca terminal ...`.
 
@@ -254,7 +254,7 @@ fm_backend_orca_composer_state() {  # <terminal-id> [expected-label] -> empty|pe
 }
 
 fm_backend_orca_send_key() {  # <terminal-id> <key>
-  local terminal=$1 key=$2
+  local terminal=$1 key=$2 help
   fm_backend_orca_tool_check || return 1
   case "$key" in
     C-c|ctrl+c|Ctrl-c|Ctrl-C)
@@ -262,6 +262,17 @@ fm_backend_orca_send_key() {  # <terminal-id> <key>
       ;;
     Enter|enter)
       fm_backend_orca_run_json orca terminal send --terminal "$terminal" --text "" --enter --json
+      ;;
+    Escape)
+      help=$(orca terminal send --help 2>/dev/null) || return 1
+      case "$help" in
+        *"control bytes pass through"*) ;;
+        *)
+          echo "error: Orca CLI does not document verbatim control-byte input; refusing Escape" >&2
+          return 1
+          ;;
+      esac
+      fm_backend_orca_send_literal "$terminal" $'\033'
       ;;
     *)
       echo "error: unsupported Orca key '$key'" >&2
