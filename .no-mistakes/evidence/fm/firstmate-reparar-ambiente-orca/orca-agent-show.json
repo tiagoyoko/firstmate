@@ -1,0 +1,30 @@
+{
+  "id": "bc7b8ebb-18c5-4c52-9509-4a3a317ee578",
+  "ok": true,
+  "result": {
+    "terminal": {
+      "handle": "term_e4e2678e-8798-46c1-9a36-99781875d230",
+      "ptyId": "1ec3b58b-dfc9-4eab-8033-714c40b64eb3::/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/orca-user/orca/workspaces/orca-project/fm-orca-live@@e9f86d4a",
+      "incarnationId": "b61d9620-c6b9-41c7-b79d-4fd944644f2e",
+      "orphaned": false,
+      "worktreeId": "1ec3b58b-dfc9-4eab-8033-714c40b64eb3::/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/orca-user/orca/workspaces/orca-project/fm-orca-live",
+      "worktreePath": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/orca-user/orca/workspaces/orca-project/fm-orca-live",
+      "branch": "refs/heads/fm-orca-live",
+      "tabId": "5690c0a2-4c15-4a8b-9fe1-fc8920a12456",
+      "leafId": "09ead69e-3495-4cf4-a812-fa3fa605aac8",
+      "title": "fm-orca-live",
+      "connected": true,
+      "writable": true,
+      "lastOutputAt": 1793576743560,
+      "preview": "fm-orca-live on  fm-orca-live\nfm-orca-live on  fm-orca-live\nfm-orca-live on  fm-orca-live",
+      "executionHostId": "local",
+      "agentIdentity": "omp",
+      "paneRuntimeId": -1,
+      "rendererGraphEpoch": 0,
+      "agentWait": null
+    }
+  },
+  "_meta": {
+    "runtimeId": "da0a293e-1b7e-4669-a45a-3ab0a9ea4da2"
+  }
+}

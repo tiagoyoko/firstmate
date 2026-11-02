@@ -1,0 +1,24 @@
+{
+  "markersPreserved": {
+    ".lock": "1\n",
+    ".omp-turnend-extension-loaded": "foreign-guard\n1\n",
+    ".omp-watch-extension-loaded": "foreign-watch\n1\n"
+  },
+  "watcherAbsent": true,
+  "notifications": [
+    {
+      "type": "extension_ui_request",
+      "id": "15bdaf1f3a021f4a",
+      "method": "setWidget",
+      "widgetKey": "autoresearch"
+    },
+    {
+      "type": "extension_ui_request",
+      "id": "15bdaf1fad421f4b",
+      "method": "notify",
+      "message": "watcher: read-only - session lock is held by another firstmate session",
+      "notifyType": "warning"
+    }
+  ],
+  "extensionErrors": []
+}

@@ -1,0 +1,56 @@
+{
+  "oldVersion": "1.4.230",
+  "currentVersion": "1.4.245",
+  "oldRejected": true,
+  "afterOld": {
+    "id": "9e981787-9f2d-4caf-aa93-f0eabf8756f8",
+    "ok": true,
+    "result": {
+      "terminal": {
+        "handle": "term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589",
+        "status": "running",
+        "tail": [
+          "",
+          "",
+          "RECEIVER_READY"
+        ],
+        "truncated": false,
+        "limited": false,
+        "oldestCursor": "0",
+        "nextCursor": "4",
+        "latestCursor": "4",
+        "returnedLineCount": 3,
+        "source": "stream"
+      }
+    },
+    "_meta": {
+      "runtimeId": "da0a293e-1b7e-4669-a45a-3ab0a9ea4da2"
+    }
+  },
+  "afterCurrent": {
+    "id": "1c59f4cb-73e6-446c-a9db-c7dad2ca141e",
+    "ok": true,
+    "result": {
+      "terminal": {
+        "handle": "term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589",
+        "status": "running",
+        "tail": [
+          "",
+          "",
+          "RECEIVER_READY",
+          "RECEIVED_BYTE=1b"
+        ],
+        "truncated": false,
+        "limited": false,
+        "oldestCursor": "0",
+        "nextCursor": "5",
+        "latestCursor": "5",
+        "returnedLineCount": 4,
+        "source": "stream"
+      }
+    },
+    "_meta": {
+      "runtimeId": "da0a293e-1b7e-4669-a45a-3ab0a9ea4da2"
+    }
+  }
+}

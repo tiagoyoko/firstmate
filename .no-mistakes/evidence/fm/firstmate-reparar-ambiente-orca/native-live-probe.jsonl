@@ -1,0 +1,6 @@
+{"name":"early-child-no-state","data":{"depth":0,"stateExists":false,"errors":[]},"time":1793577250430}
+{"name":"native-primary-start","data":{"agent":{"kind":"main","id":"Main","name":"main","depth":0},"stateExists":true},"time":1793577252796}
+{"name":"child-dormant-preserve-primary","data":{"pidBefore":"12697","pidAfter":"12697","childArm":{"ok":false,"message":"watcher: not armed - subagent sessions do not own primary supervision"},"dormantArm":{"ok":false,"message":"watcher: not armed - omp session is shutting down"}},"time":1793577272393}
+{"name":"child-dormant-preserve-primary","data":{"pidBefore":"14262","pidAfter":"14262","childArm":{"ok":false,"message":"watcher: not armed - subagent sessions do not own primary supervision"},"dormantArm":{"ok":false,"message":"watcher: not armed - omp session is shutting down"}},"time":1793577280430}
+{"name":"native-replacement-stale-rejection","data":{"before":"14262","after":"15129","staleArm":{"ok":false,"message":"watcher: not armed - omp session is shutting down"},"shutdownArmRejected":true,"sameInstanceRestart":true},"time":1793577282567}
+{"name":"native-primary-shutdown","data":{},"time":1793577282743}

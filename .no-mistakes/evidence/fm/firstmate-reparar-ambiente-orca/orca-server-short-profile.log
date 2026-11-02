@@ -1,0 +1,16 @@
+[serve] using Electron serve: packaged macOS serve stays on Electron so paired clients can still update it (orcad has no app updater)
+[secrets] Secrets are unavailable for this run: this login has no default macOS keychain. Orca will not use the keychain until it restarts, so sealed settings such as a saved proxy URL are not applied. Start orca serve from a logged-in desktop session, or unlock the login keychain, to seal credentials.
+[secrets] The OS keychain is unavailable for this run (this login has no default macOS keychain), so secrets are stored unencrypted. Start orca serve from a logged-in desktop session, or unlock the login keychain, to seal them.
+[agent-state-rules] download failed: HTTP 404
+[serve] orca CLI install: installed (/opt/homebrew/bin/orca)
+{"type":"orca_server_ready","schemaVersion":1,"runtimeId":"da0a293e-1b7e-4669-a45a-3ab0a9ea4da2","endpoint":"ws://0.0.0.0:6978","boundEndpoint":"ws://0.0.0.0:6978","advertisedEndpoint":"ws://127.0.0.1:6978","managedWslCliReconciliation":"settled","pairing":{"available":false,"reason":"disabled_by_operator","guidance":"Restart without --no-pairing to create a client pairing offer."}}
+[updater] macos_installer_scheduling_configured {"processType":"Interactive"}
+[updater] stable fallback feed pinned: current=1.4.245 → https://github.com/stablyai/orca/releases/download/v1.4.245
+[autoUpdater] Checking for update
+[autoUpdater] Generated new staging user ID: 2e20de56-a0e2-5fd6-a2fd-6c2d6b54069c
+[autoUpdater] Update for version 1.4.245 is not available (latest version: 1.4.245, downgrade is disallowed).
+[pty:history] worktreeId=3311f00b-da45-4ea9-8398-5f553cb66639::/Users/tiagoyoko/.no-m... shell=zsh histFile=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/o/terminal-history/bb54c563295b57bc/zsh_history fishSession=none
+[pty:history] worktreeId=1ec3b58b-dfc9-4eab-8033-714c40b64eb3::/Users/tiagoyoko/.no-m... shell=zsh histFile=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/o/terminal-history/25fc315dc65f77b9/zsh_history fishSession=none
+[pty:history] worktreeId=1ec3b58b-dfc9-4eab-8033-714c40b64eb3::/Users/tiagoyoko/.no-m... shell=zsh histFile=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/o/terminal-history/25fc315dc65f77b9/zsh_history fishSession=none
+[pty:history] worktreeId=3311f00b-da45-4ea9-8398-5f553cb66639::/Users/tiagoyoko/.no-m... shell=zsh histFile=/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/o/terminal-history/bb54c563295b57bc/zsh_history fishSession=none
+[pty:history] Scheduled history delete for worktree 1ec3b58b-dfc9-4eab-8033-714c40b64eb3::/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/orca-user/orca/workspaces/orca-project/fm-orca-live

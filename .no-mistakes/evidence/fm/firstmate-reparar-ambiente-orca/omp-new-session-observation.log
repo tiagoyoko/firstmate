@@ -1,0 +1,20 @@
+launch {"command": ["omp", "--mode", "rpc", "--no-session", "--no-ui", "--no-lsp", "--no-pty", "--no-skills", "--no-rules", "--no-tools", "--no-title", "--no-extensions", "--cwd", "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/product", "--config", "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/product/.omp/fm-worker-overlay.yml", "--auto-approve", "--model", "lab-local/echo", "--thinking", "off", "-e", "/Users/tiagoyoko/.no-mistakes/evidence/01M6CNQCPVNR4SAVF8VXRHBNKZ/live-probe.ts"], "stateAbsent": true, "provider": "disposable loopback HTTP; no operator credentials"}
+fresh-primary-markers {".omp-watch-extension-loaded": "sha256:47e65af312bfabb98fe6900b55358d478042526d64f35ca7726827bab9f63c9d\n87898\n", ".omp-turnend-extension-loaded": "sha256:12b239161a5ec4ba0b6a1abf4558fa461d845a2545599decb6c61be8fd47645b\n87898\n"}
+rpc-input {"type": "prompt", "id": "first", "message": "Return LAB_RESPONSE. Do not call tools."}
+first-provider-context {"hasDigest": true, "containsStartupText": true, "extensionErrors": []}
+startup-completed {"pid": "87898", "completion": "87898"}
+rpc-input {"type": "prompt", "id": "arm", "message": "/fm-watch-arm-omp"}
+real-watcher-started {"pid": "92193"}
+rpc-input {"type": "prompt", "id": "child", "message": "/lab-child"}
+rpc-input {"type": "prompt", "id": "arm-after", "message": "/fm-watch-arm-omp"}
+wake-accepted-in-native-queue {"frames": [{"type": "queue_update", "steering": [], "followUp": ["\u2063FIRSTMATE_OP: v1 watcher: FIRSTMATE WATCHER WAKE: signal: /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/product/state/lab-signal.status\n\nRun bin/fm-wake-drain.sh first and handle the queued wake. Watcher continuity is extension-owned."], "liveSteered": 0}]}
+rpc-input {"type": "prompt", "id": "consume", "message": "Continue processing the queued follow-up."}
+real-successor-and-wake {"ledger": "arm_pid=92164\twatcher_pid=92193\torigin=started\tstarted_at=1793577042\tended_at=1793577047\texit_code=0\tsignal=none\treason=actionable-signal\tbeacon_age=4\tlock_before=pid:92193|identity:Sun Nov  1 20:50:42 2026     bash /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/product/bin/fm-watch.sh\tlock_after=pid:none|identity:none\tsuccessor=started:93724\n", "wakeRequests": 1}
+rpc-input {"type": "new_session", "id": "replace"}
+cleanup {"ompExit": 0}
+Traceback (most recent call last):
+  File "/Users/tiagoyoko/.no-mistakes/evidence/01M6CNQCPVNR4SAVF8VXRHBNKZ/drive-omp.py", line 82, in <module>
+    until(lambda:(PRODUCT/'state/.watch.lock/pid').exists() and (PRODUCT/'state/.watch.lock/pid').read_text().strip()!=before_new,'new generation real watcher',60)
+  File "/Users/tiagoyoko/.no-mistakes/evidence/01M6CNQCPVNR4SAVF8VXRHBNKZ/drive-omp.py", line 29, in until
+    raise TimeoutError(label)
+TimeoutError: new generation real watcher

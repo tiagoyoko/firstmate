@@ -1,0 +1,21 @@
+[serve] using Electron serve: packaged macOS serve stays on Electron so paired clients can still update it (orcad has no app updater)
+[secrets] Secrets are unavailable for this run: this login has no default macOS keychain. Orca will not use the keychain until it restarts, so sealed settings such as a saved proxy URL are not applied. Start orca serve from a logged-in desktop session, or unlock the login keychain, to seal credentials.
+[secrets] The OS keychain is unavailable for this run (this login has no default macOS keychain), so secrets are stored unencrypted. Start orca serve from a logged-in desktop session, or unlock the login keychain, to seal them.
+[runtime] Failed to start headless RPC transport: Error: listen EINVAL: invalid argument /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/orca-profile/o-98610-8ee6.sock
+    at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+    at listenInCluster (node:net:2499:12)
+    at Server.listen (node:net:2641:5)
+    at /Applications/Orca.app/Contents/Resources/app.asar/out/main/index.js:3301:94600
+    at new Promise (<anonymous>)
+    at xMr.start (/Applications/Orca.app/Contents/Resources/app.asar/out/main/index.js:3301:94560)
+    at LPr.start (/Applications/Orca.app/Contents/Resources/app.asar/out/main/index.js:3305:50044)
+    at _zr (/Applications/Orca.app/Contents/Resources/app.asar/out/main/index.js:3366:19934)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async yzr (/Applications/Orca.app/Contents/Resources/app.asar/out/main/index.js:3366:21589) {
+  code: 'EINVAL',
+  errno: -22,
+  syscall: 'listen',
+  address: '/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/orca-profile/o-98610-8ee6.sock',
+  port: -1
+}
+[profile-state] Orca could not finish starting: listen EINVAL: invalid argument /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/orca-profile/o-98610-8ee6.sock

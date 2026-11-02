@@ -1,0 +1,114 @@
+FM_TEST_BEGIN 2026-11-01T23:34:41Z tests/fm-omp-harness.test.sh family=pure-contract-unit expected_gate_skip=none
+ok - fm-harness: omp detects by its anchored name; the marker is a precedence override that needs real omp ancestry
+ok - fm-harness: a bun-installed omp identifies by its script path, and ompd stays out
+ok - session lock and tmux liveness: omp is anchored, decoys stay out
+ok - fm-spawn: the omp launch line clears markers, pins posture, and wires the state-resident extension
+ok - fm-spawn: omp model validation is scoped to providers the listing can prove
+not ok - omp secondmate spawn should succeed: error: secondmate home cannot be inside the firstmate repo: /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/tmp/fm-omp-harness.SffFIr/secondmate/sm: expected exit 0, got 1
+FM_TEST_END 2026-11-01T23:35:24Z tests/fm-omp-harness.test.sh exit=1 duration_ms=41989 gate_skip=false
+FM_TEST_BEGIN 2026-11-01T23:35:24Z tests/fm-backend-orca.test.sh family=orca expected_gate_skip=optional-binary
+ok - fm_backend_orca_capture: parses result.terminal.tail and calls terminal read
+ok - fm_backend_orca_capture: falls back to result text fields
+ok - fm_backend_orca_capture: fails closed on Orca read error JSON
+ok - fm_backend_orca_runtime_check: accepts reachable ready runtime
+ok - fm_backend_orca_runtime_check: fails closed when runtime is not ready
+ok - fm_backend_orca_send_text_submit: verifies empty composer after Enter with one bounded read
+ok - fm_backend_orca_send_text_submit: a borderless claude composer confirms delivery (the missing #2029 shape)
+ok - fm_backend_orca_composer_state: a stale startup banner cannot outrank the live composer row
+ok - fm_backend_orca_send_text_submit: retries Enter while composer remains pending
+ok - fm_backend_orca_composer_state: a slash-command popup's argument-hint placeholder still reads pending
+ok - fm_backend_orca_composer_state: a bare dead-shell prompt reads unknown (unsafe-for-injection), never empty
+ok - fm_backend_orca_send_text_submit: a slash-command popup's placeholder fill on Enter #1 does not short-circuit as submitted; Enter #2 is retried and lands it
+ok - fm_backend_orca_send_literal: sends text without submitting
+ok - fm_backend_orca_send_text_submit: reports send-failed when Orca send fails
+ok - Orca send helpers: fail closed on ok:false JSON
+ok - fm_backend_orca_send_key: Enter maps to empty enter, C-c maps to interrupt
+ok - fm_backend_orca_send_key: refuses unsupported keys loudly
+ok - fm_backend_orca_send_key: documented raw Escape sends one byte; unsupported CLI refuses before input
+ok - fm_backend_orca_kill: calls terminal close and stays best-effort
+ok - fm_backend_orca_kill: a close its missing CLI never attempted reports the failure instead of a success
+ok - fm_backend_orca_remove_worktree: refuses empty worktree ids
+ok - fm_backend_orca_remove_worktree: fails closed on ok:false JSON
+ok - fm_backend_orca_worktree_path: resolves an Orca worktree id to its path
+ok - fm-backend dispatcher: accepts orca and routes capture through bin/backends/orca.sh
+ok - fm_backend_orca_json_get: ignores undocumented terminal id shapes
+ok - Orca lifecycle helpers: register repo, create worktree, create terminal, parse stable ids
+ok - fm_backend_orca_worktree_create: removes created worktree when path is missing
+ok - fm-spawn.sh --backend orca: preserves metadata when pathless cleanup fails
+ok - fm-spawn.sh --backend orca: reuses implicit terminal, records metadata, launches harness
+ok - fm-spawn.sh --backend orca --secondmate: refuses before secondmate-home mutation
+ok - fm-spawn.sh --backend orca: refuses before mutation when Orca runtime is not ready
+ok - fm-spawn.sh --backend orca: refuses non-isolated worktrees and closes implicit terminals
+ok - fm-spawn.sh --backend orca: removes worktree when terminal creation fails
+ok - fm-spawn.sh --backend orca: preserves metadata when abort cleanup fails
+ok - fm-spawn.sh --backend orca: releases terminal and worktree on later aborts
+●━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+●  WATCHER DOWN - SUPERVISION IS OFF
+●  1 task(s) in flight, but no live watcher process holds this home lock (last beat: 1s ago).
+●  Trust the emitted supervision protocol for this harness; do not use shell & for watcher repair.
+●  This is a supervision warning only; the guarded operation WILL still run.
+●  repair missing watcher supervision according to the session-start block for this harness; do not use shell &.
+●━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WARNING: watcher still down (same stale episode; last beat: 3s ago, grace 300s) - full banner already printed this episode.
+ok - fm-peek/fm-send/fm-crew-state route through backend=orca metadata and its durable inbox
+ok - fm-peek/fm-crew-state: Orca read error JSON fails closed
+ok - fm_backend_target_exists: Orca ok:false read JSON is not live
+ok - fm-teardown.sh backend=orca: scout report gate then helper-backed worktree removal
+ok - fm-teardown.sh backend=orca: scout teardown refuses id/path mismatches
+ok - fm-teardown.sh backend=orca: releases terminal/worktree when path is absent
+ok - fm-teardown.sh backend=orca: preserves metadata on remove ok:false JSON
+ok - fm-teardown.sh backend=orca: scout report gate precedes pathless helper cleanup
+ok - fm-teardown.sh backend=orca: ship teardown fails closed when worktree path is missing
+ok - fm-teardown.sh backend=orca: ship teardown requires a matching Orca id path
+ok - fm-teardown.sh backend=orca: ship teardown fails closed when id resolution fails
+ok - fm-teardown.sh backend=orca: ship teardown refuses id/path mismatches
+ok - fm-teardown.sh backend=orca: refuses missing worktree ids before cleanup
+ok - fm-teardown.sh backend=orca: refuses incomplete worktree-only endpoint metadata before runtime dispatch
+ok - fm-teardown.sh --force: removes Orca secondmate children through Orca
+ok - fm-teardown.sh --force: refuses Orca child id/path mismatches
+ok - fm-teardown.sh --force: refuses partial Orca secondmate children before runtime dispatch
+FM_TEST_END 2026-11-01T23:37:57Z tests/fm-backend-orca.test.sh exit=0 duration_ms=151862 gate_skip=false
+FM_TEST_BEGIN 2026-11-01T23:37:57Z tests/fm-control.test.sh family=backend-dispatch expected_gate_skip=none
+ok - fm-control exit: every verified harness gets its own verified exit command
+ok - fm-control interrupt: every verified harness gets its own verified key and repeat count
+ok - fm-control interrupt: opencode needs a double Escape, claude a single one
+ok - fm-control: a harness with no verified control mechanics is refused, not guessed at
+ok - fm-control-lib: a recorded harness resolves to its verified adapter without guessing
+ok - fm-control: prefixed recorded harnesses reach interrupt and exit mechanics
+ok - fm-control-lib: the backend key matrix matches each adapter's real send-key surface
+ok - fm-control-lib: adapter capability is per task kind, not per adapter alone
+ok - fm-control interrupt: an Orca CLI without a documented raw input path receives no key
+ok - fm-control: a backend that cannot prove an agent stopped refuses exit and relaunch
+ok - fm-control-lib: stop-proving verbs are gated on the backends that really classify agent state
+ok - fm-control: a legacy window label is refused and the exact task id is named
+ok - fm-control: an explicit backend endpoint is never a control target
+ok - fm-control: an unrecorded task id is refused
+ok - fm-control: a record whose endpoint identity names another task is refused
+ok - fm-control: a remotely placed secondmate is refused by placement, not by a metadata complaint
+ok - fm-control: interrupt and exit lock before task-state resolution
+ok - fm-control: the verb list is closed - no raw keys, arbitrary text, or clear verb
+ok - fm-control: resume is refused with the determinism reason and the alternative
+ok - fm-control: profile and note flags belong to relaunch only
+ok - fm-control exit: an already-stopped agent is idempotent success with no bytes sent
+ok - fm-control exit: a vanished endpoint refuses instead of silently succeeding
+ok - fm-control interrupt: refuses when no agent is running rather than keying a shell
+ok - fm-control exit: an endpoint whose process cannot be attributed refuses
+ok - fm-control exit: a busy agent receives interrupt delivery before the exit command
+ok - fm-control exit: an idle agent goes straight to its exit command
+ok - fm-control interrupt: unconfirmed delivery preserves observed busy state
+ok - fm-control interrupt: muse confirms cancellation from its session log
+ok - fm-control interrupt: postconditions are revalidated after acknowledgement polling
+ok - fm-control exit: an interrupt-stopped agent satisfies the gone-state postcondition
+ok - fm-control exit: a stubborn agent reports delivered input and an unconfirmed exit
+ok - fm-control interrupt: grok reports delivery without claiming cancellation
+ok - fm-control interrupt: grok's idle footer does not confirm cancellation
+ok - fm-control: a lifecycle command to a secondmate is unmarked and opens no reply expectation
+ok - fm-control's arrival leaves fm-send's from-firstmate marking untouched
+FM_TEST_END 2026-11-01T23:39:02Z tests/fm-control.test.sh exit=0 duration_ms=64801 gate_skip=false
+FM_TEST_SUMMARY total=3 failed=1 skipped_gate=0 duration_ms=263901
+FM_TEST_SUMMARY_FAMILY family=backend-dispatch count=1 duration_ms=64801 failed=0
+FM_TEST_SUMMARY_FAMILY family=orca count=1 duration_ms=151862 failed=0
+FM_TEST_SUMMARY_FAMILY family=pure-contract-unit count=1 duration_ms=41989 failed=1
+FM_TEST_SLOWEST rank=1 script=tests/fm-backend-orca.test.sh duration_ms=151862
+FM_TEST_SLOWEST rank=2 script=tests/fm-control.test.sh duration_ms=64801
+FM_TEST_SLOWEST rank=3 script=tests/fm-omp-harness.test.sh duration_ms=41989

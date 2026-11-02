@@ -1,0 +1,23 @@
+{
+  "id": "fa395964-2793-4b2c-b868-ecc4d8d60f8f",
+  "ok": true,
+  "result": {
+    "terminal": {
+      "processId": 41929,
+      "handle": "term_6b48a418-c906-494a-ad9b-6130df56672a",
+      "tabId": "00856554-8899-474a-b024-fa1c8e008e53",
+      "paneKey": "00856554-8899-474a-b024-fa1c8e008e53:fd689dcb-e174-4530-ac00-495c2c471001",
+      "ptyId": "3311f00b-da45-4ea9-8398-5f553cb66639::/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/product@@06fe13c1",
+      "worktreeId": "3311f00b-da45-4ea9-8398-5f553cb66639::/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/product",
+      "title": "Firstmate-test-escape",
+      "executionHostId": "local",
+      "incarnationId": "55b712b2-9c71-46ac-8d06-0d489d28dd3c",
+      "hostPlatform": "darwin",
+      "surface": "background",
+      "warning": "Terminal term_6b48a418-c906-494a-ad9b-6130df56672a is running, but Orca could not make it discoverable. Run `orca terminal focus --terminal term_6b48a418-c906-494a-ad9b-6130df56672a` to reveal and focus it."
+    }
+  },
+  "_meta": {
+    "runtimeId": "da0a293e-1b7e-4669-a45a-3ab0a9ea4da2"
+  }
+}

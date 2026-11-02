@@ -1,0 +1,7 @@
+
+[Uncaught Exception] Error: ENOENT: no such file or directory, open '/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/tmp/fm-omp-harness.YsPwej/primary-lifecycle/home/state/.omp-turnend-extension-loaded'
+    at readFileSync (unknown)
+    at /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/pre-r1/tests/omp-primary-lifecycle.mjs:75:18
+    at processTicksAndRejections (native:7:39)
+not ok - native omp primary/subagent lifecycle
+not ok - omp 18.12.6 native primary/subagent lifecycle failed

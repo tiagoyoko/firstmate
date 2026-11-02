@@ -1,0 +1,403 @@
+$ orca terminal create --worktree path:/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/product --title Escape-capability-guard --command 'python3 -u -c '"'"'import os,tty,time; tty.setraw(0); print("RECEIVER_READY",flush=True); b=os.read(0,1); print("RECEIVED_BYTE="+b.hex(),flush=True); time.sleep(30)'"'"'' --json
+{
+  "id": "f5fe877b-d405-480c-84ce-a4e6ea356224",
+  "ok": true,
+  "result": {
+    "terminal": {
+      "processId": 89208,
+      "handle": "term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589",
+      "tabId": "39be2370-93cb-40e0-8391-11caad4ccde0",
+      "paneKey": "39be2370-93cb-40e0-8391-11caad4ccde0:6861ed13-2a35-457f-9b41-afee7b69b77b",
+      "ptyId": "3311f00b-da45-4ea9-8398-5f553cb66639::/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/product@@ac36f1c0",
+      "worktreeId": "3311f00b-da45-4ea9-8398-5f553cb66639::/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/product",
+      "title": "Escape-capability-guard",
+      "executionHostId": "local",
+      "incarnationId": "36222693-6afe-4f16-a9ed-b3a55c06727f",
+      "hostPlatform": "darwin",
+      "surface": "background",
+      "warning": "Terminal term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589 is running, but Orca could not make it discoverable. Run `orca terminal focus --terminal term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589` to reveal and focus it."
+    }
+  },
+  "_meta": {
+    "runtimeId": "da0a293e-1b7e-4669-a45a-3ab0a9ea4da2"
+  }
+}
+
+exit=0
+$ orca terminal read --terminal term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589 --limit 20 --json
+{
+  "id": "5c2a80de-b377-4e93-aaeb-0b6ead21034a",
+  "ok": true,
+  "result": {
+    "terminal": {
+      "handle": "term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589",
+      "status": "running",
+      "tail": [],
+      "truncated": false,
+      "limited": false,
+      "oldestCursor": "0",
+      "nextCursor": "0",
+      "latestCursor": "0",
+      "returnedLineCount": 0,
+      "source": "stream"
+    }
+  },
+  "_meta": {
+    "runtimeId": "da0a293e-1b7e-4669-a45a-3ab0a9ea4da2"
+  }
+}
+
+exit=0
+$ orca terminal read --terminal term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589 --limit 20 --json
+{
+  "id": "6daf7f83-05c6-4756-9553-ea430997d16c",
+  "ok": true,
+  "result": {
+    "terminal": {
+      "handle": "term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589",
+      "status": "running",
+      "tail": [],
+      "truncated": false,
+      "limited": false,
+      "oldestCursor": "0",
+      "nextCursor": "0",
+      "latestCursor": "0",
+      "returnedLineCount": 0,
+      "source": "stream"
+    }
+  },
+  "_meta": {
+    "runtimeId": "da0a293e-1b7e-4669-a45a-3ab0a9ea4da2"
+  }
+}
+
+exit=0
+$ orca terminal read --terminal term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589 --limit 20 --json
+{
+  "id": "9495ab54-a4a4-4a9e-b9c3-e7da482ccbda",
+  "ok": true,
+  "result": {
+    "terminal": {
+      "handle": "term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589",
+      "status": "running",
+      "tail": [],
+      "truncated": false,
+      "limited": false,
+      "oldestCursor": "0",
+      "nextCursor": "0",
+      "latestCursor": "0",
+      "returnedLineCount": 0,
+      "source": "stream"
+    }
+  },
+  "_meta": {
+    "runtimeId": "da0a293e-1b7e-4669-a45a-3ab0a9ea4da2"
+  }
+}
+
+exit=0
+$ orca terminal read --terminal term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589 --limit 20 --json
+{
+  "id": "2719ef9b-3799-4bbe-ae6b-73d8961d2802",
+  "ok": true,
+  "result": {
+    "terminal": {
+      "handle": "term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589",
+      "status": "running",
+      "tail": [],
+      "truncated": false,
+      "limited": false,
+      "oldestCursor": "0",
+      "nextCursor": "0",
+      "latestCursor": "0",
+      "returnedLineCount": 0,
+      "source": "stream"
+    }
+  },
+  "_meta": {
+    "runtimeId": "da0a293e-1b7e-4669-a45a-3ab0a9ea4da2"
+  }
+}
+
+exit=0
+$ orca terminal read --terminal term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589 --limit 20 --json
+{
+  "id": "f61a80c8-99c3-4e3e-9369-41edd2a5c435",
+  "ok": true,
+  "result": {
+    "terminal": {
+      "handle": "term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589",
+      "status": "running",
+      "tail": [],
+      "truncated": false,
+      "limited": false,
+      "oldestCursor": "0",
+      "nextCursor": "0",
+      "latestCursor": "0",
+      "returnedLineCount": 0,
+      "source": "stream"
+    }
+  },
+  "_meta": {
+    "runtimeId": "da0a293e-1b7e-4669-a45a-3ab0a9ea4da2"
+  }
+}
+
+exit=0
+$ orca terminal read --terminal term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589 --limit 20 --json
+{
+  "id": "a2178f8b-f822-480c-9b70-bc71d68bdf74",
+  "ok": true,
+  "result": {
+    "terminal": {
+      "handle": "term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589",
+      "status": "running",
+      "tail": [],
+      "truncated": false,
+      "limited": false,
+      "oldestCursor": "0",
+      "nextCursor": "0",
+      "latestCursor": "0",
+      "returnedLineCount": 0,
+      "source": "stream"
+    }
+  },
+  "_meta": {
+    "runtimeId": "da0a293e-1b7e-4669-a45a-3ab0a9ea4da2"
+  }
+}
+
+exit=0
+$ orca terminal read --terminal term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589 --limit 20 --json
+{
+  "id": "0d9838e3-f260-423d-abbf-da4eb934151e",
+  "ok": true,
+  "result": {
+    "terminal": {
+      "handle": "term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589",
+      "status": "running",
+      "tail": [],
+      "truncated": false,
+      "limited": false,
+      "oldestCursor": "0",
+      "nextCursor": "0",
+      "latestCursor": "0",
+      "returnedLineCount": 0,
+      "source": "stream"
+    }
+  },
+  "_meta": {
+    "runtimeId": "da0a293e-1b7e-4669-a45a-3ab0a9ea4da2"
+  }
+}
+
+exit=0
+$ orca terminal read --terminal term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589 --limit 20 --json
+{
+  "id": "1eb6135a-f0c1-4143-8711-8a0f831f0d9e",
+  "ok": true,
+  "result": {
+    "terminal": {
+      "handle": "term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589",
+      "status": "running",
+      "tail": [],
+      "truncated": false,
+      "limited": false,
+      "oldestCursor": "0",
+      "nextCursor": "0",
+      "latestCursor": "0",
+      "returnedLineCount": 0,
+      "source": "stream"
+    }
+  },
+  "_meta": {
+    "runtimeId": "da0a293e-1b7e-4669-a45a-3ab0a9ea4da2"
+  }
+}
+
+exit=0
+$ orca terminal read --terminal term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589 --limit 20 --json
+{
+  "id": "cfc8d92b-d44d-45b9-a40f-5f0b1f8ae989",
+  "ok": true,
+  "result": {
+    "terminal": {
+      "handle": "term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589",
+      "status": "running",
+      "tail": [],
+      "truncated": false,
+      "limited": false,
+      "oldestCursor": "0",
+      "nextCursor": "0",
+      "latestCursor": "0",
+      "returnedLineCount": 0,
+      "source": "stream"
+    }
+  },
+  "_meta": {
+    "runtimeId": "da0a293e-1b7e-4669-a45a-3ab0a9ea4da2"
+  }
+}
+
+exit=0
+$ orca terminal read --terminal term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589 --limit 20 --json
+{
+  "id": "f715627d-546b-41a2-a535-5dded5f28004",
+  "ok": true,
+  "result": {
+    "terminal": {
+      "handle": "term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589",
+      "status": "running",
+      "tail": [],
+      "truncated": false,
+      "limited": false,
+      "oldestCursor": "0",
+      "nextCursor": "0",
+      "latestCursor": "0",
+      "returnedLineCount": 0,
+      "source": "stream"
+    }
+  },
+  "_meta": {
+    "runtimeId": "da0a293e-1b7e-4669-a45a-3ab0a9ea4da2"
+  }
+}
+
+exit=0
+$ orca terminal read --terminal term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589 --limit 20 --json
+{
+  "id": "a4aad2ef-ab3c-4166-9eb7-ccd9732f1c80",
+  "ok": true,
+  "result": {
+    "terminal": {
+      "handle": "term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589",
+      "status": "running",
+      "tail": [
+        "",
+        "product on  master [?]",
+        "IVED_BYTE=\"+b.hex(),f"
+      ],
+      "truncated": false,
+      "limited": false,
+      "oldestCursor": "0",
+      "nextCursor": "2",
+      "latestCursor": "2",
+      "returnedLineCount": 3,
+      "source": "stream"
+    }
+  },
+  "_meta": {
+    "runtimeId": "da0a293e-1b7e-4669-a45a-3ab0a9ea4da2"
+  }
+}
+
+exit=0
+$ orca terminal read --terminal term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589 --limit 20 --json
+{
+  "id": "d9ff8c6a-81bb-4280-8162-424a2e98de26",
+  "ok": true,
+  "result": {
+    "terminal": {
+      "handle": "term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589",
+      "status": "running",
+      "tail": [
+        "",
+        "",
+        "RECEIVER_READY"
+      ],
+      "truncated": false,
+      "limited": false,
+      "oldestCursor": "0",
+      "nextCursor": "4",
+      "latestCursor": "4",
+      "returnedLineCount": 3,
+      "source": "stream"
+    }
+  },
+  "_meta": {
+    "runtimeId": "da0a293e-1b7e-4669-a45a-3ab0a9ea4da2"
+  }
+}
+
+exit=0
+$ bash -c '. bin/backends/orca.sh; fm_backend_orca_send_key "$1" Escape' _ term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589
+error: Orca CLI does not document verbatim control-byte input; refusing Escape
+
+exit=1
+$ orca terminal read --terminal term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589 --limit 20 --json
+{
+  "id": "9e981787-9f2d-4caf-aa93-f0eabf8756f8",
+  "ok": true,
+  "result": {
+    "terminal": {
+      "handle": "term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589",
+      "status": "running",
+      "tail": [
+        "",
+        "",
+        "RECEIVER_READY"
+      ],
+      "truncated": false,
+      "limited": false,
+      "oldestCursor": "0",
+      "nextCursor": "4",
+      "latestCursor": "4",
+      "returnedLineCount": 3,
+      "source": "stream"
+    }
+  },
+  "_meta": {
+    "runtimeId": "da0a293e-1b7e-4669-a45a-3ab0a9ea4da2"
+  }
+}
+
+exit=0
+$ bash -c '. bin/backends/orca.sh; fm_backend_orca_send_key "$1" Escape' _ term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589
+
+exit=0
+$ orca terminal read --terminal term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589 --limit 20 --json
+{
+  "id": "1c59f4cb-73e6-446c-a9db-c7dad2ca141e",
+  "ok": true,
+  "result": {
+    "terminal": {
+      "handle": "term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589",
+      "status": "running",
+      "tail": [
+        "",
+        "",
+        "RECEIVER_READY",
+        "RECEIVED_BYTE=1b"
+      ],
+      "truncated": false,
+      "limited": false,
+      "oldestCursor": "0",
+      "nextCursor": "5",
+      "latestCursor": "5",
+      "returnedLineCount": 4,
+      "source": "stream"
+    }
+  },
+  "_meta": {
+    "runtimeId": "da0a293e-1b7e-4669-a45a-3ab0a9ea4da2"
+  }
+}
+
+exit=0
+$ orca terminal close --terminal term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589 --json
+{
+  "id": "81e8ee90-bf77-42f0-afe0-a1018455ed3e",
+  "ok": true,
+  "result": {
+    "close": {
+      "handle": "term_c0bbcfe4-c3e5-4572-bbcb-97e2bef55589",
+      "tabId": "39be2370-93cb-40e0-8391-11caad4ccde0",
+      "ptyKilled": true
+    }
+  },
+  "_meta": {
+    "runtimeId": "da0a293e-1b7e-4669-a45a-3ab0a9ea4da2"
+  }
+}
+
+exit=0

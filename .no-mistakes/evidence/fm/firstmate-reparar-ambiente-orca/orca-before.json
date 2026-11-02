@@ -1,0 +1,28 @@
+{
+  "id": "3e8c1c9f-c191-4491-b9fc-0797bcba66c3",
+  "ok": true,
+  "result": {
+    "terminal": {
+      "handle": "term_6b48a418-c906-494a-ad9b-6130df56672a",
+      "status": "running",
+      "tail": [
+        "python3 -c 'import os,tty; tty.setraw(0); print(\"BYTE_RECEIVER_READY\",flush=True); b=os.read(0,1); print(\"RECEIVED_BYTE=\"+b.hex(),flush=True); import time; time.sleep(240)'",
+        "[WARN] - (starship::context): Scanning current directory timed out.",
+        "[WARN] - (starship::context): You can set scan_timeout in your config to a higher value to allow longer-running scans to keep executing.",
+        "",
+        "productpython3aste'import os,tty; tty.setraw(0); print(\"BYTE_RECEIVER_READY\",flush=True); b=os.read(0,1); print(\"RECEIVED_BYTE=\"+b.hex(),flush=True); import time; time.sleep(240)'",
+        "BYTE_RECEIVER_READY"
+      ],
+      "truncated": false,
+      "limited": false,
+      "oldestCursor": "0",
+      "nextCursor": "7",
+      "latestCursor": "7",
+      "returnedLineCount": 6,
+      "source": "stream"
+    }
+  },
+  "_meta": {
+    "runtimeId": "da0a293e-1b7e-4669-a45a-3ab0a9ea4da2"
+  }
+}

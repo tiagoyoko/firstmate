@@ -1,0 +1,30 @@
+{
+  "id": "f1f69c69-6b5c-4fe4-bc0e-92526ebdd4da",
+  "ok": true,
+  "result": {
+    "repo": {
+      "id": "3311f00b-da45-4ea9-8398-5f553cb66639",
+      "path": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/product",
+      "displayName": "product",
+      "badgeColor": "#737373",
+      "addedAt": 1793576424025,
+      "kind": "git",
+      "externalWorktreeVisibilityLegacy": false,
+      "upstream": null,
+      "gitUsername": "",
+      "hookSettings": {
+        "mode": "auto",
+        "setupRunPolicy": "run-by-default",
+        "setupAgentStartupPolicy": "start-immediately",
+        "scripts": {
+          "setup": "",
+          "archive": ""
+        }
+      },
+      "externalWorktreeVisibility": "hide"
+    }
+  },
+  "_meta": {
+    "runtimeId": "da0a293e-1b7e-4669-a45a-3ab0a9ea4da2"
+  }
+}

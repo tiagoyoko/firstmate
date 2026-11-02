@@ -1,0 +1,16 @@
+launch {"command": ["omp", "--mode", "rpc", "--no-session", "--no-ui", "--no-lsp", "--no-pty", "--no-skills", "--no-rules", "--no-tools", "--no-title", "--no-extensions", "--cwd", "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/product", "--config", "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/product/.omp/fm-worker-overlay.yml", "--auto-approve", "--model", "lab-local/echo", "--thinking", "off", "-e", "/Users/tiagoyoko/.no-mistakes/evidence/01M6CNQCPVNR4SAVF8VXRHBNKZ/live-probe.ts"], "stateAbsent": true, "provider": "disposable loopback HTTP; no operator credentials"}
+fresh-primary-markers {".omp-watch-extension-loaded": "sha256:47e65af312bfabb98fe6900b55358d478042526d64f35ca7726827bab9f63c9d\n53195\n", ".omp-turnend-extension-loaded": "sha256:12b239161a5ec4ba0b6a1abf4558fa461d845a2545599decb6c61be8fd47645b\n53195\n"}
+rpc-input {"type": "prompt", "id": "first", "message": "Return LAB_RESPONSE. Do not call tools."}
+first-provider-context {"hasDigest": true, "hasStartupError": true, "extensionErrors": []}
+startup-completed {"pid": "53195", "completion": "53195"}
+rpc-input {"type": "prompt", "id": "arm", "message": "/fm-watch-arm-omp"}
+real-watcher-started {"pid": "58038"}
+rpc-input {"type": "prompt", "id": "child", "message": "/lab-child"}
+rpc-input {"type": "prompt", "id": "arm-after", "message": "/fm-watch-arm-omp"}
+cleanup {"ompExit": 0}
+Traceback (most recent call last):
+  File "/Users/tiagoyoko/.no-mistakes/evidence/01M6CNQCPVNR4SAVF8VXRHBNKZ/drive-omp.py", line 72, in <module>
+    until(lambda:any('FIRSTMATE WATCHER WAKE: signal: lab-signal' in json.dumps(r) for r in requests),'actual wake in provider input',100)
+  File "/Users/tiagoyoko/.no-mistakes/evidence/01M6CNQCPVNR4SAVF8VXRHBNKZ/drive-omp.py", line 29, in until
+    raise TimeoutError(label)
+TimeoutError: actual wake in provider input

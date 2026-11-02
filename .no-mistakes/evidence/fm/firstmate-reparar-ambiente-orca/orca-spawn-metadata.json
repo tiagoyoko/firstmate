@@ -1,0 +1,16 @@
+{
+  "window": "fm-orca-live",
+  "endpoint_task_id": "orca-live",
+  "worktree": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/orca-user/orca/workspaces/orca-project/fm-orca-live",
+  "project": "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/orca-project",
+  "harness": "omp",
+  "kind": "scout",
+  "tasktmp": "/tmp/fm-orca-live",
+  "model": "default",
+  "effort": "default",
+  "busy_gen": "g1793576714.57427.18353",
+  "spawn_gen": "s1793576714.54623.26086",
+  "backend": "orca",
+  "orca_worktree_id": "1ec3b58b-dfc9-4eab-8033-714c40b64eb3::/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/orca-user/orca/workspaces/orca-project/fm-orca-live",
+  "terminal": "term_e4e2678e-8798-46c1-9a36-99781875d230"
+}

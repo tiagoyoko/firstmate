@@ -1,0 +1,19 @@
+$ /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/bin/fm-control.sh orca-live interrupt
+interrupt-delivered orca-live harness=omp backend=orca verified=endpoint cancel=unconfirmed
+
+exit=0
+$ /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/bin/fm-control.sh orca-live exit
+error: task orca-live runs on the orca backend, which has no recovery-grade agent-state classifier, so 'exit' cannot prove the agent actually stopped; refusing rather than reporting an unproven transition as done
+
+exit=1
+$ /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/bin/fm-control.sh orca-live relaunch --note 'Disposable boundary probe'
+error: task orca-live runs on the orca backend, which has no recovery-grade agent-state classifier, so 'relaunch' cannot prove the agent actually stopped; refusing rather than reporting an unproven transition as done
+
+exit=1
+
+complete: orca-live captain-call inventory reviewed
+WARNING: watcher still down (same stale episode; last beat: never, grace 300s) - full banner already printed this episode.
+teardown: reaping leaked worktree process(es) for orca-live: 56836 57242 60717
+teardown: force-killing leaked worktree process(es) for orca-live: 56836 57242
+teardown orca-live complete (window term_e4e2678e-8798-46c1-9a36-99781875d230, worktree /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/orca-user/orca/workspaces/orca-project/fm-orca-live)
+Backlog: orca-live just finished (this home keeps no markdown backlog at /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/orca-firstmate/data/backlog.md). Update /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/orca-firstmate/data/backlog.md - move orca-live to Done, keep Done to the 10 most recent, then re-scan Queued and dispatch only work whose blockers are gone and date is due.

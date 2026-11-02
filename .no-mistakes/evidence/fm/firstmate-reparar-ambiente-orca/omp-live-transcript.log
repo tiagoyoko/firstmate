@@ -1,0 +1,18 @@
+launch {"command": ["omp", "--mode", "rpc", "--no-session", "--no-ui", "--no-lsp", "--no-pty", "--no-skills", "--no-rules", "--no-tools", "--no-title", "--no-extensions", "--cwd", "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/product", "--config", "/Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/product/.omp/fm-worker-overlay.yml", "--auto-approve", "--model", "lab-local/echo", "--thinking", "off", "-e", "/Users/tiagoyoko/.no-mistakes/evidence/01M6CNQCPVNR4SAVF8VXRHBNKZ/live-probe.ts"], "stateAbsent": true, "provider": "disposable loopback HTTP; no operator credentials"}
+fresh-primary-markers {".omp-watch-extension-loaded": "sha256:47e65af312bfabb98fe6900b55358d478042526d64f35ca7726827bab9f63c9d\n9001\n", ".omp-turnend-extension-loaded": "sha256:12b239161a5ec4ba0b6a1abf4558fa461d845a2545599decb6c61be8fd47645b\n9001\n"}
+rpc-input {"type": "prompt", "id": "first", "message": "Return LAB_RESPONSE. Do not call tools."}
+first-provider-context {"hasDigest": true, "containsStartupText": true, "extensionErrors": []}
+startup-completed {"pid": "9001", "completion": "9001"}
+rpc-input {"type": "prompt", "id": "arm", "message": "/fm-watch-arm-omp"}
+real-watcher-started {"pid": "12697"}
+rpc-input {"type": "prompt", "id": "child", "message": "/lab-child"}
+rpc-input {"type": "prompt", "id": "arm-after", "message": "/fm-watch-arm-omp"}
+wake-accepted-in-native-queue {"frames": [{"type": "queue_update", "steering": [], "followUp": ["\u2063FIRSTMATE_OP: v1 watcher: FIRSTMATE WATCHER WAKE: signal: /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/product/state/lab-signal.status\n\nRun bin/fm-wake-drain.sh first and handle the queued wake. Watcher continuity is extension-owned."], "liveSteered": 0}]}
+rpc-input {"type": "prompt", "id": "consume", "message": "Continue processing the queued follow-up."}
+real-successor-and-wake {"ledger": "arm_pid=12673\twatcher_pid=12697\torigin=started\tstarted_at=1793577270\tended_at=1793577276\texit_code=0\tsignal=none\treason=actionable-signal\tbeacon_age=3\tlock_before=pid:12697|identity:Sun Nov  1 20:54:30 2026     bash /Users/tiagoyoko/.no-mistakes/worktrees/2b0478335959/01M6CNQCPVNR4SAVF8VXRHBNKZ/.test-phase/product/bin/fm-watch.sh\tlock_after=pid:none|identity:none\tsuccessor=started:14262\n", "wakeRequests": 1}
+rpc-input {"type": "new_session", "id": "replace"}
+rpc-new-session-continuity {"before": "14262", "after": "14262", "note": "OMP 18.12.6 emits session_switch for new_session; existing watcher remains live"}
+rpc-input {"type": "prompt", "id": "child-after-new", "message": "/lab-child"}
+rpc-input {"type": "prompt", "id": "native-replace", "message": "/lab-replace-primary"}
+PASS {"markers": true, "nativeChild": true, "dormant": true, "realWake": true, "successor": true, "replacement": true}
+cleanup {"ompExit": 0}
