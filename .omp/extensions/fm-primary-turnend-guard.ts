@@ -23,9 +23,8 @@
 // an in-process replacement (/new, /resume, /fork) and maps to `clear`, whose
 // wrapper contract re-emits the digest only when this lock owner already
 // completed a full startup; session_compact maps to `compact`.
-// before_agent_start returning { message } was verified to reach model context
-// on omp 18.1.11 (the model quoted an injected marker back), so omp qualifies
-// for the Run tier.
+// docs/sessionstart-nudge.md owns the Run-tier transport and native handler
+// budget limit; native ownership alone does not establish startup readiness.
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -90,6 +89,8 @@ function lockOwnership(): LockOwnership {
 
 function markLoaded(): void {
   if (lockOwnership() === "other") return;
+  // TURNEND activates before WATCH in a fresh home; marker publication must
+  // not depend on WATCH having created state/ first.
   mkdirSync(state, { recursive: true });
   writeFileSync(marker, `${extensionVersion}\n${process.pid}\n`);
 }

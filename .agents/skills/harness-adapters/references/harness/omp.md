@@ -50,7 +50,7 @@ Native factories are also rebound to subagent sessions on newer omp versions; th
 ## Primary integration
 
 The omp primary follows the Pi extension-owned watcher model through `../../../docs/supervision-protocols/omp.md`: `.omp/extensions/fm-primary-omp-watch.ts` arms `bin/fm-watch-arm.sh --restart` through the `fm_watch_arm_omp` tool and owns every successor, and `.omp/extensions/fm-primary-turnend-guard.ts` answers omp's blocking `session_stop` hook by forcing one continuation when `../../../bin/fm-turnend-guard.sh` returns 2, bounded per turn by omp's `stop_hook_active` flag.
-The same file ports the `tool_call` seatbelts and delivers the session-start digest through `before_agent_start` on the Run tier; omp's `session_start` carries no reason, so the source is derived (first start `startup` or `resume` from the launch line, later in-process starts `clear`, `session_compact` as `compact`).
+The same file ports the `tool_call` seatbelts; `../../../docs/sessionstart-nudge.md` owns the native startup transport, source mapping, and handler-budget limit.
 omp has no asynchronous Stop-hook equivalent, so the Claude auto-arm model does not apply; `fm_supervision_model` classifies omp as `extension`, and `fm_omp_extension_owns_supervision` in `../../../bin/fm-wake-lib.sh` is the ownership proof that tolerates the extension's own watcher hand-off.
 The Pi supervision branch is out of scope for omp; every actionable wake is delivered to main.
 Launch a primary with plain `omp` inside the home (`FM_OMP_HARNESS=omp omp` when starting from a Claude pane); `../../../bin/fm-session-start.sh` prints `OMP_WATCH_EXTENSION: not loaded` when the running session has not loaded both tracked extensions.

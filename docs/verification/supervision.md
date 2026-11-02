@@ -58,7 +58,9 @@ A file named both by `-e` and by auto-discovery loads twice (two factory calls, 
 ### omp native ownership, 2026-11-01
 
 The primary-only ownership boundary was verified with installed omp 18.12.6 and Bun 1.3.14 through its real `loadExtensions`, prepared-factory rebinding, identity-bearing `ExtensionRunner`, and native event dispatch.
-The portable and installed-native modes execute the same behavioral probe:
+The portable and installed-native modes execute the same [behavioral probe](../../tests/omp-primary-lifecycle.mjs).
+Its fresh-home regression starts without `state/`, activates TURNEND before WATCH, and checks both primary marker publications while factory binding and native subagent lifecycle leave the home untouched.
+Run either mode with:
 
 ```sh
 bin/fm-test-run.sh tests/fm-omp-harness.test.sh tests/fm-pi-watch-extension.test.sh

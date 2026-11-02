@@ -77,7 +77,7 @@ Reinstall the CLI and rerun; [`verification/runtime-backends.md`](verification/r
 - Orca is macOS-only and explicit-only.
 - The app must be running and report ready.
 - Secondmate spawns are unsupported.
-- Escape is refused before input on a CLI that does not document verbatim control-byte delivery; Ctrl+U remains unverified.
+- Ctrl+U remains unverified; [Setup](#setup) owns the supported keys and Escape's compatibility gate.
 - Compatibility is checked through runtime readiness and the installed CLI's documented input contract, not an assumed version floor.
 - Only the verified terminal-handle and worktree result fields are accepted; speculative response shapes are rejected.
 - Orca's worktree shape is unverified against the spawn-time Claude workspace-trust check in `bin/fm-claude-trust.sh`, which refuses any path that is not a linked git worktree sharing the project's git common dir, so a claude spawn on Orca fails loudly at that check rather than launching if Orca clones instead of linking.
