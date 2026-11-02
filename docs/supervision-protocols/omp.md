@@ -7,6 +7,7 @@ When this session owns supervision and away mode is not active:
    If `bin/fm-session-start.sh` reported the omp extensions as not loaded, restart omp inside this home; pass `-e __FM_OMP_TURNEND_EXT__ -e __FM_OMP_EXT__` only when omp must start from another directory, because omp loads a file named both ways twice.
 3. Initial process cycle only: make the one required `fm_watch_arm_omp` call; if startup already owned the fleet lock, this is an ownership-based no-op.
    Use `/fm-watch-arm-omp` only as a human-entered fallback.
+   Both entry points enforce the same generation ownership; neither revives a session that has shut down.
    Never run `bin/fm-watch-arm.sh` through omp's bash tool because that foreground arm can wedge the agent and bypasses extension-owned cleanup.
 4. If the extension says no live session holds the lock, run `bin/fm-session-start.sh` to reclaim the session lock, then call `fm_watch_arm_omp` again.
 5. The extension starts `bin/fm-watch-arm.sh --restart`, keeps the child attached to the live omp process, and owns every later successor launch.

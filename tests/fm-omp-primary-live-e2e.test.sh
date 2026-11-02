@@ -19,6 +19,19 @@ set -u
 # shellcheck source=tests/lib.sh
 . "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
+# Credential-free vendor-contract path. The package path is explicit because
+# standalone omp binaries need not ship an importable native SDK.
+if [ "${FM_OMP_NATIVE_LIFECYCLE:-0}" = 1 ]; then
+  fm_live_gate default-on FM_OMP_NATIVE_LIFECYCLE bun jq
+  [ -f "${FM_OMP_NATIVE_PACKAGE:-}/package.json" ] \
+    || fail "set FM_OMP_NATIVE_PACKAGE to the installed @oh-my-pi/pi-coding-agent package"
+  native_version=$(jq -r .version "$FM_OMP_NATIVE_PACKAGE/package.json")
+  bash "$(dirname "${BASH_SOURCE[0]}")/fm-omp-harness.test.sh" \
+    || fail "omp $native_version native primary/subagent lifecycle failed"
+  printf 'ok - installed omp %s native loader/runner lifecycle passed without provider calls\n' "$native_version"
+  exit
+fi
+
 fm_live_gate opt-in FM_OMP_LIVE_E2E omp node jq
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -27,6 +40,8 @@ unset NO_MISTAKES_GATE
 fail() {
   printf 'not ok - %s\n' "$1" >&2
   if [ -f "${RPC_LOG:-}" ]; then
+    printf '# native extension errors:\n' >&2
+    jq -c 'select(.type == "extension_error")' "$RPC_LOG" >&2 2>/dev/null
     printf '# rpc frame types seen:\n' >&2
     grep -o '"type":"[a-z_]*"' "$RPC_LOG" 2>/dev/null | sort | uniq -c | sort -rn | head -30 >&2
     printf '# guard spy log:\n' >&2
@@ -212,8 +227,10 @@ case "$first" in
   *) fail "the session-start digest did not reach model context before the first turn; reply was: $first" ;;
 esac
 lock_pid=$(sed -n '1p' "$PROJECT/state/.lock" 2>/dev/null || true)
-omp_real_pid=$(pgrep -P "$OMP_PID" -x omp 2>/dev/null | head -1 || true)
-[ -n "$omp_real_pid" ] || omp_real_pid=$OMP_PID
+# The installed CLI may be a Bun script, not a kernel process named omp.
+# The extension's live process marker identifies either supported packaging.
+omp_real_pid=$(sed -n '2p' "$PROJECT/state/.omp-watch-extension-loaded" 2>/dev/null || true)
+lab_pid_is_safe "$omp_real_pid" || fail "the extension marker does not name this lab's omp process"
 [ "$lock_pid" = "$omp_real_pid" ] || fail "the session lock names pid '$lock_pid', not the omp process $omp_real_pid; ancestry detection failed"
 [ -f "$PROJECT/state/.session-start-complete" ] || fail "session start did not record completion"
 pass "omp $OMP_VERSION: before_agent_start delivered the digest into model context and the lock names the omp process"

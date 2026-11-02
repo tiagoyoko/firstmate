@@ -1552,7 +1552,7 @@ The real lifecycle smoke proved spawn, metadata, nested-subshell worktree discov
 
 ## Orca
 
-Real readiness was verified against `/usr/local/bin/orca` with `/Applications/Orca.app` bundle version 1.4.116.
+Real readiness was refreshed on 2026-11-01 against `/usr/local/bin/orca`, with the running app reporting `result.runtime.appVersion=1.4.245`, and omp 18.12.6 as the smoke worker.
 
 ```sh
 orca status --json
@@ -1576,6 +1576,39 @@ tests/fm-bootstrap.test.sh
 ```
 
 The fake-Orca suite covers readiness, registration, create response parsing, metadata routing, popup-safe submit, and path-matched release refusal.
+
+An isolated disposable project exercised the official lifecycle helpers without changing the operational home's backend or moving existing tasks:
+
+```sh
+FM_HOME="$LAB_HOME" bin/fm-spawn.sh orca-lifecycle "$LAB_PROJECT" \
+  --scout --harness omp --model openai-codex/gpt-6.1-sol --effort low --backend orca
+FM_HOME="$LAB_HOME" bin/fm-peek.sh orca-lifecycle
+FM_HOME="$LAB_HOME" bin/fm-send.sh orca-lifecycle "<private smoke instruction>"
+FM_HOME="$LAB_HOME" bin/fm-crew-state.sh orca-lifecycle
+FM_HOME="$LAB_HOME" bin/fm-control.sh orca-lifecycle interrupt
+FM_HOME="$LAB_HOME" bin/fm-control.sh orca-lifecycle exit
+FM_HOME="$LAB_HOME" bin/fm-captain-hold.sh complete orca-lifecycle --none
+FM_HOME="$LAB_HOME" bin/fm-teardown.sh orca-lifecycle
+```
+
+Spawn produced a distinct Orca-managed linked copy and one agent beside the workspace's unused default shell.
+The worker executed the inbox instruction, wrote its acknowledgement artifact, and moved the instruction into `handled/`.
+The active-state and interrupt results were:
+
+```text
+state: working · source: pane · harness busy (omp-ext)
+interrupt-delivered orca-lifecycle harness=omp backend=orca verified=endpoint cancel=unconfirmed
+```
+
+The installed `orca terminal send --help` explicitly documents that text without Enter passes control bytes verbatim.
+The adapter's Escape path uses that contract and refuses before input when the installed help does not advertise it; `tests/fm-backend-orca.test.sh` pins both the exact ESC byte and the no-Enter/no-Ctrl-C boundary.
+Verified exit remained refused because no public exact-endpoint agent-process census was available through this CLI.
+`orca worktree ps --help` offers only limit, agent-wait and host-routing options, not an exact repository or worktree filter; no unscoped shared inventory was used.
+`terminal show` binds the handle, host and terminal incarnation but exposes no process creation identity or authoritative agent-free result.
+`terminal wait --for tui-idle` returned satisfied while the omp process remained live, so it cannot prove exit.
+The normal report-inventory and teardown helpers cleaned the disposable task; that scratch cleanup is not evidence that `fm-control exit` is supported.
+This evidence does not authorize selecting Orca for future tasks that require verified exit or relaunch.
+
 
 ## cmux
 

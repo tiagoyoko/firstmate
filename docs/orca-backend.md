@@ -24,7 +24,7 @@ No manual repository registration is required.
 
 Open the Orca app to watch a task's terminal.
 Routine supervision uses the recorded endpoint through `bin/fm-peek.sh <id>` and `FM_HOME=<home> bin/fm-send.sh <id> '<text>'`.
-Enter and Ctrl-C are supported; Escape is not.
+Enter, Ctrl-C, and capability-checked Escape are supported; Escape requires the installed CLI to document verbatim text-only control-byte input.
 
 ## Task shape and metadata
 
@@ -56,6 +56,9 @@ The composer read is one bounded tail of the live terminal and never pages backw
 A bare shell row is `unknown`, not an empty agent composer, and plain-text captures degrade a glyph row carrying trailing text to `unknown` rather than a false `pending`.
 The watcher has no native Orca busy signal, so each harness adapter's semantic lifecycle supplies worker state.
 Grok alone retains its isolated rendered-tail fallback.
+`fm-control.sh interrupt` verifies endpoint survival but reports cancellation as unconfirmed when the harness has no cancellation acknowledgement.
+`fm-control.sh exit` and `relaunch` remain unsupported because Orca has no recovery-grade agent-state classifier in Firstmate; terminal metadata or an idle composer is not proof the agent exited.
+Do not select Orca for work that requires those lifecycle guarantees.
 
 Cleanup keeps all shared Firstmate safety checks.
 A scout still requires its report and completed decision inventory.
@@ -74,8 +77,8 @@ Reinstall the CLI and rerun; [`verification/runtime-backends.md`](verification/r
 - Orca is macOS-only and explicit-only.
 - The app must be running and report ready.
 - Secondmate spawns are unsupported.
-- Escape is unsupported.
-- Orca exposes no stable CLI version or protocol marker, so readiness is the compatibility gate rather than a version floor.
+- Ctrl+U remains unverified; [Setup](#setup) owns the supported keys and Escape's compatibility gate.
+- Compatibility is checked through runtime readiness and the installed CLI's documented input contract, not an assumed version floor.
 - Only the verified terminal-handle and worktree result fields are accepted; speculative response shapes are rejected.
 - Orca's worktree shape is unverified against the spawn-time Claude workspace-trust check in `bin/fm-claude-trust.sh`, which refuses any path that is not a linked git worktree sharing the project's git common dir, so a claude spawn on Orca fails loudly at that check rather than launching if Orca clones instead of linking.
 

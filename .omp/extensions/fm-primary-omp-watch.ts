@@ -23,10 +23,11 @@
 // Session-generation ownership (stated once here):
 // omp emits session_shutdown for ordinary same-process replacements (/new,
 // /resume, /fork) as well as terminal quit. This extension binds one generation
-// per session activation. Only the active live generation may start, stop,
-// rearm, or clear the arm child. An owning replacement session_start (or fresh
-// factory bind) arms its new generation without a model turn. A replacement
-// handoff carries actionable closes that were still pending delivery; its
+// per primary session activation. Native subagent factories share this module;
+// binding alone cannot claim ownership before ctx.agent.kind is available.
+// Only the active live primary generation may start, stop, rearm, or clear the
+// arm child. An owning replacement session_start arms without a model turn.
+// A handoff carries actionable closes that were still pending delivery; its
 // durable state lives at state/extensions/omp-primary-watch/session-replacement-actionable.json.
 // Stale callbacks from a prior generation are no-ops against the active replacement.
 //
@@ -485,7 +486,23 @@ process.once("exit", cleanupOnProcessExit);
 
 export default function (pi: ExtensionAPI) {
   let generation = createGeneration();
-  activateGeneration(generation);
+  let activated = false;
+
+  function isPrimaryContext(ctx: { agent?: { kind?: string } } | undefined): boolean {
+    return ctx?.agent?.kind !== "sub";
+  }
+
+  function armFromContext(ctx: { agent?: { kind?: string } } | undefined): ArmResult {
+    if (!isPrimaryContext(ctx)) return { ok: false, message: "watcher: not armed - subagent sessions do not own primary supervision" };
+    // Older hosts may invoke the tool before session_start. Activate once only:
+    // a stale callback or a real shutdown must never reclaim a successor.
+    if (!activated) {
+      if (activeGeneration) return { ok: false, message: shuttingDownMessage };
+      activateGeneration(generation);
+      activated = true;
+    }
+    return activateOwnedWatch(generation);
+  }
 
   async function sendWake(
     owner: SessionGeneration,
@@ -1019,23 +1036,28 @@ export default function (pi: ExtensionAPI) {
     return result;
   }
 
-  pi.on?.("before_agent_start", (event) => {
+  pi.on?.("before_agent_start", (event, ctx) => {
+    if (!isPrimaryContext(ctx)) return;
     consumeWake(generation, String((event as { prompt?: unknown })?.prompt ?? ""));
   });
-  pi.on?.("message_start", (event) => {
+  pi.on?.("message_start", (event, ctx) => {
+    if (!isPrimaryContext(ctx)) return;
     const message = (event as { message?: { role?: unknown; content?: unknown } })?.message;
     if (!message || message.role !== "user") return;
     consumeWake(generation, userMessageText(message.content));
   });
 
-  pi.on?.("session_start", async () => {
+  pi.on?.("session_start", async (_event, ctx) => {
+    if (!isPrimaryContext(ctx)) return;
     if (generation.stopping) generation = createGeneration();
     activateGeneration(generation);
+    activated = true;
     markLoaded();
     if (lockOwnership() !== "owned") return;
     activateOwnedWatch(generation);
   });
-  pi.on?.("session_shutdown", async () => {
+  pi.on?.("session_shutdown", async (_event, ctx) => {
+    if (!isPrimaryContext(ctx)) return;
     // omp carries no shutdown reason (verified: `reason` is undefined), so the
     // replacement handoff is always persisted when anything is pending; a
     // terminal quit then merely replays an already-drained wake next start.
@@ -1046,7 +1068,7 @@ export default function (pi: ExtensionAPI) {
   pi.registerCommand?.("fm-watch-arm-omp", {
     description: "Arm firstmate watcher supervision through the omp extension instead of foreground bash.",
     handler: async (_args, ctx) => {
-      const result = activateOwnedWatch(generation);
+      const result = armFromContext(ctx);
       ctx?.ui?.notify?.(result.message, result.ok ? "info" : "warning");
     },
   });
@@ -1060,8 +1082,8 @@ export default function (pi: ExtensionAPI) {
       "Call fm_watch_arm_omp only for the first required cycle or after a notification says the cycle is missing, failed, or unhealthy. Do not call it after ordinary work, turn completion, or ordinary signal, stale, check, or heartbeat handling because the omp extension owns re-arming. Never run bin/fm-watch-arm.sh through bash.",
     ],
     parameters: Type.Object({}),
-    execute: async () => {
-      const result = activateOwnedWatch(generation);
+    execute: async (_toolCallId: string, _params: unknown, _signal: unknown, _onUpdate: unknown, ctx: { agent?: { kind?: string } } | undefined) => {
+      const result = armFromContext(ctx);
       return {
         content: [{ type: "text", text: result.message }],
         details: result,
@@ -1069,5 +1091,4 @@ export default function (pi: ExtensionAPI) {
     },
   });
 
-  markLoaded();
 }
